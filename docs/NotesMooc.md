@@ -56,8 +56,8 @@ Pour que l'étiquette garde un sens, il suffit d'encadrer un mot par une paire d
 - Avoir un seul document qui contient les calculs, les résultats et des commentaires qui expliquent les choix faits.
 
 - 3 possibilités:
-	+ Jupyter: permet de gérer des notebooks et d'utiliser les langages Python3/R (déjà installé avec anaconda, il suffit juste de le lancer avec jupyter notebook
-).
+	+ Jupyter: permet de gérer des notebooks et d'utiliser les langages Python3/R (déjà installé avec anaconda, il suffit juste de le lancer avec `jupyter notebook`
+ou de lancer aussi `jupyter lab`).
 	+ RStrudio: pareil, mais c'est plus facile à partager ses résultats en format HTML et c'est aussi facile d'export en plusieurs formats. On peut l'utiliser avec autres langages, notamment Python, mais il y a un souci de la nonexistence des sessions (ex: il faut redéfinir les variables dans une nouvelle cellule) et donc les bouts de code ont tendance à être longs ce qui peut compliquer la tâche de l'explication.
 	+ OrgMode: plus intéressant car il permet d'utiliser plusieurs langages et voire même une session shell au même temps. C'est aussi simple d'export le fichier en plusieurs formats avec des raccourcis.
 
@@ -67,7 +67,6 @@ Pour que l'étiquette garde un sens, il suffit d'encadrer un mot par une paire d
 - [Autres langages en Jupyter](https://gitlab.inria.fr/learninglab/mooc-rr/mooc-rr-ressources/tree/master/documents/notebooks/)
 
 
-### 
 
 
 

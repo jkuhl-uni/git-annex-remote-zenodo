@@ -1,9 +1,14 @@
-# Log:
+# Journal:
 
 ## Semaine 1 (10/05 - 16/05):
 
 ### Lundi 10/05:
-
+- J'ai revu des points git-annex pour se refamiliariser avec cet outil.
+- J'ai mis à jour le fichier __notes.md__ pour ajouter des liens utils et des explications pour des outils dont j'aurai besoin dans le futur dans le cadre du stage.
+- J'ai commencé la lecture du cours MOOC Recherche Reproductible.
+- J'ai lu les leçons du Module 1 et j'ai pris des notes des aspects intéressants.
+- J'ai lu la majorité des éléments du module 2 et pris des notes.
+- J'ai regardé des exemples des journaux et des blogs des anciens étudiants qui ont utilisé Org-mode/ Rstudio/ Jupyter pour avoir des bons résultats pratiques.
 
 ## Semaine 2 (17/05 - 23/05):
 
