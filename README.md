@@ -15,7 +15,9 @@
 - Regardé des parties de la visio-conférence de la Journée SIF Recherche Reproductible et pris des notes.
 
 ### Mercredi 12/05:
--
+- Regardé la deuxième moitié de la visio-conférence de la Journée SIF Recherche Reproductible.
+- Lu des articles scientifiques pour mieux assimiler les outils GUIX et Snakemake et comprendre leur utilité dans le cadre de la recherche reproductible.
+- Discuté avec Mr. Vincent Danjean sur des éléments du sujet. 
 
 ### Jeudi 13/05:
 Jour férié.
