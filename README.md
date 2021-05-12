@@ -14,6 +14,15 @@
 - J'ai continué la lecture des séquences du Module 2.
 - Regardé des parties de la visio-conférence de la Journée SIF Recherche Reproductible et pris des notes.
 
+### Mercredi 12/05:
+-
+
+### Jeudi 13/05:
+Jour férié.
+
+### Vendredi 14/05:
+-
+
 ## Semaine 2 (17/05 - 23/05):
 
 
