@@ -23,7 +23,8 @@
 Jour férié.
 
 ### Vendredi 14/05:
--
+- J'ai fait des tutos pour apprendre comment écrire des fichiers Snakemake.
+- J'ai lu des articles pour mieux assimiler l'utilité des outils comme Docker dans le cadre de la RR.
 
 ## Semaine 2 (17/05 - 23/05):
 
