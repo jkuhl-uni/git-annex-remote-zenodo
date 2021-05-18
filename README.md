@@ -28,6 +28,27 @@ Jour férié.
 
 ## Semaine 2 (17/05 - 23/05):
 
+### Lundi 17/05:
+- Atelier reproductibilité des environnements logiciels (Jour 1): l'utilité et l'importance de la recherche reproductible est évidente et c'est pour cette raison que c'est nécessaire de prendre en considération le développement des environnements logiciels aussi et pas seulement le côté workflow / outils d'analyse. Ainsi, l'utilisation de GUIX ne se manifeste pas seulement dans le cas des utilisateurs individuels qui cherchent à retrouver les même résultats des calculs qu'ils avaient trouvé il y a des années, mais aussi dans le cas des centres de recherche où c'est intéressant de pouvoir redéployer les clusters et les rendre productibles. 
++ link: https://hpc.guix.info/events/2021/atelier-reproductibilit%C3%A9-environnements/
+- J'ai suivi des tutorials Zenodo pour publier des articles sur la base de données en utilisant l'API. Au début, j'ai vérifié l'accès à l'API (GET query), en suite, j'ai utilisé des commandes simples cURL pour créer un nouveau dépôt (POST query) et en fin j'ai publié des fichiers sur ce dépôt (PUT query).
++ link: https://felipecrp.github.io/2021/01/01/uploading-to-zenodo-through-api.html
+- J'ai fait un deuxième tutorial pour publier des articles sur l'API mais cette fois j'ai utilisé python. La démarche était la même.
++ link: https://developers.zenodo.org/?python#quickstart-upload
+- J'ai aussi publié un article manuellement comme test sur le sandbox Zenodo aussi.
+
+### Mardi 18/05:
+
+
+
+### Mercredi 19/05:
+
+
+### Jeudi 20/05:
+
+
+### Vendredi 21/05:
+
 
 
 ## Semaine 3 (24/05 - 30/05):
