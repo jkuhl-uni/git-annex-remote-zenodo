@@ -30,15 +30,18 @@ Jour férié.
 
 ### Lundi 17/05:
 - Atelier reproductibilité des environnements logiciels (Jour 1): l'utilité et l'importance de la recherche reproductible est évidente et c'est pour cette raison que c'est nécessaire de prendre en considération le développement des environnements logiciels aussi et pas seulement le côté workflow / outils d'analyse. Ainsi, l'utilisation de GUIX ne se manifeste pas seulement dans le cas des utilisateurs individuels qui cherchent à retrouver les même résultats des calculs qu'ils avaient trouvé il y a des années, mais aussi dans le cas des centres de recherche où c'est intéressant de pouvoir redéployer les clusters et les rendre productibles. 
-+ link: https://hpc.guix.info/events/2021/atelier-reproductibilit%C3%A9-environnements/
+  link: https://hpc.guix.info/events/2021/atelier-reproductibilit%C3%A9-environnements/
 - J'ai suivi des tutorials Zenodo pour publier des articles sur la base de données en utilisant l'API. Au début, j'ai vérifié l'accès à l'API (GET query), en suite, j'ai utilisé des commandes simples cURL pour créer un nouveau dépôt (POST query) et en fin j'ai publié des fichiers sur ce dépôt (PUT query).
-+ link: https://felipecrp.github.io/2021/01/01/uploading-to-zenodo-through-api.html
+  link: https://felipecrp.github.io/2021/01/01/uploading-to-zenodo-through-api.html
 - J'ai fait un deuxième tutorial pour publier des articles sur l'API mais cette fois j'ai utilisé python. La démarche était la même.
-+ link: https://developers.zenodo.org/?python#quickstart-upload
+  link: https://developers.zenodo.org/?python#quickstart-upload
 - J'ai aussi publié un article manuellement comme test sur le sandbox Zenodo aussi.
 
 ### Mardi 18/05:
-
+- Atelier reproductibilité des environnements logiciels (Jour 2): Une première présentation qui explique comment se servir de Docker et l'outil Snapshot Archive de Debian pour générer un env logiciel permettant d'exécuter des programmes où il y avait des anciennes versions des dépendances. En effet, après avoir récupéré les bonnes versions avec Snapshot Debian (en utilisant les dates des packages), on peut générer une nouvelle image Docker avec un Dockerfile où on récupère les bonnes dépendances et on peut ainsi créer un container avec cette image pour refaire l'expérience dans cet environnement. La deuxième présentation portait sur l'inévitabilité du choix de passer de module à NIX / GUIX et une comparaison entre les deux selon des cas d'usage. Finalement, l'importance de la programmation lettrée a été expliqué et elle se manifeste dans son capacité à faciliter les tâche du calcul intensif dans le cadre de la recherche scientifique puisqu'elle aide à grouper l'exécution des programmes, les explications, et les graphes et résultats dans un même fichier que l'on peut exporter et analyser facilement. Un outil qui mène à ce résultat est Org mode, et quand c'est couplé avec un environnement géré par GUIX, on s'approche de plus en plus au meilleur résultat reproductible.
+  link: https://hpc.guix.info/events/2021/atelier-reproductibilit%C3%A9-environnements/
+- Je continue à lire un peu plus sur les logiciels que l'on va utiliser dans le reste de ce sujet et donc cet article scientifique écrit par Ludovic Courtès et Ricardo Wurmus sur le logiciel GUIX et comment il permet de gérer des environnements reproductibles. Et puisque les packages disponibles sont dans l'ordre de 2000, c'est util pour les utilisateurs qui veulent reproduire le même env sur un autre système HPC (cela peut être aussi intéressant pour les rechercheurs qui analysent l'impact du hardware sur la performance du software).
+  link: https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf
 
 
 ### Mercredi 19/05:
