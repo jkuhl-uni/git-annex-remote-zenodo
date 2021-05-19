@@ -43,7 +43,6 @@ Jour férié.
 - Je continue à lire un peu plus sur les logiciels que l'on va utiliser dans le reste de ce sujet et donc cet article scientifique écrit par Ludovic Courtès et Ricardo Wurmus sur le logiciel GUIX et comment il permet de gérer des environnements reproductibles. Et puisque les packages disponibles sont dans l'ordre de 2000, c'est util pour les utilisateurs qui veulent reproduire le même env sur un autre système HPC (cela peut être aussi intéressant pour les rechercheurs qui analysent l'impact du hardware sur la performance du software).
   + link: https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf
 
-
 ### Mercredi 19/05:
 
 
@@ -53,46 +52,134 @@ Jour férié.
 ### Vendredi 21/05:
 
 
-
 ## Semaine 3 (24/05 - 30/05):
 
+### Lundi 24/05:
+
+### Mardi 25/05:
+
+### Mercredi 26/05:
+
+### Jeudi 27/05:
+
+### Vendredi 28/05:
 
 
 ## Semaine 4 (31/05 - 06/06):
 
+### Lundi 31/05:
+
+### Mardi 01/06:
+
+### Mercredi 02/06:
+
+### Jeudi 03/06:
+
+### Vendredi 04/06:
 
 
 ## Semaine 5 (07/06 - 13/06):
 
+### Lundi 07/06:
+
+### Mardi 08/06:
+
+### Mercredi 09/06:
+
+### Jeudi 10/06:
+
+### Vendredi 11/06:
 
 
 ## Semaine 6 (14/06 - 20/06):
 
+### Lundi 14/06:
+
+### Mardi 15/06:
+
+### Mercredi 16/06:
+
+### Jeudi 17/06:
+
+### Vendredi 18/06:
 
 
 ## Semaine 7 (21/06 - 27/06):
 
+### Lundi 21/06:
+
+### Mardi 22/06:
+
+### Mercredi 23/06:
+
+### Jeudi 24/06:
+
+### Vendredi 25/06:
 
 
 ## Semaine 8 (28/06 - 04/07):
 
+### Lundi 28/06:
+
+### Mardi 29/06:
+
+### Mercredi 30/06:
+
+### Jeudi 01/07:
+
+### Vendredi 02/07:
 
 
 ## Semaine 9 (05/07 - 11/07):
 
+### Lundi 05/07:
+
+### Mardi 06/07:
+
+### Mercredi 07/07:
+
+### Jeudi 08/07:
+
+### Vendredi 09/07:
 
 
 ## Semaine 10 (12/07 - 18/07):
 
+### Lundi 12/07:
+
+### Mardi 13/07:
+
+### Mercredi 14/07:
+
+### Jeudi 15/07:
+
+### Vendredi 16/07:
 
 
 ## Semaine 11 (19/07 - 25/07):
 
+### Lundi 19/07:
+
+### Mardi 20/07:
+
+### Mercredi 21/07:
+
+### Jeudi 22/07:
+
+### Vendredi 23/07:
 
 
 ## Semaine 12 (26/07 - 31/07):
 
+### Lundi 26/07:
 
+### Mardi 27/07:
+
+### Mercredi 28/07:
+
+### Jeudi 29/07:
+
+### Vendredi 30/07:
 
 
 
