@@ -1,3 +1,7 @@
+#+TITLE:       LabBook
+#+AUTHOR:      Oumaima
+#+STARTUP: overview indent inlineimages logdrawer
+#+TAGS: R(R) Python(p) OrgMode(O) 
 
 * Introduction to the tools that will be used.
 ** git-annex.
