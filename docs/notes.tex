@@ -1,0 +1,431 @@
+% Created 2021-05-20 jeu. 13:40
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{oumaima}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={oumaima},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 27.2 (Org mode 9.4.4)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\section{Introduction to the tools that will be used.}
+\label{sec:org064e0de}
+\subsection{git-annex.}
+\label{sec:org6637abe}
+\subsubsection{intro.}
+\label{sec:org6fabc52}
+git-annex allows managing files with git, without checking the
+filecontents into git. While that may seem paradoxical, it is
+useful when dealing with files larger than git can currently
+easily handle, whether due to limitations in memory, time, or disk
+space.
+\begin{itemize}
+\item In our framework, it will be used to keep hold of the multiple
+versions of the files that are used during the process of research
+and data analysis. It's imperative to keep track of the versions so
+as to facilitate the task when reproducing a result.
+(in this case most files are large and git-annex is the best at
+handling the size).
+\end{itemize}
+\subsubsection{useful links.}
+\label{sec:orgb4d9fa8}
+\url{https://git-annex.branchable.com/walkthrough/}
+\url{https://git-annex.branchable.com/special\_remotes/external/}
+
+
+\subsection{Zenodo.}
+\label{sec:orgfa39c40}
+\subsubsection{intro.}
+\label{sec:org3192ddb}
+Zenodo is a general-purpose open-access repository developed under
+the European OpenAIRE program and operated by CERN. It allows
+researchers to deposit research papers, data sets, research
+software, reports, and any other research related digital
+artifacts.
+\begin{itemize}
+\item We will be using Zenodo as the database where the articles and
+research papers will be deposited at the end of the mooc. The API
+is easily accessible through Python with the use of the package
+requests which allows the use of the basic HTTP queries.
+\end{itemize}
+\subsubsection{useful links.}
+\label{sec:org235ef0f}
+\url{https://developers.zenodo.org/\#quickstart-upload}
+
+
+\subsection{Datalad.}
+\label{sec:org0e663e4}
+\subsubsection{intro.}
+\label{sec:org08b5349}
+DataLad builds on top of git-annex and extends it with an
+intuitive command-line interface. It enables users to operate
+on data using familiar concepts, such as files and directories,
+while transparently managing data access and authorization with
+underlying hosting providers.
+A powerful and complete Python API is also provided to enable
+authors of data-centric applications to bring versioning and the
+fearless acquisition of data into continuous integration workflows.
+
+\subsubsection{additional functionalities to Git / git-annex.}
+\label{sec:orgc1cbde1}
+\begin{itemize}
+\item minimize the use of unique/idiosyncratic functionality.
+\item simplify working with repositories.
+\item add a range of useful concepts and functions.
+\item make the boundaries between repositories vanish from a user’s
+point of view.
+\item provide users with the ability to act on “virtual” file paths.
+\end{itemize}
+
+\subsubsection{key points.}
+\label{sec:orge8be0c0}
+\begin{itemize}
+\item DataLad manages your data, but it does not host it.
+\item You can make DataLad publish file content to one location
+and afterwards automatically push an update to GitHub.
+\item DataLad scales to large dataset sizes.
+\item dataset = superdataset = subdataset unless it's registered
+in another dataset: sub / super.
+\item Converting an existing Git or git-annex repository into a
+DataLad dataset: 	\$ datalad create -f
+\end{itemize}
+
+\subsubsection{exporting the content of a dataset as a ZIP archive to figshare.}
+\label{sec:org625c300}
+Ideally figshare should be supported as a proper git annex
+special remote. Unfortunately, figshare does not support having
+directories, and can store only a flat list of files. That makes
+it impossible for any sensible publishing of complete datasets.
+\$ datalad export-to-figshare [-h] [-d DATASET] [--missing-content \{error|continue|ignore\}] [--no-annex] [--article-id ID] [PATH]	(*)
+
+\subsubsection{useful links.}
+\label{sec:org26540f8}
+\url{https://handbook.datalad.org/en/latest/basics/101-180-FAQ.html}
+\url{http://docs.datalad.org/en/stable/generated/man/datalad-export-to-figshare.html}  (*)
+\url{http://handbook.datalad.org/en/latest/usecases/ml-analysis.html}
+\url{https://handbook.datalad.org/en/latest/beyond\_basics/101-168-dvc.html}
+
+
+\subsection{Snakemake.}
+\label{sec:orgb231407}
+\subsubsection{intro.}
+\label{sec:org7de0758}
+Snakemake is a workflow engine that provides a readable
+Python-based workflow definition language and a powerful
+execution environment that scales from single-core workstations
+to compute clusters without modifying the workflow.
+\begin{itemize}
+\item This will be used to handle the workflows in our project and
+and it's useful in the case of reproducibility because it allows
+the definition and the use of environments. For instance, we can
+define a seperate conda env in a rule in the Snakefile and
+we can inculde the packages we want to use while configurating
+the new conda environment (command: snakemake --use-env).
+\end{itemize}
+\subsubsection{useful links.}
+\label{sec:org49341cc}
+\url{https://snakemake.readthedocs.io/en/stable/}
+\url{https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html\#tutorial}
+\url{https://www.youtube.com/watch?v=NNPBDOBHlxo\&ab\_channel=EdinburghGenomicsTraining}
+\url{https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html}
+
+
+\subsection{GUIX.}
+\label{sec:orge1c2e84}
+\subsubsection{intro.}
+\label{sec:org68e4c78}
+"GNU GUIX is a general-purpose package manager that implements 
+the functional package management paradigm pioneered by Nix" (*). it
+allows the creation and the deployment of isolated software
+environments, operating systems and the maintaining of a large
+range of packages.
+\begin{itemize}
+\item By definition, this software is a great addition to our arsenal
+in the subject of reproducible research. And among the many uses it
+has, tools like time-machine, for instance, allow the execution of
+old programmes. By finding the right version of the commit and
+installing these versions of dependencies, we can get back to a
+similar state to the old one and so, by executing the programme, we
+can get the same results.
+\end{itemize}
+\subsubsection{useful links.}
+\label{sec:org13689ee}
+\url{https://link.springer.com/content/pdf/10.1007\%2F978-3-319-27308-2\_47.pdf} (*)
+\url{https://guix.gnu.org/manual/en/html\_node/Binary-Installation.html}
+\url{https://guix.gnu.org/en/manual/en/guix.html}
+
+
+\subsection{Docker.}
+\label{sec:org14bcd89}
+\subsubsection{intro.}
+\label{sec:org76439f1}
+Docker is a software for developing, shipping, and running
+applications. It allows the user to create seperate containers for
+their applications which seperates them from the infrastructure of
+the computer of the user and facilitates their use from other
+individuals.
+\begin{itemize}
+\item Having a container which isolates the app from the environment
+and where the developper can state the packages and the versions
+that they want to use makes it possible for them to reproduce
+the same results. All they need to do is to create an image
+using a Dockerfile and to store it so as to be used to create a
+container whenever needed.
+\end{itemize}
+
+\subsubsection{useful links.}
+\label{sec:org2a17d8e}
+\url{https://reproducible-analysis-workshop.readthedocs.io/en/latest/8.Intro-Docker.html}
+
+
+\section{The tutorials that were done in order get a better grasp of the tool.}
+\label{sec:orgd36c39f}
+\subsection{git-annex.}
+\label{sec:org9e47c2e}
+\subsubsection{useful commands.}
+\label{sec:orga87d312}
+\begin{itemize}
+\item creating a repository:
+\begin{verbatim}
+      git init 
+      git annex init
+\end{verbatim}
+
+\item adding files:
+\begin{verbatim}
+      git annex add .
+      git commit -a -m added
+\end{verbatim}
+
+\item adding a remote (usb drive):
+\begin{verbatim}
+      sudo mount /media/usb
+      cd /media/usb
+      git clone ~/annex
+      cd annex
+      git annex init "portable USB drive"
+      git remote add laptop ~/annex
+      cd ~/annex
+      git remote add usbdrive /media/usb/annex
+\end{verbatim}
+
+\item getting file content:
+\begin{verbatim}
+      cd /media/usb/annex
+      git annex sync laptop
+      git annex get .
+\end{verbatim}
+
+\item syncing:
+\begin{verbatim}
+       cd /media/usb/annex
+       git annex sync
+\end{verbatim}
+
+\item removing files:
+\begin{verbatim}
+       git annex drop iso/debian.iso
+\end{verbatim}
+\end{itemize}
+
+\subsubsection{useful links.}
+\label{sec:orgedfc3d9}
+\url{https://git-annex.branchable.com/walkthrough/}
+\url{https://git-annex.branchable.com/special\_remotes/external/}
+
+
+\subsection{Zenodo.}
+\label{sec:orgb67670f}
+\subsubsection{Uploading through the API.}
+\label{sec:org4c83b54}
+\begin{enumerate}
+\item with cURL:
+\label{sec:orgf7469a1}
+\begin{itemize}
+\item LINK: \url{https://felipecrp.github.io/2021/01/01/uploading-to-zenodo-through-api.html}
+\item PROCESS:
+\begin{itemize}
+\item We tested to see if the API is accessible by using a GET
+request and there wasn't an error message.
+\item We then sent a POST request to the API to request the creation
+of a new deposit which we will be using to upload our files
+later on. We then receive a JSON message confirming the
+creation of the deposit and extra information (date, title, owner, ..).
+\item We then sent a PUT request to upload the files in the deposit
+using the bucket link that was sent in the JSON message when
+we created the deposit.
+\item Once we finish uploading the files, we can check the deposit
+to see if they have been uploaded. I did the test twice and
+uploaded simple .txt files (zenodotest.txt \& zenodotest2.txt)
+and they are accessible via this URL: \url{https://zenodo.org/api/files/4aefd393-ed38-489c-bc8c-2413d9cb160f/zenodotest2.txt?access\_token=WgYPkomVp1HpJniDmwS2ylFBhwsNpntxFzKqo02HGij94nVFlO0tAefboqtn}
+\end{itemize}
+\end{itemize}
+
+\item with Python:
+\label{sec:org8680c92}
+\begin{itemize}
+\item LINK: \url{https://developers.zenodo.org/?python\#quickstart-upload}
+\item PROCESS:
+\begin{itemize}
+\item The process is similar to the last one. We first import the
+package requests which we will be using to send the HTTP
+requests to the browser, and then we use a GET request to
+access the deposit (while giving an authentication key with
+the right access).
+\item We then send a POST request to create a new deposit and we
+get in return a message containing information about this
+new deposit (id, links, ..).
+\item Now, we can finally create new uploads. We first fetch the
+bucket URL by using this command which retrieves the item
+corresponding to the key "bucket" in the "links" dictionary.
+\end{itemize}
+\begin{verbatim}
+bucket_url = r.json()["links"]["bucket"]
+\end{verbatim}
+
+We use the method PUT to upload out file into the deposit.
+I did that using the new API.
+\end{itemize}
+\end{enumerate}
+\subsubsection{Uploading through the website:}
+\label{sec:orgc85108f}
+I also tested how to publish an article and save it in the
+database. To do this, I simply used the sandbox and uploaded
+a report I worked on with an other student last year.
+
+
+\subsection{Snakemake.}
+\label{sec:orgd19ddf0}
+I created a simple Snakefile in which I wrote a couple rules with
+shell commands and tried to compile some old projects in order to
+test this tool. 
+\begin{itemize}
+\item LINK:
+\url{https://www.youtube.com/watch?v=hPrXcUUp70Y\&ab\_channel=NCSAatIllinois}
+\end{itemize}
+
+
+\subsection{Docker.}
+\label{sec:orgc84856c}
+In the case of Docker, I've alredy used this tool during the
+project of the semester 8 and so I have a grasp on its basic
+usage. I've already manipulated existing images and deployed
+containers either separately or in groups using docker-compose.
+In the case of creating new images, I've tried creating some using
+simple Dockerfiles.
+
+
+\section{An introduction to Reproducible Research.}
+\label{sec:org4490f56}
+It is the practice of having the flow of research documented in all
+of its steps in order to get the same result even if it's retested
+by other researchers or in the future. It relies on many components
+of the scientific study such as: having accessible data, detailed
+research and analysis, reproducible workflows and evironments, ..
+\begin{itemize}
+\item The main features that need to be present for a scientific
+research to be reproductibility-friendly:
+\begin{itemize}
+\item WF specification: connected tools steps of the analysis.
+\item WF execution: provenence modules, data management, ..
+\item WF environment: companion tools like Virtual machines, containers, ..
+\end{itemize}
+\end{itemize}
+
+\section{A look into GUIX and reproducible software environments.}
+\label{sec:org0afe8a1}
+\subsection{Link:}
+\label{sec:org98fa5a5}
+  \url{https://link.springer.com/content/pdf/10.1007\%2F978-3-319-27308-2\_47.pdf}
+  Paper: \emph{Reproducible and User-Controlled Software Environments in HPC
+with Guix} by \uline{Ludovic Courtès} and \uline{Ricardo Wurmus}.
+
+\subsection{Notes.}
+\label{sec:org09f5943}
+\begin{itemize}
+\item "GNU GUIX is a general-purpose package manager that implements the
+\end{itemize}
+functional package management paradigm pioneered by Nix".
+
+\begin{itemize}
+\item It's important to handle the software environments when trying to
+work on reproducible research because the work that is being done
+mainly focuses on workflows, conventions, \ldots{} . We need to have
+the same  software environment to be able to reproduce the same results.
+\item A solution that was first given is to either write down the
+numbers of the dependencies (insufficient), or to save/download
+and reuse full system images (the images are large + it's
+difficult to combine with the software environment of each of
+the users). -> GUIX is the sollution to these problems.
+\item Reproducing the exact same software environment on a different HPC
+system could allow the users to assess the impact of the hardware
+on the software’s performance + it would allow other researchers
+to reproduce the same experiment on their systems.
+\item Package managers like APT / RPM suffer from limitations:
+\begin{itemize}
+\item Package binaries that every user installs, such as .deb
+files, are actually built on the package maintainer’s
+machine, and details about the host may leak into the
+binary that is uploaded.
+\item While it is possible for users to define their own variant
+of a package, it's still difficult to do. For instance,
+even if a user builds a custom .spec file, they can't always
+register it in the yumdb database (it's only allowed for
+the administrator) so it's difficult for the user to track
+down and register the complete graph of dependencies manually.
+\item These tools implement an imperative and stateful package
+management model: imperative in the sense that it modifies
+the set of available packages in place (ex: switching to an
+alternative MPI implementation, or upgrading the OpenMP
+run-time library means that suddenly all the installed
+applications and libraries start using them). It is stateful
+because the system state at a given point in time is the
+result of the series of installation and upgrade operations
+that have been made over time, and there may be no way to
+reproduce the exact same state elsewhere.
+\end{itemize}
+
+\item Package management is to be seen as functional paradigms where the
+results only depend on the inputs. So, rerunning a given build
+with the same input should result in bit-identical files (used
+by Nix and now by Guix). A tool that is used is chroot which
+allows them to run in a limited environment with a defined set
+of env variables, a dedicated user ID, separate name spaces for
+PIDs, inter-process communication (IPC), networking, \ldots{} This is
+so as to ensure that build can't end up using libraries it's not
+supposed to use -> this is what allows this process to be seen as
+pure functions with reproducible results.
+\item After each build, the created files are stored in the /gnu/store
+directory. each entry has a name that includes a hash of all the
+inputs of the build process that led to it (libs, compilers, ..).
+Therefore, we can fetch the diagram of dependencies easily in this
+case. After running 'guix build openmpi' for instance, we get as a
+return the directory name /gnu/store/xx-openmpi-1.8.1. and the
+daemon spawns the build process in an isolated environment (if
+the directory doesn't exist). For the normal user, the command
+'guix package' is enough to install the packages without  typing
+out the long names. In fact, this command creates a symbolic link
+to the selected /gnu/store item and the symbolic link is then
+stored in  \textasciitilde{} /.guix-profile.
+\end{itemize}
+\end{document}
