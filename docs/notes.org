@@ -74,7 +74,9 @@
     http://docs.datalad.org/en/stable/generated/man/datalad-export-to-figshare.html	 (*)
     http://handbook.datalad.org/en/latest/usecases/ml-analysis.html
     https://handbook.datalad.org/en/latest/beyond_basics/101-168-dvc.html
-
+    http://docs.datalad.org/en/stable/generated/datalad.api.Dataset.html
+    http://docs.datalad.org/en/stable/generated/man/datalad-export-archive-ora.html
+    https://carpentries.topicbox.com/groups/discuss/Tb776978a905c0bf8-M3d3e4bb2f0a49fdf2391282c 
     
 ** Snakemake.
 *** intro.
@@ -257,6 +259,7 @@ bucket_url = r.json()["links"]["bucket"]
     + WF execution: provenence modules, data management, ..
     + WF environment: companion tools like Virtual machines, containers, ..
 
+      
 * A look into GUIX and reproducible software environments.
 ** Link:
   https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf

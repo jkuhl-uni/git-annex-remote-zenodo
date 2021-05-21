@@ -44,9 +44,18 @@ Jour férié.
   + link: https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf
 
 ### Mercredi 19/05:
-
+- les outils de package manegement comme apt sont limités dans leur fonctionnement. En effet, c'est parfois difficile pour les utilisateur de définir des packages et de les enregistrer dans la database, ce qui complique l'enregistrement et la recherche des graphes de dépendences manuellement. Mais puisque ces outils sont stateful (l'état de la machine dépend de toutes les installations qui ont été faites au fil du temps) et impératifs (l'utilisation d'une nouvelle version de la bibliothèque OpenMP par exemple cause les autres applications installées à l'utiliser et donc il y aura une modification dans les packages), alors ce n'est pas possible pour les utilisateurs de reproduire les mêmes résultats.
+- L'utilisation de chroot dans le developpement des outils de package management rend la procédure fonctionnelle. En effet, chroot limite l'accès possible en un environnement isolé où tous les identificateurs sont personnalisés pour cet env (ex: les variables d'environnement, la communication inter-processus, PIDs , ..). Donc, et puisque l'on limite l'accès aux libs et aux packages, après chaque build on retrouve les mêmes résultats puisque les données de l'input sont les mêmes (fonctions). 
+- Pour chaque build, on connait les identificateurs de toutes les dépendences puisque ils tous stocké dans une fichier dans /gnu/store comme des inputs. On retrouve aussi grâce à ça le diagramme de dépendances.
+  
 
 ### Jeudi 20/05:
+- Datalad est en dessus de git-annex (extend) et permet de manipuler les données avec des simple commandes. Il ne stocke pas les données mais il les gère comme un système de fichiers / dossiers. L'utilisateur ne voit plus les dépôts comme des entités isolées qu'il peut manipuler d'une façon limitée. 
+- On peut prendre un dépôt Git ou git-annex déjà initialisé et le convertir en un dataset Datalad facilement et le manipuler soit en ligne de commande ou avec l'API python qui automatise la gestion des versions et que l'on peut intégrer dans le workflow.
+  + link: http://docs.datalad.org/en/stable/generated/datalad.api.Dataset.html
+- Datalad permet d'exporter les dataset comme des archives sur plusieurs remotes (ex: figshare / ora). Pour le cas de figshare qui est une database, on peut simplement utiliser la commande export-to-figshare mais puisque l'infrastructure de figshare ne permet pas d'avoir des directory, alors le stockage se fait dans une liste des fichiers mal structurée.
+  + link: http://docs.datalad.org/en/stable/generated/man/datalad-export-archive-ora.html
+	  https://carpentries.topicbox.com/groups/discuss/Tb776978a905c0bf8-M3d3e4bb2f0a49fdf2391282c 
 
 
 ### Vendredi 21/05:
