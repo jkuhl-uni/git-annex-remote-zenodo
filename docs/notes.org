@@ -65,7 +65,32 @@
       in another dataset: sub / super.
     - Converting an existing Git or git-annex repository into a
       DataLad dataset: 	$ datalad create -f
-
+    - A dataset is a Git repository. All features of the version
+      control system Git also apply to everything managed by DataLad.
+    - DataLad only cares (knows) about two things: Datasets and
+      files. A DataLad dataset is a collection of files in
+      folders. And a file is the smallest unit any dataset can
+      contain. Thus, a DataLad dataset has the same structure as any
+      directory on your computer, and DataLad itself can be
+      conceptualized as a content-management system that operates on
+      the units of files.
+    - A DataLad dataset can take care of managing and version
+      controlling arbitrarily large data. To do this, it has an optional
+      annex for (large) file content.
+    - Deep in the core of DataLad lies the social principle to
+      minimize custom procedures and data structures. DataLad will not
+      transform your files into something that only DataLad or a
+      specialized tool can read. A PDF file (or any other type of
+      file) stays a PDF file (or whatever other type of file it was)
+      whether it is managed by DataLad or not. This guarantees that
+      users will not lose data or access if DataLad would vanish from
+      their system.
+    - DataLad allows to capture full provenance: The origin of
+      datasets, the origin of files obtained from web sources,
+      complete machine-readable and automatically reproducible records
+      of how files were created (including software environments).
+      
+      
 *** exporting the content of a dataset as a ZIP archive to figshare.
     Ideally figshare should be supported as a proper git annex
     special remote. Unfortunately, figshare does not support having
@@ -78,6 +103,10 @@
     http://docs.datalad.org/en/stable/generated/man/datalad-export-to-figshare.html	 (*)
     http://handbook.datalad.org/en/latest/usecases/ml-analysis.html
     https://handbook.datalad.org/en/latest/beyond_basics/101-168-dvc.html
+    http://docs.datalad.org/en/stable/generated/datalad.api.Dataset.html
+    http://docs.datalad.org/en/stable/generated/man/datalad-export-archive-ora.html
+    https://carpentries.topicbox.com/groups/discuss/Tb776978a905c0bf8-M3d3e4bb2f0a49fdf2391282c 
+    http://handbook.datalad.org/en/latest/index.html
 
     
 ** Snakemake.
@@ -86,12 +115,15 @@
     Python-based workflow definition language and a powerful
     execution environment that scales from single-core workstations
     to compute clusters without modifying the workflow.
+    - As projects grow or age, it becomes increasingly difficult to
+      keep track of all the parts and how they fit together.
     - This will be used to handle the workflows in our project and
       and it's useful in the case of reproducibility because it allows
       the definition and the use of environments. For instance, we can
       define a seperate conda env in a rule in the Snakefile and
       we can inculde the packages we want to use while configurating
-      the new conda environment (command: snakemake --use-env). 
+      the new conda environment (command: snakemake --use-env).
+      
 *** useful links.
     https://snakemake.readthedocs.io/en/stable/
     https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html#tutorial
@@ -132,11 +164,47 @@
       the same results. All they need to do is to create an image
       using a Dockerfile and to store it so as to be used to create a
       container whenever needed.
+      Dockerfiles can be tracked and versioned in source control
+      repositories. Once a Docker container has been built, its
+      contents can be exported to a binary file; these files are
+      generally smaller than virtual machine files, so they can be
+      shared more easily.
+    - The use of Docker containers for reproducible research comes
+      with caveats. Individual containers are stored and executed in
+      isolation from other containers on the same computer; however,
+      because all containers on a given machine share the same
+      operating system, this isolation is not as complete as it is
+      with virtual machines. This means, for example, that a given
+      container is not guaranteed to have access to a specific amount
+      of computer memory or processing power—multiple containers may
+      have to compete for these resources
 
 *** useful links.
    https://reproducible-analysis-workshop.readthedocs.io/en/latest/8.Intro-Docker.html
+   https://gigascience.biomedcentral.com/articles/10.1186/s13742-016-0135-4
 
    
+** Conda
+   Conda is an open source package management system and environment
+   management system that runs on Windows, macOS and Linux. Conda
+   quickly installs, runs and updates packages and their dependencies. 
+   Conda provides multiple ways of reproducing project environments.
+   Creating a clone of an environment can provide a custom base
+   environment or snapshot of the environment. Spec list and
+   conda-pack create platform and operating system specific copies of
+   an environment. 
+   
+
+** Singularity.
+   Singularity is a container platform. It allows you to create and
+   run containers that package up pieces of software in a way that is
+   portable and reproducible.
+   - Having a container which isolates the app from the environment
+     and where the developper can state the packages and the versions
+     that they want to use makes it possible for them to reproduce
+     the same results.
+
+     
 * The tutorials that were done in order get a better grasp of the tool.
 ** git-annex.
 *** useful commands.
@@ -260,7 +328,14 @@ bucket_url = r.json()["links"]["bucket"]
     + WF specification: connected tools steps of the analysis.
     + WF execution: provenence modules, data management, ..
     + WF environment: companion tools like Virtual machines, containers, ..
+  - Reproducible practices do not necessarily ensure that others can
+    obtain identical results to those obtained by the original
+    scientists. Indeed, this objective may be infeasible for some
+    types of computational analysis, including those that use
+    randomization procedures, floating-point operations, or
+    specialized computer hardware.
 
+    
 * A look into GUIX and reproducible software environments.
 ** Link:
   https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf
@@ -329,3 +404,107 @@ with Guix/ by _Ludovic Courtès_ and _Ricardo Wurmus_.
     to the selected /gnu/store item and the symbolic link is then
     stored in  ~ /.guix-profile.
 
+
+
+* Combining Snakemake with other tools.
+** Integrated package management with Conda.
+   We can now define isolated software environments in each rule and
+   deploy them using Conda upon the execution of the workflow.
+   Packages will be installed into your working directory, without
+   requiring any admin/root priviledges. Snakemake will store the
+   environment persistently in .snakemake/conda/$hash with $hash
+   being the MD5 hash of the environment definition file content.
+   This way, updates to the environment definition are automatically
+   detected.
+   
+** Running jobs in containers.
+   As an alternative to using Conda, it is possible to define, for
+   each rule, a docker or singularity container to use. It will
+   execute the job within a singularity container that is spawned
+   from the given image.
+
+** Combining Conda with containers.
+   A global definition of a container image can be combined with a
+   per-rule conda directive upon using the command:
+      #+BEGIN_EXAMPLE
+      snakemake --use-conda --use-singularity
+      #+END_EXAMPLE
+   Snakemake will first pull the defined container image, and then
+   create the requested conda environment from within the container.
+   The conda environments will still be stored in your working
+   environment, such that they don’t have to be recreated unless they
+   have changed. The hash under which the environments are stored
+   includes the used container image url, such that changes to the
+   container image also lead to new environments to be created.
+   When a job is executed, Snakemake will first enter the container
+   and then activate the conda environment.
+   By this, both packages and OS can be easily controlled without the
+   overhead of creating and distributing specialized container
+   images. It is also possible to define a container image per rule.
+   The user can, upon execution, freely choose the desired level of reproducibility:
+   - no package management (use whatever is on the system).
+   - Conda based package management (use versions defined by the workflow developer).
+   - Conda based package management in containerized OS (use versions
+     and OS defined by the workflow developer).
+   + Link: https://snakemake.readthedocs.io/en/v5.1.4/snakefiles/deployment.html
+
+
+
+
+
+* Version control for data.
+** Importance of Version Controlling Data.
+   The reality is that data is only rarely invariant. For example,
+   throughout a scientific project, datasets can be extended with new
+   data, adapted to new naming schemes, reorganised into different
+   file hierarchies, updated with new data points or modified to fix
+   any errors.
+   If a dataset that is the basis for computing a scientific result
+   changes without version control, reproducibility can be threatened:
+   results may become invalid, or scripts that are based on file names
+   that change between versions can break.
+   Therefore, version controlling data and other large files in a
+   similar way to version controlling code or manuscripts can help
+   ensure the reproducibility of a project and capture the provenance
+   of results.
+
+** Challenges in version controlling data.
+   When you work, share, and collaborate on large, potentially binary
+   files (such as many scientific data formats), you need to think
+   about ways to version control this data with specialised
+   tools. This is because most version control tools - such as Git -
+   are not well suited to handle large binary data. As a Git
+   repository stores every version of every file that is added to it,
+   large files that undergo regular modifications can inflate the size
+   of a·project significantly. If others try to clone your repository
+   or fetch/pull to update it locally, it will take longer to do this
+   if it contains larger files that have been versioned and modified.
+
+** Version controlling data with git-annex.
+   The git-annex tool is a distributed system that can manage and
+   share large files independent from a central service or
+   server. git-annex manages all file content in a separate directory
+   in the repository (.git/annex/objects, the so-called annex) and
+   only places file names with some metadata into version control by
+   Git. When a Git repository with an annex is pushed to a web-hosting
+   service such as GitHub, the contents stored in the annex are not
+   uploaded. Instead, they can be pushed to a storage system.
+   If a repository with an annex is cloned, the clone will not
+   contain the contents of all annexed files by default, but display
+   only file names. This makes the repository small, even if it tracks
+   hundreds of gigabytes of data, and cloning fast, while file
+   contents are stored in one or more free or commercial external
+   storage solutions.
+      
+** Link:
+   https://the-turing-way.netlify.app/reproducible-research/vcs/vcs-data.html
+
+
+
+
+
+
+
+#+BEGIN_SRC sh
+
+#+END_SRC

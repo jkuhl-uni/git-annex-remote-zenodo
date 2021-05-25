@@ -44,19 +44,37 @@ Jour férié.
   + link: https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf
 
 ### Mercredi 19/05:
-
+- les outils de package manegement comme apt sont limités dans leur fonctionnement. En effet, c'est parfois difficile pour les utilisateur de définir des packages et de les enregistrer dans la database, ce qui complique l'enregistrement et la recherche des graphes de dépendences manuellement. Mais puisque ces outils sont stateful (l'état de la machine dépend de toutes les installations qui ont été faites au fil du temps) et impératifs (l'utilisation d'une nouvelle version de la bibliothèque OpenMP par exemple cause les autres applications installées à l'utiliser et donc il y aura une modification dans les packages), alors ce n'est pas possible pour les utilisateurs de reproduire les mêmes résultats.
+- L'utilisation de chroot dans le developpement des outils de package management rend la procédure fonctionnelle. En effet, chroot limite l'accès possible en un environnement isolé où tous les identificateurs sont personnalisés pour cet env (ex: les variables d'environnement, la communication inter-processus, PIDs , ..). Donc, et puisque l'on limite l'accès aux libs et aux packages, après chaque build on retrouve les mêmes résultats puisque les données de l'input sont les mêmes (fonctions). 
+- Pour chaque build, on connait les identificateurs de toutes les dépendences puisque ils tous stocké dans une fichier dans /gnu/store comme des inputs. On retrouve aussi grâce à ça le diagramme de dépendances.
+  
 
 ### Jeudi 20/05:
+- Datalad est en dessus de git-annex (extend) et permet de manipuler les données avec des simple commandes. Il ne stocke pas les données mais il les gère comme un système de fichiers / dossiers. L'utilisateur ne voit plus les dépôts comme des entités isolées qu'il peut manipuler d'une façon limitée. 
+- On peut prendre un dépôt Git ou git-annex déjà initialisé et le convertir en un dataset Datalad facilement et le manipuler soit en ligne de commande ou avec l'API python qui automatise la gestion des versions et que l'on peut intégrer dans le workflow.
+  + link: http://docs.datalad.org/en/stable/generated/datalad.api.Dataset.html
+- Datalad permet d'exporter les dataset comme des archives sur plusieurs remotes (ex: figshare / ora). Pour le cas de figshare qui est une database, on peut simplement utiliser la commande export-to-figshare mais puisque l'infrastructure de figshare ne permet pas d'avoir des directory, alors le stockage se fait dans une liste des fichiers mal structurée.
+  + link: http://docs.datalad.org/en/stable/generated/man/datalad-export-archive-ora.html
+	  https://carpentries.topicbox.com/groups/discuss/Tb776978a905c0bf8-M3d3e4bb2f0a49fdf2391282c 
 
 
 ### Vendredi 21/05:
-
+- L'importance de 'Data Version Control' est évidente puisque dans le domaine de la recherche on gère des données de différents types et de grande taille et ces données peuvent changer et évoluer rapidement et donc au final on aura plusieurs version de chaque fichier et quand on compile les fichiers sources on peut avoir des différents résultats si on prend les mauvaises versions des fichiers. Mais on peut pas toujours tout mettre sur Git (surtout dans le cas des fichiers de grande taille qui évoluent exponentiellement). On gère ça alors with git-annex qui crée un directory annex où sont stockés les noms et les métadata des fichiers. Donc quand le dépôt est push sur Github, seuls les métadata sont transmises et alors les dépôts ne sont plus lourds. Les données peuvent être transmises sur des autres depôts (figshare, amazon, ...) et on peut facilement les récupérer avec une commande.
+- On fait cela donc avec Datalad.
 
 ## Semaine 3 (24/05 - 30/05):
 
 ### Lundi 24/05:
+Jour férié.
 
 ### Mardi 25/05:
+- On peut intégrer les outils de gestion des packages et des environnements (ex: Conda) et les outils de packaging et des containers (ex: Docker et Singularity) lors de la création d'un workflow quand on execute un fichier Snakefile. 
+En effet, on peut atteindre plusieurs niveaux de reproductibilité selon l'approche choisie. Si l'utilisateur décide par exemple de ne pas définir aucun env Conda et de ne pas lancer le workflow dans un container, c'est le résultat minimal de la reproductibilité, puisqu'on réussit à garder un schéma qui montre le workflow et donc quand on veut reproduire un résultat scientifique (surtout quand on a plusieurs étapes et plusieurs données d'entrée/sortie), on peut refaire l'experience avec le même workflow. Mais il y a toujours un problème dans ce cas puisqu'on gère pas les versions et on peut lancer le workflow avec des différents packages / dépendances.
+On peut améliorer cela en créant un environnement Conda où on spécifie les versions que l'on souhaite récupérer et installer. C'est déjà mieux comme ça.
+On peut aussi choisir de définir une image Singularity ou Docker dans le Snakefile. Dans ce cas, Snakemake récupère l'image et exécute le workflow dans ce container qui est isolé et qui peut être transmis ou stocker facilement pour être utilisé pour reproduire le résultat.
+En fin, on peut fusionner les deux approches pour atteindre le meilleur résultat. Si on lance le workflow dans un container en définissant un environnement Conda alors cet env ne sera pas fortement dépendant du OS.
+- On peut suivre cette approche mais en utilisant GUIX. 
+
 
 ### Mercredi 26/05:
 
