@@ -1,0 +1,921 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-05-25 mar. 10:10 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="oumaima" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org2c6b60f">1. Introduction to the tools that will be used.</a>
+<ul>
+<li><a href="#org5824b91">1.1. git-annex.</a>
+<ul>
+<li><a href="#org50d277c">1.1.1. intro.</a></li>
+<li><a href="#orgbd866d3">1.1.2. useful links.</a></li>
+</ul>
+</li>
+<li><a href="#org6b7e6e0">1.2. Zenodo.</a>
+<ul>
+<li><a href="#org6413b41">1.2.1. intro.</a></li>
+<li><a href="#org542f149">1.2.2. useful links.</a></li>
+</ul>
+</li>
+<li><a href="#org08afac2">1.3. Datalad.</a>
+<ul>
+<li><a href="#orgdc5cf34">1.3.1. intro.</a></li>
+<li><a href="#org6269a31">1.3.2. additional functionalities to Git / git-annex.</a></li>
+<li><a href="#org42d29b1">1.3.3. key points.</a></li>
+<li><a href="#org1ff3de6">1.3.4. exporting the content of a dataset as a ZIP archive to figshare.</a></li>
+<li><a href="#org1bf88d3">1.3.5. useful links.</a></li>
+</ul>
+</li>
+<li><a href="#org8fe1cc9">1.4. Snakemake.</a>
+<ul>
+<li><a href="#orgbf106cc">1.4.1. intro.</a></li>
+<li><a href="#org2f28e8d">1.4.2. useful links.</a></li>
+</ul>
+</li>
+<li><a href="#org5281160">1.5. GUIX.</a>
+<ul>
+<li><a href="#org0a3f478">1.5.1. intro.</a></li>
+<li><a href="#orgdbeda2a">1.5.2. useful links.</a></li>
+</ul>
+</li>
+<li><a href="#org9843411">1.6. Docker.</a>
+<ul>
+<li><a href="#org196337d">1.6.1. intro.</a></li>
+<li><a href="#org05ddbc3">1.6.2. useful links.</a></li>
+</ul>
+</li>
+<li><a href="#org0846b0e">1.7. Conda</a></li>
+</ul>
+</li>
+<li><a href="#org4097b22">2. The tutorials that were done in order get a better grasp of the tool.</a>
+<ul>
+<li><a href="#org775c745">2.1. git-annex.</a>
+<ul>
+<li><a href="#org67863bb">2.1.1. useful commands.</a></li>
+<li><a href="#orgb0248f4">2.1.2. useful links.</a></li>
+</ul>
+</li>
+<li><a href="#orgd99b7f7">2.2. Zenodo.</a>
+<ul>
+<li><a href="#orga0169f8">2.2.1. Uploading through the API.</a></li>
+<li><a href="#org6a31c31">2.2.2. Uploading through the website:</a></li>
+</ul>
+</li>
+<li><a href="#org962a96e">2.3. Snakemake.</a></li>
+<li><a href="#orga17b1d6">2.4. Docker.</a></li>
+</ul>
+</li>
+<li><a href="#org3675a7d">3. An introduction to Reproducible Research.</a></li>
+<li><a href="#orga977c16">4. A look into GUIX and reproducible software environments.</a>
+<ul>
+<li><a href="#org87d906a">4.1. Link:</a></li>
+<li><a href="#org1dcde24">4.2. Notes.</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org2c6b60f" class="outline-2">
+<h2 id="org2c6b60f"><span class="section-number-2">1</span> Introduction to the tools that will be used.</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org5824b91" class="outline-3">
+<h3 id="org5824b91"><span class="section-number-3">1.1</span> git-annex.</h3>
+<div class="outline-text-3" id="text-1-1">
+</div>
+<div id="outline-container-org50d277c" class="outline-4">
+<h4 id="org50d277c"><span class="section-number-4">1.1.1</span> intro.</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<p>
+git-annex allows managing files with git, without checking the
+filecontents into git. While that may seem paradoxical, it is
+useful when dealing with files larger than git can currently
+easily handle, whether due to limitations in memory, time, or disk
+space.
+</p>
+<ul class="org-ul">
+<li>In our framework, it will be used to keep hold of the multiple
+versions of the files that are used during the process of research
+and data analysis. It's imperative to keep track of the versions so
+as to facilitate the task when reproducing a result.
+(in this case most files are large and git-annex is the best at
+handling the size).</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbd866d3" class="outline-4">
+<h4 id="orgbd866d3"><span class="section-number-4">1.1.2</span> useful links.</h4>
+<div class="outline-text-4" id="text-1-1-2">
+<p>
+<a href="https://git-annex.branchable.com/walkthrough/">https://git-annex.branchable.com/walkthrough/</a>
+<a href="https://git-annex.branchable.com/special_remotes/external/">https://git-annex.branchable.com/special_remotes/external/</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org6b7e6e0" class="outline-3">
+<h3 id="org6b7e6e0"><span class="section-number-3">1.2</span> Zenodo.</h3>
+<div class="outline-text-3" id="text-1-2">
+</div>
+<div id="outline-container-org6413b41" class="outline-4">
+<h4 id="org6413b41"><span class="section-number-4">1.2.1</span> intro.</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<p>
+Zenodo is a general-purpose open-access repository developed under
+the European OpenAIRE program and operated by CERN. It allows
+researchers to deposit research papers, data sets, research
+software, reports, and any other research related digital
+artifacts.
+</p>
+<ul class="org-ul">
+<li>We will be using Zenodo as the database where the articles and
+research papers will be deposited at the end of the mooc. The API
+is easily accessible through Python with the use of the package
+requests which allows the use of the basic HTTP queries.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org542f149" class="outline-4">
+<h4 id="org542f149"><span class="section-number-4">1.2.2</span> useful links.</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+<a href="https://developers.zenodo.org/#quickstart-upload">https://developers.zenodo.org/#quickstart-upload</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org08afac2" class="outline-3">
+<h3 id="org08afac2"><span class="section-number-3">1.3</span> Datalad.</h3>
+<div class="outline-text-3" id="text-1-3">
+</div>
+<div id="outline-container-orgdc5cf34" class="outline-4">
+<h4 id="orgdc5cf34"><span class="section-number-4">1.3.1</span> intro.</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<p>
+DataLad builds on top of git-annex and extends it with an
+intuitive command-line interface. It enables users to operate
+on data using familiar concepts, such as files and directories,
+while transparently managing data access and authorization with
+underlying hosting providers.
+A powerful and complete Python API is also provided to enable
+authors of data-centric applications to bring versioning and the
+fearless acquisition of data into continuous integration workflows.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6269a31" class="outline-4">
+<h4 id="org6269a31"><span class="section-number-4">1.3.2</span> additional functionalities to Git / git-annex.</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<ul class="org-ul">
+<li>minimize the use of unique/idiosyncratic functionality.</li>
+<li>simplify working with repositories.</li>
+<li>add a range of useful concepts and functions.</li>
+<li>make the boundaries between repositories vanish from a user’s
+point of view.</li>
+<li>provide users with the ability to act on “virtual” file paths.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org42d29b1" class="outline-4">
+<h4 id="org42d29b1"><span class="section-number-4">1.3.3</span> key points.</h4>
+<div class="outline-text-4" id="text-1-3-3">
+<ul class="org-ul">
+<li>DataLad manages your data, but it does not host it.</li>
+<li>You can make DataLad publish file content to one location
+and afterwards automatically push an update to GitHub.</li>
+<li>DataLad scales to large dataset sizes.</li>
+<li>dataset = superdataset = subdataset unless it's registered
+in another dataset: sub / super.</li>
+<li>Converting an existing Git or git-annex repository into a
+DataLad dataset: 	$ datalad create -f</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1ff3de6" class="outline-4">
+<h4 id="org1ff3de6"><span class="section-number-4">1.3.4</span> exporting the content of a dataset as a ZIP archive to figshare.</h4>
+<div class="outline-text-4" id="text-1-3-4">
+<p>
+Ideally figshare should be supported as a proper git annex
+special remote. Unfortunately, figshare does not support having
+directories, and can store only a flat list of files. That makes
+it impossible for any sensible publishing of complete datasets.
+$ datalad export-to-figshare [-h] [-d DATASET] [&#x2013;missing-content {error|continue|ignore}] [&#x2013;no-annex] [&#x2013;article-id ID] [PATH]	(*)
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1bf88d3" class="outline-4">
+<h4 id="org1bf88d3"><span class="section-number-4">1.3.5</span> useful links.</h4>
+<div class="outline-text-4" id="text-1-3-5">
+<p>
+<a href="https://handbook.datalad.org/en/latest/basics/101-180-FAQ.html">https://handbook.datalad.org/en/latest/basics/101-180-FAQ.html</a>
+<a href="http://docs.datalad.org/en/stable/generated/man/datalad-export-to-figshare.html">http://docs.datalad.org/en/stable/generated/man/datalad-export-to-figshare.html</a>  (*)
+<a href="http://handbook.datalad.org/en/latest/usecases/ml-analysis.html">http://handbook.datalad.org/en/latest/usecases/ml-analysis.html</a>
+<a href="https://handbook.datalad.org/en/latest/beyond_basics/101-168-dvc.html">https://handbook.datalad.org/en/latest/beyond_basics/101-168-dvc.html</a>
+<a href="http://docs.datalad.org/en/stable/generated/datalad.api.Dataset.html">http://docs.datalad.org/en/stable/generated/datalad.api.Dataset.html</a>
+<a href="http://docs.datalad.org/en/stable/generated/man/datalad-export-archive-ora.html">http://docs.datalad.org/en/stable/generated/man/datalad-export-archive-ora.html</a>
+<a href="https://carpentries.topicbox.com/groups/discuss/Tb776978a905c0bf8-M3d3e4bb2f0a49fdf2391282c">https://carpentries.topicbox.com/groups/discuss/Tb776978a905c0bf8-M3d3e4bb2f0a49fdf2391282c</a> 
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org8fe1cc9" class="outline-3">
+<h3 id="org8fe1cc9"><span class="section-number-3">1.4</span> Snakemake.</h3>
+<div class="outline-text-3" id="text-1-4">
+</div>
+<div id="outline-container-orgbf106cc" class="outline-4">
+<h4 id="orgbf106cc"><span class="section-number-4">1.4.1</span> intro.</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<p>
+Snakemake is a workflow engine that provides a readable
+Python-based workflow definition language and a powerful
+execution environment that scales from single-core workstations
+to compute clusters without modifying the workflow.
+</p>
+<ul class="org-ul">
+<li>As projects grow or age, it becomes increasingly difficult to
+keep track of all the parts and how they fit together.</li>
+<li>This will be used to handle the workflows in our project and
+and it's useful in the case of reproducibility because it allows
+the definition and the use of environments. For instance, we can
+define a seperate conda env in a rule in the Snakefile and
+we can inculde the packages we want to use while configurating
+the new conda environment (command: snakemake &#x2013;use-env).</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2f28e8d" class="outline-4">
+<h4 id="org2f28e8d"><span class="section-number-4">1.4.2</span> useful links.</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<p>
+<a href="https://snakemake.readthedocs.io/en/stable/">https://snakemake.readthedocs.io/en/stable/</a>
+<a href="https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html#tutorial">https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html#tutorial</a>
+<a href="https://www.youtube.com/watch?v=NNPBDOBHlxo&amp;ab_channel=EdinburghGenomicsTraining">https://www.youtube.com/watch?v=NNPBDOBHlxo&amp;ab_channel=EdinburghGenomicsTraining</a>
+<a href="https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html">https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org5281160" class="outline-3">
+<h3 id="org5281160"><span class="section-number-3">1.5</span> GUIX.</h3>
+<div class="outline-text-3" id="text-1-5">
+</div>
+<div id="outline-container-org0a3f478" class="outline-4">
+<h4 id="org0a3f478"><span class="section-number-4">1.5.1</span> intro.</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<p>
+"GNU GUIX is a general-purpose package manager that implements 
+the functional package management paradigm pioneered by Nix" (*). it
+allows the creation and the deployment of isolated software
+environments, operating systems and the maintaining of a large
+range of packages.
+</p>
+<ul class="org-ul">
+<li>By definition, this software is a great addition to our arsenal
+in the subject of reproducible research. And among the many uses it
+has, tools like time-machine, for instance, allow the execution of
+old programmes. By finding the right version of the commit and
+installing these versions of dependencies, we can get back to a
+similar state to the old one and so, by executing the programme, we
+can get the same results.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgdbeda2a" class="outline-4">
+<h4 id="orgdbeda2a"><span class="section-number-4">1.5.2</span> useful links.</h4>
+<div class="outline-text-4" id="text-1-5-2">
+<p>
+<a href="https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf">https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf</a> (*)
+<a href="https://guix.gnu.org/manual/en/html_node/Binary-Installation.html">https://guix.gnu.org/manual/en/html_node/Binary-Installation.html</a>
+<a href="https://guix.gnu.org/en/manual/en/guix.html">https://guix.gnu.org/en/manual/en/guix.html</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org9843411" class="outline-3">
+<h3 id="org9843411"><span class="section-number-3">1.6</span> Docker.</h3>
+<div class="outline-text-3" id="text-1-6">
+</div>
+<div id="outline-container-org196337d" class="outline-4">
+<h4 id="org196337d"><span class="section-number-4">1.6.1</span> intro.</h4>
+<div class="outline-text-4" id="text-1-6-1">
+<p>
+Docker is a software for developing, shipping, and running
+applications. It allows the user to create seperate containers for
+their applications which seperates them from the infrastructure of
+the computer of the user and facilitates their use from other
+individuals.
+</p>
+<ul class="org-ul">
+<li>Having a container which isolates the app from the environment
+and where the developper can state the packages and the versions
+that they want to use makes it possible for them to reproduce
+the same results. All they need to do is to create an image
+using a Dockerfile and to store it so as to be used to create a
+container whenever needed.
+Dockerfiles can be tracked and versioned in source control
+repositories. Once a Docker container has been built, its
+contents can be exported to a binary file; these files are
+generally smaller than virtual machine files, so they can be
+shared more easily.</li>
+<li>The use of Docker containers for reproducible research comes
+with caveats. Individual containers are stored and executed in
+isolation from other containers on the same computer; however,
+because all containers on a given machine share the same
+operating system, this isolation is not as complete as it is
+with virtual machines. This means, for example, that a given
+container is not guaranteed to have access to a specific amount
+of computer memory or processing power—multiple containers may
+have to compete for these resources</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org05ddbc3" class="outline-4">
+<h4 id="org05ddbc3"><span class="section-number-4">1.6.2</span> useful links.</h4>
+<div class="outline-text-4" id="text-1-6-2">
+<p>
+<a href="https://reproducible-analysis-workshop.readthedocs.io/en/latest/8.Intro-Docker.html">https://reproducible-analysis-workshop.readthedocs.io/en/latest/8.Intro-Docker.html</a>
+<a href="https://gigascience.biomedcentral.com/articles/10.1186/s13742-016-0135-4">https://gigascience.biomedcentral.com/articles/10.1186/s13742-016-0135-4</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org0846b0e" class="outline-3">
+<h3 id="org0846b0e"><span class="section-number-3">1.7</span> Conda</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+Conda provides multiple ways of reproducing project environments.
+Creating a clone of an environment can provide a custom base
+environment or snapshot of the environment. Spec list and
+conda-pack create platform and operating system specific copies of
+an environment. 
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org4097b22" class="outline-2">
+<h2 id="org4097b22"><span class="section-number-2">2</span> The tutorials that were done in order get a better grasp of the tool.</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org775c745" class="outline-3">
+<h3 id="org775c745"><span class="section-number-3">2.1</span> git-annex.</h3>
+<div class="outline-text-3" id="text-2-1">
+</div>
+<div id="outline-container-org67863bb" class="outline-4">
+<h4 id="org67863bb"><span class="section-number-4">2.1.1</span> useful commands.</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<ul class="org-ul">
+<li><p>
+creating a repository:
+</p>
+<pre class="example" id="org334bea7">
+      git init 
+      git annex init
+</pre></li>
+
+<li><p>
+adding files:
+</p>
+<pre class="example" id="org46a34dc">
+      git annex add .
+      git commit -a -m added
+</pre></li>
+
+<li><p>
+adding a remote (usb drive):
+</p>
+<pre class="example" id="org14f2b2b">
+      sudo mount /media/usb
+      cd /media/usb
+      git clone ~/annex
+      cd annex
+      git annex init "portable USB drive"
+      git remote add laptop ~/annex
+      cd ~/annex
+      git remote add usbdrive /media/usb/annex
+</pre></li>
+
+<li><p>
+getting file content:
+</p>
+<pre class="example" id="org6c254e5">
+      cd /media/usb/annex
+      git annex sync laptop
+      git annex get .
+</pre></li>
+
+<li><p>
+syncing:
+</p>
+<pre class="example" id="org4aecc13">
+       cd /media/usb/annex
+       git annex sync
+</pre></li>
+
+<li><p>
+removing files:
+</p>
+<pre class="example" id="org545545f">
+       git annex drop iso/debian.iso
+</pre></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgb0248f4" class="outline-4">
+<h4 id="orgb0248f4"><span class="section-number-4">2.1.2</span> useful links.</h4>
+<div class="outline-text-4" id="text-2-1-2">
+<p>
+<a href="https://git-annex.branchable.com/walkthrough/">https://git-annex.branchable.com/walkthrough/</a>
+<a href="https://git-annex.branchable.com/special_remotes/external/">https://git-annex.branchable.com/special_remotes/external/</a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgd99b7f7" class="outline-3">
+<h3 id="orgd99b7f7"><span class="section-number-3">2.2</span> Zenodo.</h3>
+<div class="outline-text-3" id="text-2-2">
+</div>
+<div id="outline-container-orga0169f8" class="outline-4">
+<h4 id="orga0169f8"><span class="section-number-4">2.2.1</span> Uploading through the API.</h4>
+<div class="outline-text-4" id="text-2-2-1">
+</div>
+<ol class="org-ol">
+<li><a id="org8b2218e"></a>with cURL:<br />
+<div class="outline-text-5" id="text-2-2-1-1">
+<ul class="org-ul">
+<li>LINK: <a href="https://felipecrp.github.io/2021/01/01/uploading-to-zenodo-through-api.html">https://felipecrp.github.io/2021/01/01/uploading-to-zenodo-through-api.html</a></li>
+<li>PROCESS:
+<ul class="org-ul">
+<li>We tested to see if the API is accessible by using a GET
+request and there wasn't an error message.</li>
+<li>We then sent a POST request to the API to request the creation
+of a new deposit which we will be using to upload our files
+later on. We then receive a JSON message confirming the
+creation of the deposit and extra information (date, title, owner, ..).</li>
+<li>We then sent a PUT request to upload the files in the deposit
+using the bucket link that was sent in the JSON message when
+we created the deposit.</li>
+<li>Once we finish uploading the files, we can check the deposit
+to see if they have been uploaded. I did the test twice and
+uploaded simple .txt files (zenodotest.txt &amp; zenodotest2.txt)
+and they are accessible via this URL: <a href="https://zenodo.org/api/files/4aefd393-ed38-489c-bc8c-2413d9cb160f/zenodotest2.txt?access_token=WgYPkomVp1HpJniDmwS2ylFBhwsNpntxFzKqo02HGij94nVFlO0tAefboqtn">https://zenodo.org/api/files/4aefd393-ed38-489c-bc8c-2413d9cb160f/zenodotest2.txt?access_token=WgYPkomVp1HpJniDmwS2ylFBhwsNpntxFzKqo02HGij94nVFlO0tAefboqtn</a></li>
+</ul></li>
+</ul>
+</div>
+</li>
+
+<li><a id="org4ed2ccc"></a>with Python:<br />
+<div class="outline-text-5" id="text-2-2-1-2">
+<ul class="org-ul">
+<li>LINK: <a href="https://developers.zenodo.org/?python#quickstart-upload">https://developers.zenodo.org/?python#quickstart-upload</a></li>
+<li><p>
+PROCESS:
+</p>
+<ul class="org-ul">
+<li>The process is similar to the last one. We first import the
+package requests which we will be using to send the HTTP
+requests to the browser, and then we use a GET request to
+access the deposit (while giving an authentication key with
+the right access).</li>
+<li>We then send a POST request to create a new deposit and we
+get in return a message containing information about this
+new deposit (id, links, ..).</li>
+<li>Now, we can finally create new uploads. We first fetch the
+bucket URL by using this command which retrieves the item
+corresponding to the key "bucket" in the "links" dictionary.</li>
+</ul>
+<pre class="example" id="org0af4d10">
+bucket_url = r.json()["links"]["bucket"]
+</pre>
+
+<p>
+We use the method PUT to upload out file into the deposit.
+I did that using the new API. 
+</p></li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div id="outline-container-org6a31c31" class="outline-4">
+<h4 id="org6a31c31"><span class="section-number-4">2.2.2</span> Uploading through the website:</h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+I also tested how to publish an article and save it in the
+database. To do this, I simply used the sandbox and uploaded
+a report I worked on with an other student last year.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org962a96e" class="outline-3">
+<h3 id="org962a96e"><span class="section-number-3">2.3</span> Snakemake.</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+I created a simple Snakefile in which I wrote a couple rules with
+shell commands and tried to compile some old projects in order to
+test this tool. 
+</p>
+<ul class="org-ul">
+<li>LINK:
+<a href="https://www.youtube.com/watch?v=hPrXcUUp70Y&amp;ab_channel=NCSAatIllinois">https://www.youtube.com/watch?v=hPrXcUUp70Y&amp;ab_channel=NCSAatIllinois</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orga17b1d6" class="outline-3">
+<h3 id="orga17b1d6"><span class="section-number-3">2.4</span> Docker.</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+In the case of Docker, I've alredy used this tool during the
+project of the semester 8 and so I have a grasp on its basic
+usage. I've already manipulated existing images and deployed
+containers either separately or in groups using docker-compose.
+In the case of creating new images, I've tried creating some using
+simple Dockerfiles.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org3675a7d" class="outline-2">
+<h2 id="org3675a7d"><span class="section-number-2">3</span> An introduction to Reproducible Research.</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+It is the practice of having the flow of research documented in all
+of its steps in order to get the same result even if it's retested
+by other researchers or in the future. It relies on many components
+of the scientific study such as: having accessible data, detailed
+research and analysis, reproducible workflows and evironments, ..
+</p>
+<ul class="org-ul">
+<li>The main features that need to be present for a scientific
+research to be reproductibility-friendly:
+<ul class="org-ul">
+<li>WF specification: connected tools steps of the analysis.</li>
+<li>WF execution: provenence modules, data management, ..</li>
+<li>WF environment: companion tools like Virtual machines, containers, ..</li>
+</ul></li>
+<li>Reproducible practices do not necessarily ensure that others can
+obtain identical results to those obtained by the original
+scientists. Indeed, this objective may be infeasible for some
+types of computational analysis, including those that use
+randomization procedures, floating-point operations, or
+specialized computer hardware.</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orga977c16" class="outline-2">
+<h2 id="orga977c16"><span class="section-number-2">4</span> A look into GUIX and reproducible software environments.</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org87d906a" class="outline-3">
+<h3 id="org87d906a"><span class="section-number-3">4.1</span> Link:</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+  <a href="https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf">https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf</a>
+  Paper: <i>Reproducible and User-Controlled Software Environments in HPC
+with Guix</i> by <span class="underline">Ludovic Courtès</span> and <span class="underline">Ricardo Wurmus</span>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1dcde24" class="outline-3">
+<h3 id="org1dcde24"><span class="section-number-3">4.2</span> Notes.</h3>
+<div class="outline-text-3" id="text-4-2">
+<ul class="org-ul">
+<li>"GNU GUIX is a general-purpose package manager that implements the</li>
+</ul>
+<p>
+functional package management paradigm pioneered by Nix".
+</p>
+
+<ul class="org-ul">
+<li>It's important to handle the software environments when trying to
+work on reproducible research because the work that is being done
+mainly focuses on workflows, conventions, &#x2026; . We need to have
+the same  software environment to be able to reproduce the same results.</li>
+<li>A solution that was first given is to either write down the
+numbers of the dependencies (insufficient), or to save/download
+and reuse full system images (the images are large + it's
+difficult to combine with the software environment of each of
+the users). -&gt; GUIX is the sollution to these problems.</li>
+<li>Reproducing the exact same software environment on a different HPC
+system could allow the users to assess the impact of the hardware
+on the software’s performance + it would allow other researchers
+to reproduce the same experiment on their systems.</li>
+<li>Package managers like APT / RPM suffer from limitations:
+<ul class="org-ul">
+<li>Package binaries that every user installs, such as .deb
+files, are actually built on the package maintainer’s
+machine, and details about the host may leak into the
+binary that is uploaded.</li>
+<li>While it is possible for users to define their own variant
+of a package, it's still difficult to do. For instance,
+even if a user builds a custom .spec file, they can't always
+register it in the yumdb database (it's only allowed for
+the administrator) so it's difficult for the user to track
+down and register the complete graph of dependencies manually.</li>
+<li>These tools implement an imperative and stateful package
+management model: imperative in the sense that it modifies
+the set of available packages in place (ex: switching to an
+alternative MPI implementation, or upgrading the OpenMP
+run-time library means that suddenly all the installed
+applications and libraries start using them). It is stateful
+because the system state at a given point in time is the
+result of the series of installation and upgrade operations
+that have been made over time, and there may be no way to
+reproduce the exact same state elsewhere.</li>
+</ul></li>
+
+<li>Package management is to be seen as functional paradigms where the
+results only depend on the inputs. So, rerunning a given build
+with the same input should result in bit-identical files (used
+by Nix and now by Guix). A tool that is used is chroot which
+allows them to run in a limited environment with a defined set
+of env variables, a dedicated user ID, separate name spaces for
+PIDs, inter-process communication (IPC), networking, &#x2026; This is
+so as to ensure that build can't end up using libraries it's not
+supposed to use -&gt; this is what allows this process to be seen as
+pure functions with reproducible results.</li>
+<li>After each build, the created files are stored in the /gnu/store
+directory. each entry has a name that includes a hash of all the
+inputs of the build process that led to it (libs, compilers, ..).
+Therefore, we can fetch the diagram of dependencies easily in this
+case. After running 'guix build openmpi' for instance, we get as a
+return the directory name /gnu/store/xx-openmpi-1.8.1. and the
+daemon spawns the build process in an isolated environment (if
+the directory doesn't exist). For the normal user, the command
+'guix package' is enough to install the packages without  typing
+out the long names. In fact, this command creates a symbolic link
+to the selected /gnu/store item and the symbolic link is then
+stored in  ~ /.guix-profile.</li>
+</ul>
+
+
+
+
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #483d8b;">pwd</span>
+<span style="color: #483d8b;">cd</span> ~/Desktop
+<span style="color: #483d8b;">pwd</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: oumaima</p>
+<p class="date">Created: 2021-05-25 mar. 10:10</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

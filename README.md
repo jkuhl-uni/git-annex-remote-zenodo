@@ -59,13 +59,22 @@ Jour férié.
 
 
 ### Vendredi 21/05:
-
+- L'importance de 'Data Version Control' est évidente puisque dans le domaine de la recherche on gère des données de différents types et de grande taille et ces données peuvent changer et évoluer rapidement et donc au final on aura plusieurs version de chaque fichier et quand on compile les fichiers sources on peut avoir des différents résultats si on prend les mauvaises versions des fichiers. Mais on peut pas toujours tout mettre sur Git (surtout dans le cas des fichiers de grande taille qui évoluent exponentiellement). On gère ça alors with git-annex qui crée un directory annex où sont stockés les noms et les métadata des fichiers. Donc quand le dépôt est push sur Github, seuls les métadata sont transmises et alors les dépôts ne sont plus lourds. Les données peuvent être transmises sur des autres depôts (figshare, amazon, ...) et on peut facilement les récupérer avec une commande.
+- On fait cela donc avec Datalad.
 
 ## Semaine 3 (24/05 - 30/05):
 
 ### Lundi 24/05:
+Jour férié.
 
 ### Mardi 25/05:
+- On peut intégrer les outils de gestion des packages et des environnements (ex: Conda) et les outils de packaging et des containers (ex: Docker et Singularity) lors de la création d'un workflow quand on execute un fichier Snakefile. 
+En effet, on peut atteindre plusieurs niveaux de reproductibilité selon l'approche choisie. Si l'utilisateur décide par exemple de ne pas définir aucun env Conda et de ne pas lancer le workflow dans un container, c'est le résultat minimal de la reproductibilité, puisqu'on réussit à garder un schéma qui montre le workflow et donc quand on veut reproduire un résultat scientifique (surtout quand on a plusieurs étapes et plusieurs données d'entrée/sortie), on peut refaire l'experience avec le même workflow. Mais il y a toujours un problème dans ce cas puisqu'on gère pas les versions et on peut lancer le workflow avec des différents packages / dépendances.
+On peut améliorer cela en créant un environnement Conda où on spécifie les versions que l'on souhaite récupérer et installer. C'est déjà mieux comme ça.
+On peut aussi choisir de définir une image Singularity ou Docker dans le Snakefile. Dans ce cas, Snakemake récupère l'image et exécute le workflow dans ce container qui est isolé et qui peut être transmis ou stocker facilement pour être utilisé pour reproduire le résultat.
+En fin, on peut fusionner les deux approches pour atteindre le meilleur résultat. Si on lance le workflow dans un container en définissant un environnement Conda alors cet env ne sera pas fortement dépendant du OS.
+- On peut suivre cette approche mais en utilisant GUIX. 
+
 
 ### Mercredi 26/05:
 
