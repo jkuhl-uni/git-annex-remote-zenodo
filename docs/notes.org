@@ -289,7 +289,8 @@ bucket_url = r.json()["links"]["bucket"]
       #+END_EXAMPLE
 
 	We use the method PUT to upload out file into the deposit.
-	I did that using the new API. 
+	I did that using the new API.
+	
 *** Uploading through the website:
     I also tested how to publish an article and save it in the
     database. To do this, I simply used the sandbox and uploaded
@@ -498,9 +499,229 @@ with Guix/ by _Ludovic Courtès_ and _Ricardo Wurmus_.
 
 
 
-
-
-
-#+BEGIN_SRC sh
-
+* Tutorial git-annex
+** Intro.
+We can start off by creating a new repository where we will be working.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd ~/Desktop
+mkdir tutos
+cd tutos
+mkdir git-annex
+cd git-annex
 #+END_SRC
+
+Then, we initialize a git repository and we initialize this as a
+git-annex repository as well and we can choose a name for it
+("testlaptop").
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init "testlaptop"
+#+END_SRC
+
+We can see in the results that the repository is initialized and its
+state has been recorded by git.
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/Desktop/tutos/git-annex/.git/
+: init testlaptop ok
+: (recording state in git...)
+
+We now just copy a file we want to work with. I just copied a random
+file from my Downloads directory into the current one. I then added
+this file into the git annex repository using the command add.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cp ~/Downloads/AirPollutionInGrenoble.pdf .
+git annex add AirPollutionInGrenoble.pdf
+#+END_SRC
+
+We can see that the state of the file is being recorded now because we
+added  it to git.
+#+RESULTS:
+: 
+: add AirPollutionInGrenoble.pdf ok
+: (recording state in git...)
+
+All is left is for us to commit the changes.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git commit -m "just added a new pdf file (report on air pollution)" 
+#+END_SRC
+
+#+RESULTS:
+: [master (root-commit) f118046] just added a new pdf file (report on air pollution)
+:  1 file changed, 1 insertion(+)
+:  create mode 120000 AirPollutionInGrenoble.pdf
+
+The file has now become a symlink pointing to a subdirectory of
+./git/annex as we can see.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+ls -lh
+#+END_SRC
+
+
+#+RESULTS:
+: total 4,0K
+: .git/annex/objects/z9/ZJ/SHA256E-s1107977--5ae39c189f2042e2dddc9db35aed4a3f0b9955c1c1e3fa48205e14a7cce23a84.pdf/SHA256E-s1107977--5ae39c189f2042e2dddc9db35aed4a3f0b9955c1c1e3fa48205e14a7cce23a84.pdf
+
+** Using a USB drive as a second location.
+   We start off by creating a new folder where we will be working.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd "/media/nubudi/Ubuntu 18.04.3 LTS amd641"
+mkdir git-annex-usb
+cd git-annex-usb
+#+END_SRC
+
+  We then initialize a git and a git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init "testusb"
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Initialized empty Git repository in /media/nubudi/Ubuntu 18.04.3 LTS amd641/.git/
+init testusb 
+  Detected a filesystem without fifo support.
+
+  Disabling ssh connection caching.
+
+  Detected a crippled filesystem.
+
+  Enabling direct mode.
+ok
+(recording state in git...)
+#+end_example
+
+  We add the repository we have just created as a remote in the first
+  one. This is done so that the two locations know about each other.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd ~/Desktop/tutos/git-annex
+git remote add usb "/media/nubudi/Ubuntu 18.04.3 LTS amd641/git-annex-usb"
+#+END_SRC
+
+  We do the same, adding the laptop repository as a remote in the usb
+  repository. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd "/media/nubudi/Ubuntu 18.04.3 LTS amd641/git-annex-usb"
+git remote add testlaptop ~/Desktop/tutos/git-annex
+#+END_SRC
+
+  Now tha the two repositories are connected and know about each
+  other, we can use the command sync to synchronize the git state
+  between the two.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd ~/Desktop/tutos/git-annex
+git annex sync
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+commit 
+On branch master
+nothing to commit, working tree clean
+ok
+pull usb 
+warning: no common commits
+remote: Counting objects: 5, done.
+(1/3)           remote: Compressing objects:  66% (2/3)           remote: Compressing objects: 100% (3/3)           remote: Compressing objects: 100% (3/3), done.        
+remote: Total 5 (delta 1), reused 0 (delta 0)
+(1/5)   Unpacking objects:  40% (2/5)   Unpacking objects:  60% (3/5)   Unpacking objects:  80% (4/5)   Unpacking objects: 100% (5/5)   Unpacking objects: 100% (5/5), done.
+From /media/nubudi/Ubuntu 18.04.3 LTS amd641/git-annex-usb
+usb/git-annex
+ok
+pull testusb 
+ok
+(merging usb/git-annex into git-annex...)
+(recording state in git...)
+push usb 
+Counting objects: 26, done.
+Delta compression using up to 4 threads.
+(1/22)   Compressing objects:   9% (2/22)   Compressing objects:  13% (3/22)   Compressing objects:  18% (4/22)   Compressing objects:  22% (5/22)   Compressing objects:  27% (6/22)   Compressing objects:  31% (7/22)   Compressing objects:  36% (8/22)   Compressing objects:  40% (9/22)   Compressing objects:  45% (10/22)   Compressing objects:  50% (11/22)   Compressing objects:  54% (12/22)   Compressing objects:  59% (13/22)   Compressing objects:  63% (14/22)   Compressing objects:  68% (15/22)   Compressing objects:  72% (16/22)   Compressing objects:  77% (17/22)   Compressing objects:  81% (18/22)   Compressing objects:  86% (19/22)   Compressing objects:  90% (20/22)   Compressing objects:  95% (21/22)   Compressing objects: 100% (22/22)   Compressing objects: 100% (22/22), done.
+(1/26)   Writing objects:   7% (2/26)   Writing objects:  11% (3/26)   Writing objects:  15% (4/26)   Writing objects:  19% (5/26)   Writing objects:  23% (6/26)   Writing objects:  26% (7/26)   Writing objects:  30% (8/26)   Writing objects:  34% (9/26)   Writing objects:  38% (10/26)   Writing objects:  42% (11/26)   Writing objects:  46% (12/26)   Writing objects:  50% (13/26)   Writing objects:  53% (14/26)   Writing objects:  57% (15/26)   Writing objects:  61% (16/26)   Writing objects:  65% (17/26)   Writing objects:  69% (18/26)   Writing objects:  73% (19/26)   Writing objects:  76% (20/26)   Writing objects:  80% (21/26)   Writing objects:  84% (22/26)   Writing objects:  88% (23/26)   Writing objects:  92% (24/26)   Writing objects:  96% (25/26)   Writing objects: 100% (26/26)   Writing objects: 100% (26/26), 2.50 KiB | 853.00 KiB/s, done.
+Total 26 (delta 5), reused 0 (delta 0)
+To /media/nubudi/Ubuntu 18.04.3 LTS amd641/git-annex-usb
+synced/git-annex
+synced/master
+ok
+push testusb 
+Counting objects: 8, done.
+Delta compression using up to 4 threads.
+(1/6)   Compressing objects:  33% (2/6)   Compressing objects:  50% (3/6)   Compressing objects:  66% (4/6)   Compressing objects:  83% (5/6)   Compressing objects: 100% (6/6)   Compressing objects: 100% (6/6), done.
+(1/8)   Writing objects:  25% (2/8)   Writing objects:  37% (3/8)   Writing objects:  50% (4/8)   Writing objects:  62% (5/8)   Writing objects:  75% (6/8)   Writing objects:  87% (7/8)   Writing objects: 100% (8/8)   Writing objects: 100% (8/8), 873 bytes | 436.00 KiB/s, done.
+Total 8 (delta 1), reused 0 (delta 0)
+To /media/nubudi/Ubuntu 18.04.3 LTS amd641
+synced/git-annex
+ok
+#+end_example
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd "/media/nubudi/Ubuntu 18.04.3 LTS amd641/git-annex-usb"
+git annex sync
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+commit ok
+merge synced/master 
+Merge made by the 'recursive' strategy.
+ AirPollutionInGrenoble.pdf | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 120000 AirPollutionInGrenoble.pdf
+ok
+pull testlaptop 
+From /home/nubudi/Desktop/tutos/git-annex
+testlaptop/git-annex
+testlaptop/master
+testlaptop/synced/master
+ok
+push testlaptop 
+Counting objects: 4, done.
+Delta compression using up to 4 threads.
+(1/3)   Compressing objects:  66% (2/3)   Compressing objects: 100% (3/3)   Compressing objects: 100% (3/3), done.
+(2/4)   Writing objects:  75% (3/4)   Writing objects: 100% (4/4)   Writing objects: 100% (4/4), 470 bytes | 470.00 KiB/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+To /home/nubudi/Desktop/tutos/git-annex
+synced/master
+synced/git-annex
+ok
+#+end_example
+
+We can see that the file that we had in the first repository appears
+as if it has been added in the second repository. However, this isn't
+the case since git-annex in this case only copied the metadata (and
+now the entire content of the file).
+If you want to get the content of the file, you can use the command
+get.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd /home/nubudi/Desktop/tutos/git-annex
+echo "this is a test" > test.txt
+git add .
+git commit -m "added new file and tried to delete a second one"
+#+END_SRC
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+cd "/media/nubudi/Ubuntu 18.04.3 LTS amd641/git-annex-usb"
+git annex sync --content
+#+END_SRC
+
+#+RESULTS:
+: 
+: commit (recording state in git...)
+: ok
+: pull testlaptop 
+: ok
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis test.txt
+#+END_SRC
+
+
+ https://writequit.org/articles/getting-started-with-git-annex.html
+
+ 
+* Implementing a new remote: Zenodo.
+** 
