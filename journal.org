@@ -175,4 +175,6 @@ transfer_store()
   #+end_example
 
 
-  
+** step four: implementing the git-annex remote.
+   
+
