@@ -1,0 +1,178 @@
+
+
+* Monday 31/05.
+
+** first step: get.
+  We start off by writing a small function to test the get query on
+  the API. To do this, it is imperative to have the token (can
+  be easily created on sandbox.zenodo) and have the access to do all
+  queries. 
+
+  #+begin_src python :results output :exports both
+import requests
+import json
+def api():
+    # get 
+    ACCESS_TOKEN = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions', params={'access_token': ACCESS_TOKEN})
+    print(r.status_code)
+    print(r.json())
+
+api()
+#+end_src
+
+  #+RESULTS:
+  : 200
+  : [{'conceptrecid': '843324', 'created': '2021-05-31T09:10:44.699738', 'id': 843325, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/files', 'html': 'https://sandbox.zenodo.org/deposit/843325', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843325'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843325', 'recid': 843325}}, 'modified': '2021-05-31T09:10:44.699748', 'owner': 72937, 'record_id': 843325, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '843318', 'created': '2021-05-31T09:08:54.053305', 'id': 843319, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/files', 'html': 'https://sandbox.zenodo.org/deposit/843319', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843319'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843319', 'recid': 843319}}, 'modified': '2021-05-31T09:08:54.053314', 'owner': 72937, 'record_id': 843319, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '843316', 'created': '2021-05-31T09:06:53.436731', 'id': 843317, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/files', 'html': 'https://sandbox.zenodo.org/deposit/843317', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843317'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843317', 'recid': 843317}}, 'modified': '2021-05-31T09:06:53.436742', 'owner': 72937, 'record_id': 843317, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '843264', 'created': '2021-05-31T08:19:11.642843', 'id': 843265, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/files', 'html': 'https://sandbox.zenodo.org/deposit/843265', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843265'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843265', 'recid': 843265}}, 'modified': '2021-05-31T08:19:11.642858', 'owner': 72937, 'record_id': 843265, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptdoi': '10.5072/zenodo.825388', 'conceptrecid': '825388', 'created': '2021-05-17T09:41:44.571812', 'doi': '10.5072/zenodo.825389', 'doi_url': 'https://doi.org/10.5072/zenodo.825389', 'files': [{'checksum': '96379d6f2dfdbdd68ee0fa48a31ee07c', 'filename': 'Air_Pollution_In_Grenoble[Report].pdf', 'filesize': 1107977, 'id': '306aabed-decc-40d2-9873-2bfb9f063c83', 'links': {'download': 'https://sandbox.zenodo.org/api/files/4b42766b-b581-4e1c-b6ea-227238c56360/Air_Pollution_In_Grenoble%5BReport%5D.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/files/306aabed-decc-40d2-9873-2bfb9f063c83'}}], 'id': 825389, 'links': {'badge': 'https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.825389.svg', 'bucket': 'https://sandbox.zenodo.org/api/files/0429908f-f411-4ce8-9b74-095242cc69e9', 'conceptbadge': 'https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.825388.svg', 'conceptdoi': 'https://doi.org/10.5072/zenodo.825388', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/actions/discard', 'doi': 'https://doi.org/10.5072/zenodo.825389', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/files', 'html': 'https://sandbox.zenodo.org/deposit/825389', 'latest': 'https://sandbox.zenodo.org/api/records/825389', 'latest_html': 'https://sandbox.zenodo.org/record/825389', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/actions/publish', 'record': 'https://sandbox.zenodo.org/api/records/825389', 'record_html': 'https://sandbox.zenodo.org/record/825389', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/825389'}, 'metadata': {'access_right': 'open', 'creators': [{'affiliation': 'Student at Polytech Grenoble', 'name': 'HAJJI Oumaima'}, {'affiliation': 'Student at Polytech Grenoble', 'name': 'MOREAU Clélia'}], 'description': '<p>This is a report that was done by two students to study the phenomenon of air pollution in Grenoble and its surroundings.</p>\n\n<p>This report covered the topics of the sources of air pollution, the results this phenomenon has on the environment and people, and how it&#39;s tracked and studied.&nbsp;</p>', 'doi': '10.5072/zenodo.825389', 'keywords': ['Report', 'Air pollution', 'Grenoble'], 'language': 'eng', 'license': 'CC-BY-1.0', 'prereserve_doi': {'doi': '10.5072/zenodo.825389', 'recid': 825389}, 'publication_date': '2021-05-17', 'publication_type': 'report', 'title': 'Air Pollution In Grenoble', 'upload_type': 'publication'}, 'modified': '2021-05-17T09:42:32.790666', 'owner': 72937, 'record_id': 825389, 'state': 'done', 'submitted': True, 'title': 'Air Pollution In Grenoble'}]
+
+** second step: post.
+   Adding the argument headers to specify the content type because we
+   want a json app. We also still need the access token because we
+   can't make any query to the API without it.
+   When we don't use the argument json={} we get an error and we can't
+   use the response message to move on.
+
+  #+begin_src python :results output :exports both
+def apipost():
+    import requests
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'}
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', params=params, headers=headers)
+    print(r.status_code)
+
+apipost()
+
+  #+end_src
+
+  #+RESULTS:
+  : 400
+
+  Now that we've added the argument json={}, we get the message 201,
+  meaning that the request succeeded.
+  
+  #+begin_src python :results output :exports both
+def apipost():
+    import requests
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'}
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', json={}, params=params, headers=headers)
+    print(r.status_code)
+
+apipost()
+
+  #+end_src
+
+  #+RESULTS:
+  : 201
+
+  
+   Headers are not necessary here since "requests" automatically adds
+   "Content-Type: application/json", because we're using the "json="
+   keyword argument headers=headers.
+   A test without the headers argument:
+     
+  #+begin_src python :results output :exports both
+def apipost():
+    import requests
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'}
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', json={}, params=params)
+    print(r.status_code)
+
+apipost()
+
+  #+end_src
+
+  #+RESULTS:
+  : 201
+
+** step three: merging the two and posting on the API
+   now we just write a bigger program where we do the necessary steps
+   to communicate with the API in chronological order. First, we send
+   a get request to check the access. Then, we create an empty
+   depository and we upload a file.
+   
+  #+begin_src python :results output :exports both
+
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+import os
+import json
+import requests
+
+# method to handle all the basic queries
+def query(query_method, url, headers=None, data=None):
+    
+    # making sure that the headers are specified before sending the request
+    if headers is None:
+        headers = {"Content-Type": "application/json"}
+        
+    # we use the same access key for all the queries.    
+    params = {'access_token': KEY}    
+
+    # depending on the query, some of the arguments might be null
+    if query_method == 'get':
+        request = requests.get(url, params = params)
+    else:
+        if query_method == 'post': 
+            request = requests.post(url, params=params, json={}, headers=headers)
+        else:
+            request = requests.put(url, params=params, json={}, data=data)
+            
+    # informing the user of the currint state of the operation        
+    print("finished the " + query_method + "operation. Here is the returned message \n")
+    print(request.status_code)
+
+    #returning the resulting request for later uses
+    return request
+
+
+# this is the main method to call to transfer data
+def transfer_store():
+    # first step: get
+    r = query('get', URL_SANDBOX)
+    
+    #creating an empty upload with post
+    r = query('post', URL_SANDBOX)
+    print(r.json())
+    
+    # now, we upload the file (cf the tips in the tutorial)
+    # to do so, we will fetch the bucket_url which will be the folder containing the files
+    URL_BUCKET = r.json()['links']['bucket']
+
+    # and then we upload it
+    filename = 'notes.pdf'
+    path = '/home/nubudi/Downloads/notes.pdf'
+    #filename = input("inter the name of the file you want to send (ex: toto.zip) \n")
+    #path = input("inter the path to the file (ex: /path/to/toto.zip) \n")
+
+    # The target URL is a combination of the bucket link with the desired filename
+    # seperated by a slash.
+    with open(path, "rb") as fp:
+        r = query('put', "%s/%s" % (URL_BUCKET, filename), data=fp)
+        
+    if r.status_code < 400:
+        print("finished exporting the file... \n")
+
+transfer_store()
+
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  finished the getoperation. Here is the returned message 
+
+  200
+  finished the postoperation. Here is the returned message 
+
+  201
+  {'conceptrecid': '843349', 'created': '2021-05-31T09:30:05.987337+00:00', 'files': [], 'id': 843350, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/713c9ace-a2ed-48a1-8646-868010463788', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/files', 'html': 'https://sandbox.zenodo.org/deposit/843350', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/843350', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/843350', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843350'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843350', 'recid': 843350}}, 'modified': '2021-05-31T09:30:05.987346+00:00', 'owner': 72937, 'record_id': 843350, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished exporting the file... 
+
+  #+end_example
+
+
+  
