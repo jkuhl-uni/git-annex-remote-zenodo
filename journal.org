@@ -23,7 +23,7 @@ api()
 
   #+RESULTS:
   : 200
-  : [{'conceptrecid': '843324', 'created': '2021-05-31T09:10:44.699738', 'id': 843325, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/files', 'html': 'https://sandbox.zenodo.org/deposit/843325', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843325/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843325'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843325', 'recid': 843325}}, 'modified': '2021-05-31T09:10:44.699748', 'owner': 72937, 'record_id': 843325, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '843318', 'created': '2021-05-31T09:08:54.053305', 'id': 843319, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/files', 'html': 'https://sandbox.zenodo.org/deposit/843319', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843319/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843319'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843319', 'recid': 843319}}, 'modified': '2021-05-31T09:08:54.053314', 'owner': 72937, 'record_id': 843319, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '843316', 'created': '2021-05-31T09:06:53.436731', 'id': 843317, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/files', 'html': 'https://sandbox.zenodo.org/deposit/843317', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843317/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843317'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843317', 'recid': 843317}}, 'modified': '2021-05-31T09:06:53.436742', 'owner': 72937, 'record_id': 843317, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '843264', 'created': '2021-05-31T08:19:11.642843', 'id': 843265, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/files', 'html': 'https://sandbox.zenodo.org/deposit/843265', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843265/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843265'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843265', 'recid': 843265}}, 'modified': '2021-05-31T08:19:11.642858', 'owner': 72937, 'record_id': 843265, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptdoi': '10.5072/zenodo.825388', 'conceptrecid': '825388', 'created': '2021-05-17T09:41:44.571812', 'doi': '10.5072/zenodo.825389', 'doi_url': 'https://doi.org/10.5072/zenodo.825389', 'files': [{'checksum': '96379d6f2dfdbdd68ee0fa48a31ee07c', 'filename': 'Air_Pollution_In_Grenoble[Report].pdf', 'filesize': 1107977, 'id': '306aabed-decc-40d2-9873-2bfb9f063c83', 'links': {'download': 'https://sandbox.zenodo.org/api/files/4b42766b-b581-4e1c-b6ea-227238c56360/Air_Pollution_In_Grenoble%5BReport%5D.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/files/306aabed-decc-40d2-9873-2bfb9f063c83'}}], 'id': 825389, 'links': {'badge': 'https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.825389.svg', 'bucket': 'https://sandbox.zenodo.org/api/files/0429908f-f411-4ce8-9b74-095242cc69e9', 'conceptbadge': 'https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.825388.svg', 'conceptdoi': 'https://doi.org/10.5072/zenodo.825388', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/actions/discard', 'doi': 'https://doi.org/10.5072/zenodo.825389', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/files', 'html': 'https://sandbox.zenodo.org/deposit/825389', 'latest': 'https://sandbox.zenodo.org/api/records/825389', 'latest_html': 'https://sandbox.zenodo.org/record/825389', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/825389/actions/publish', 'record': 'https://sandbox.zenodo.org/api/records/825389', 'record_html': 'https://sandbox.zenodo.org/record/825389', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/825389'}, 'metadata': {'access_right': 'open', 'creators': [{'affiliation': 'Student at Polytech Grenoble', 'name': 'HAJJI Oumaima'}, {'affiliation': 'Student at Polytech Grenoble', 'name': 'MOREAU Clélia'}], 'description': '<p>This is a report that was done by two students to study the phenomenon of air pollution in Grenoble and its surroundings.</p>\n\n<p>This report covered the topics of the sources of air pollution, the results this phenomenon has on the environment and people, and how it&#39;s tracked and studied.&nbsp;</p>', 'doi': '10.5072/zenodo.825389', 'keywords': ['Report', 'Air pollution', 'Grenoble'], 'language': 'eng', 'license': 'CC-BY-1.0', 'prereserve_doi': {'doi': '10.5072/zenodo.825389', 'recid': 825389}, 'publication_date': '2021-05-17', 'publication_type': 'report', 'title': 'Air Pollution In Grenoble', 'upload_type': 'publication'}, 'modified': '2021-05-17T09:42:32.790666', 'owner': 72937, 'record_id': 825389, 'state': 'done', 'submitted': True, 'title': 'Air Pollution In Grenoble'}]
+  : [{'conceptrecid': '844091', 'created': '2021-05-31T23:11:39.973087', 'id': 844092, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/files', 'html': 'https://sandbox.zenodo.org/deposit/844092', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844092'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844092', 'recid': 844092}}, 'modified': '2021-05-31T23:11:39.973105', 'owner': 72937, 'record_id': 844092, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844087', 'created': '2021-05-31T23:08:34.076159', 'id': 844088, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/files', 'html': 'https://sandbox.zenodo.org/deposit/844088', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844088'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844088', 'recid': 844088}}, 'modified': '2021-05-31T23:08:34.076183', 'owner': 72937, 'record_id': 844088, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844081', 'created': '2021-05-31T23:04:59.816588', 'id': 844082, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/files', 'html': 'https://sandbox.zenodo.org/deposit/844082', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844082'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844082', 'recid': 844082}}, 'modified': '2021-05-31T23:04:59.816597', 'owner': 72937, 'record_id': 844082, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844079', 'created': '2021-05-31T23:04:39.914423', 'id': 844080, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/files', 'html': 'https://sandbox.zenodo.org/deposit/844080', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844080'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844080', 'recid': 844080}}, 'modified': '2021-05-31T23:04:39.914448', 'owner': 72937, 'record_id': 844080, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844077', 'created': '2021-05-31T23:03:47.160325', 'id': 844078, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/files', 'html': 'https://sandbox.zenodo.org/deposit/844078', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844078'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844078', 'recid': 844078}}, 'modified': '2021-05-31T23:03:47.160356', 'owner': 72937, 'record_id': 844078, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844075', 'created': '2021-05-31T23:02:36.003019', 'id': 844076, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/files', 'html': 'https://sandbox.zenodo.org/deposit/844076', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844076'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844076', 'recid': 844076}}, 'modified': '2021-05-31T23:02:36.003036', 'owner': 72937, 'record_id': 844076, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844069', 'created': '2021-05-31T22:59:46.066747', 'id': 844070, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/files', 'html': 'https://sandbox.zenodo.org/deposit/844070', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844070'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844070', 'recid': 844070}}, 'modified': '2021-05-31T22:59:46.066761', 'owner': 72937, 'record_id': 844070, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844061', 'created': '2021-05-31T22:43:13.506703', 'id': 844062, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/files', 'html': 'https://sandbox.zenodo.org/deposit/844062', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844062'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844062', 'recid': 844062}}, 'modified': '2021-05-31T22:43:13.506716', 'owner': 72937, 'record_id': 844062, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844059', 'created': '2021-05-31T22:42:36.075462', 'id': 844060, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/files', 'html': 'https://sandbox.zenodo.org/deposit/844060', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844060'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844060', 'recid': 844060}}, 'modified': '2021-05-31T22:42:36.075482', 'owner': 72937, 'record_id': 844060, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844049', 'created': '2021-05-31T22:22:00.989030', 'id': 844050, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/files', 'html': 'https://sandbox.zenodo.org/deposit/844050', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844050'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844050', 'recid': 844050}}, 'modified': '2021-05-31T22:22:00.989047', 'owner': 72937, 'record_id': 844050, 'state': 'unsubmitted', 'submitted': False, 'title': ''}]
 
 ** second step: post.
    Adding the argument headers to specify the content type because we
@@ -108,7 +108,7 @@ def query(query_method, url, headers=None, data=None):
         headers = {"Content-Type": "application/json"}
         
     # we use the same access key for all the queries.    
-    params = {'access_token': KEY}    
+    params = {'access_token': KEY}
 
     # depending on the query, some of the arguments might be null
     if query_method == 'get':
@@ -141,8 +141,8 @@ def transfer_store():
     URL_BUCKET = r.json()['links']['bucket']
 
     # and then we upload it
-    filename = 'notes.pdf'
-    path = '/home/nubudi/Downloads/notes.pdf'
+    filename = 'AirPollutionInGrenoble.pdf'
+    path = '/home/nubudi/Downloads/AirPollutionInGrenoble.pdf'
     #filename = input("inter the name of the file you want to send (ex: toto.zip) \n")
     #path = input("inter the path to the file (ex: /path/to/toto.zip) \n")
 
@@ -166,7 +166,7 @@ transfer_store()
   finished the postoperation. Here is the returned message 
 
   201
-  {'conceptrecid': '843349', 'created': '2021-05-31T09:30:05.987337+00:00', 'files': [], 'id': 843350, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/713c9ace-a2ed-48a1-8646-868010463788', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/files', 'html': 'https://sandbox.zenodo.org/deposit/843350', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/843350', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/843350', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/843350/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/843350'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.843350', 'recid': 843350}}, 'modified': '2021-05-31T09:30:05.987346+00:00', 'owner': 72937, 'record_id': 843350, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  {'conceptrecid': '844061', 'created': '2021-05-31T22:43:13.506703+00:00', 'files': [], 'id': 844062, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/ae0afa09-a65e-4f53-b6a0-e355753f9f40', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/files', 'html': 'https://sandbox.zenodo.org/deposit/844062', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/844062', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/844062', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844062'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844062', 'recid': 844062}}, 'modified': '2021-05-31T22:43:13.506716+00:00', 'owner': 72937, 'record_id': 844062, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
   finished the putoperation. Here is the returned message 
 
   200
@@ -174,6 +174,100 @@ transfer_store()
 
   #+end_example
 
+  - new version with added functionalities
+
+  #+begin_src python :results output :exports both
+
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+import os
+import json
+import requests
+
+# method to handle all the basic queries
+def query(query_method, url, key_id=None,  headers=None, data=None):
+    
+    # making sure that the headers are specified before sending the request
+    if headers is None:
+        headers = {"Content-Type": "application/json"}
+        
+    # we use the same access key for all the queries.    
+    params = {'access_token': KEY}
+
+    # depending on the query, some of the arguments might be null
+    if query_method == 'get':
+        request = requests.get(url, params = params)
+    else:
+        if query_method == 'post': 
+            request = requests.post(url, params=params, json={}, headers=headers)
+        else:
+            request = requests.put(url, params=params, json={}, data=data)
+            
+    # informing the user of the currint state of the operation        
+    print("finished the " + query_method + "operation. Here is the returned message \n")
+    print(request.status_code)
+
+    #returning the resulting request for later uses
+    return request
+
+
+# this is the main method to call to transfer data
+def transfer_store (key):
+    # first step: get
+    r = query('get', URL_SANDBOX)
+    
+    #creating an empty upload with post
+    r = query('post', URL_SANDBOX)
+    print(r.json())
+    
+    # now, we upload the file (cf the tips in the tutorial)
+    # to do so, we will fetch the bucket_url which will be the folder containing the files
+    URL_BUCKET = r.json()['links']['bucket']
+
+    # and then we upload it
+    filename = 'AirPollutionInGrenoble.pdf'
+    path = '/home/nubudi/Downloads/AirPollutionInGrenoble.pdf'
+    #filename = input("inter the name of the file you want to send (ex: toto.zip) \n")
+    #path = input("inter the path to the file (ex: /path/to/toto.zip) \n")
+
+    # The target URL is a combination of the bucket link with the desired filename
+    # seperated by a slash.
+    with open(path, "rb") as fp:
+        r = query('put', "%s/%s" % (URL_BUCKET, filename), data=fp)
+
+    print(r.json())
+    """
+    # now, we set the key in the remote by sending a put query
+    deposition_id = r.json()['id']
+    data = {'key_id': key}
+    r = query('put', 'https://zenodo.org/api/deposit/depositions/%s' % deposition_id, data=json.dumps(data))
+    """
+    if r.status_code < 400:
+        print("finished exporting the file... \n")
+
+
+def transfer_retrieve(key):
+        # get the file identified by `key` and store it to `filename`
+        # raise RemoteError if the file couldn't be retrieved
+
+        # get request to: https://sandbox.zenodo.org/api/deposit/depositions 
+    uuuurl = 'https://sandbox.zenodo.org/api/deposit/depositions/844088/files'
+    r = query('get', uuuurl)
+    print(r.json())
+
+
+
+#transfer_store('testet')
+transfer_retrieve('testet')
+
+
+  #+end_src
+
+  #+RESULTS:
+  : finished the getoperation. Here is the returned message 
+  : 
+  : 200
+  : [{'checksum': '96379d6f2dfdbdd68ee0fa48a31ee07c', 'filename': 'AirPollutionInGrenoble.pdf', 'filesize': 1107977, 'id': 'd4ecf116-ff2d-4fcb-8c1e-c31065f73b31', 'links': {'download': 'https://sandbox.zenodo.org/api/files/28c34351-9840-4b62-b297-699ec90bd027/AirPollutionInGrenoble.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/files/d4ecf116-ff2d-4fcb-8c1e-c31065f73b31'}}]
 
 ** step four: implementing the git-annex remote.
    

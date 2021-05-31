@@ -30,7 +30,7 @@ class ZenodoRemote(ExportRemote):
             params = {'access_token': KEY, 'identifier' : id}   
         # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
         else:
-             params = {'access_token': KEY}
+            params = {'access_token': KEY}
 
         # depending on the query, some of the arguments might be null
         if query_method == 'get':
@@ -71,8 +71,6 @@ class ZenodoRemote(ExportRemote):
         # store the file in `filename` to a unique location derived from `key`
         # raise RemoteError if the file couldn't be stored
         
-        import requests
-
         # uploading the file:
 
         # we first need to create an empty upload
@@ -83,12 +81,12 @@ class ZenodoRemote(ExportRemote):
         # to do so, we will fetch the bucket_url which will be the folder containing the files
         URL_BUCKET = r.json()["links"]["bucket"]
 
+        # todo: extract the path and the filename from arg 'filename'
+
         # and then we upload it
         filename = 'notes.pdf'
         path = '/home/nubudi/Downloads/notes.pdf'
-        #filename = input("inter the name of the file you want to send (ex: toto.zip) \n")
-        #path = input("inter the path to the file (ex: /path/to/toto.zip) \n")
-
+        
         # The target URL is a combination of the bucket link with the desired filename
         # seperated by a slash.
         with open(path, "rb") as fp:
@@ -97,61 +95,79 @@ class ZenodoRemote(ExportRemote):
         if r.status_code < 400:
             print("finished exporting the file... \n")
         else:
-            raise RemoteError ('error')
+            raise RemoteError ('error while exporting the file... \n')
 
-        # Publishing the file 
+        # todo: publishing the file 
+        # simply by using a post query
 
 
     def transfer_retrieve(self, key, filename):
         # get the file identified by `key` and store it to `filename`
         # raise RemoteError if the file couldn't be retrieved
+
+        # get request to: https://sandbox.zenodo.org/api/deposit/depositions
+
         print("a")
 
     def checkpresent(self, key):
         # return True if the key is present in the remote
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
+
+        # get request to: https://sandbox.zenodo.org/api/deposit/depositions
         print("not implemented")
 
     def remove(self, key):
         # remove the key from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
+        
         print("not implemented")
-
-    # Additional methods:
 
     def transferexport_store(self, key, local_file, remote_file):
         # store the file located at `local_file` to `remote_file` on the remote
         # raise RemoteError if the file couldn't be stored
-        print("not implemented")
+
+        return self.transfer_store(key, local_file)
+        # and set the key later on using a put command to be able to retrieve files
+        # or: self.transfer_store(remote_file, local_file) which means setting 
+        # the name of the file in the remote as the key.
+        
         
     def transferexport_retrieve(self, key, local_file, remote_file):
         # get the file located at `remote_file` from the remote and store it to `local_file`
         # raise RemoteError if the file couldn't be retrieved
-        print("not implemented")
+
+        return self.transfer_retrieve(key, local_file)
+        # same idea
 
     def checkpresentexport(self, key, remote_file):
         # return True if the file `remote_file` is present in the remote
         # return False if not
         # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
-        print("not implemented")
+        
+        return self.checkpresentexport(key)
+        # same idea
 
     def removeexport(self, key, remote_file):
         # remove the file in `remote_file` from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
-        print("not implemented")
+
+        return self.remove(key)
+        # same idea
 
     def removeexportdirectory(self, remote_directory):
         # remove the directory `remote_directory` from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing directory isn't considered an error
+
         print("not implemented")
 
     def renameexport(self, key, filename, new_filename):
         # move the remote file in `name` to `new_name`
         # raise RemoteError if it couldn't be moved
+
         print("not implemented")
 
 
