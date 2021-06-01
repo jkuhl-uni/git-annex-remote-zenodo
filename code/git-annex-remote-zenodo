@@ -14,8 +14,13 @@ KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
 
 class ZenodoRemote(ExportRemote):
 
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.deposit = None
+        self.deposit_id = None
+
     # method to handle all the basic queries
-    def query(query_method, url, id=None, headers=None, data=None):
+    def query(self, query_method, url, id=None, headers=None, data=None):
         # id = key (!= KEY or access token to the API): to be stored in the remote. 
         # In most cases, this is going to be the remote file name. It should be at 
         # least be unambigiously derived from it.
@@ -52,7 +57,6 @@ class ZenodoRemote(ExportRemote):
     def initremote(self):
     # initialize the remote, eg. create the folders
     # raise RemoteError if the remote couldn't be initialized
-        #self.key = input("inter the token \n")
 	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
 
 
@@ -65,6 +69,17 @@ class ZenodoRemote(ExportRemote):
         if r.status_code != 200:
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
             raise RemoteError('could not send a get query to the API')
+        
+        # we first need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a post query to the API')
+        
+        # setting the id for this deposit
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        # finished preparing the remote
 
 
     def transfer_store(self, key, filename):
@@ -72,11 +87,7 @@ class ZenodoRemote(ExportRemote):
         # raise RemoteError if the file couldn't be stored
         
         # uploading the file:
-
-        # we first need to create an empty upload
-        r = self.query('post', URL_SANDBOX, key)
-        print(r.json())
-
+        r = self.deposit
         # now, we upload the file (cf the tips in the tutorial)
         # to do so, we will fetch the bucket_url which will be the folder containing the files
         URL_BUCKET = r.json()["links"]["bucket"]
@@ -106,22 +117,34 @@ class ZenodoRemote(ExportRemote):
         # raise RemoteError if the file couldn't be retrieved
 
         # get request to: https://sandbox.zenodo.org/api/deposit/depositions
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
 
-        print("a")
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a get query to the API')
+        
 
     def checkpresent(self, key):
         # return True if the key is present in the remote
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
 
-        # get request to: https://sandbox.zenodo.org/api/deposit/depositions
-        print("not implemented")
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == key:
+                print('yes, this file exists in the remote: ' + key )
+                return True
+        return False 
+
 
     def remove(self, key):
         # remove the key from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
-        
+
         print("not implemented")
 
     def transferexport_store(self, key, local_file, remote_file):

@@ -251,11 +251,9 @@ def transfer_retrieve(key):
         # raise RemoteError if the file couldn't be retrieved
 
         # get request to: https://sandbox.zenodo.org/api/deposit/depositions 
-    uuuurl = 'https://sandbox.zenodo.org/api/deposit/depositions/844088/files'
+    uuuurl = 'https://sandbox.zenodo.org/api/deposit/depositions/844128/files'
     r = query('get', uuuurl)
     print(r.json())
-
-
 
 #transfer_store('testet')
 transfer_retrieve('testet')
@@ -269,6 +267,271 @@ transfer_retrieve('testet')
   : 200
   : [{'checksum': '96379d6f2dfdbdd68ee0fa48a31ee07c', 'filename': 'AirPollutionInGrenoble.pdf', 'filesize': 1107977, 'id': 'd4ecf116-ff2d-4fcb-8c1e-c31065f73b31', 'links': {'download': 'https://sandbox.zenodo.org/api/files/28c34351-9840-4b62-b297-699ec90bd027/AirPollutionInGrenoble.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/files/d4ecf116-ff2d-4fcb-8c1e-c31065f73b31'}}]
 
-** step four: implementing the git-annex remote.
-   
+  #+begin_src python :results output :exports both
+import requests
 
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+class ZenodoRemote():
+
+    def __init__(self):
+        self.deposit = None
+        self.deposit_id = None
+
+    # method to handle all the basic queries
+    def query(self, query_method: str, url, id=None, headers=None, data=None):
+        # id = key (!= KEY or access token to the API): to be stored in the remote. 
+        # In most cases, this is going to be the remote file name. It should be at 
+        # least be unambigiously derived from it.
+        import requests
+
+        # making sure that the headers are specified before sending the request
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
+
+        # we use the same access key for all the queries. 
+        # for put / post   
+        if id is not None:    
+            params = {'access_token': KEY, 'identifier' : id}   
+        # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
+        else:
+            params = {'access_token': KEY}
+
+        # depending on the query, some of the arguments might be null
+        if query_method == 'get':
+            request = requests.get(url, json={}, params = params)
+        else:
+            if query_method == 'post': 
+                request = requests.post(url, params=params, json={}, headers=headers)
+            else:
+                request = requests.put(url, params=params, json={}, data=data)
+                
+        # informing the user of the currint state of the operation        
+        print("finished the " + query_method + "operation. Here is the returned message \n")
+        print(request.status_code)
+        #returning the resulting request for later uses
+        return request
+
+
+    # methods to implement
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        #self.key = input("inter the token \n")
+	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+    def prepare(self):
+        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
+        # raise RemoteError if not ready to use
+
+        # let's try to connect to the API, if the status code is not 200: there is an error 
+        r = self.query('get', URL_SANDBOX)
+        if r.status_code != 200:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+        
+        # we first need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        print(r.json())
+
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        # finished preparing the remote
+
+
+    def transfer_store(self, key):
+        # store the file in `filename` to a unique location derived from `key`
+        # raise RemoteError if the file couldn't be stored
+        
+        # uploading the file:
+        r = self.deposit
+        # now, we upload the file (cf the tips in the tutorial)
+        # to do so, we will fetch the bucket_url which will be the folder containing the files
+        URL_BUCKET = r.json()["links"]["bucket"]
+
+        # todo: extract the path and the filename from arg 'filename'
+
+        # and then we upload it
+        filename = 'notes.pdf'
+        path = '/home/nubudi/Downloads/notes.pdf'
+        
+        # The target URL is a combination of the bucket link with the desired filename
+        # seperated by a slash.
+        with open(path, "rb") as fp:
+            r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
+        
+        if r.status_code < 400:
+            print("finished exporting the file... \n")
+        
+        # todo: publishing the file 
+        # simply by using a post query
+
+    def transfer_retrieve(self, key):
+        # get the file identified by `key` and store it to `filename`
+        # raise RemoteError if the file couldn't be retrieved
+	    
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        print(r.json())
+        
+
+    # Redirect output to stderr to avoid messing up the protocol
+remote = ZenodoRemote()
+remote.initremote()
+remote.prepare()
+remote.transfer_store('notes.pdf')
+remote.transfer_retrieve('notes.pdf') 
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  finished the getoperation. Here is the returned message 
+
+  200
+  finished the postoperation. Here is the returned message 
+
+  201
+  {'conceptrecid': '844143', 'created': '2021-06-01T00:13:57.858160+00:00', 'files': [], 'id': 844144, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/4e680567-c908-4a94-88b0-af5ab11551f6', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/files', 'html': 'https://sandbox.zenodo.org/deposit/844144', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/844144', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/844144', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844144'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844144', 'recid': 844144}}, 'modified': '2021-06-01T00:13:57.858173+00:00', 'owner': 72937, 'record_id': 844144, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished exporting the file... 
+
+  finished the getoperation. Here is the returned message 
+
+  200
+  [{'checksum': '2d2d364fe89375260446330175bd832f', 'filename': 'notes.pdf', 'filesize': 180064, 'id': 'a05fa9ca-0087-4c3f-9915-4e657e39312e', 'links': {'download': 'https://sandbox.zenodo.org/api/files/4e680567-c908-4a94-88b0-af5ab11551f6/notes.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/files/a05fa9ca-0087-4c3f-9915-4e657e39312e'}}]
+  #+end_example
+
+
+  #+begin_src python :results output :exports both
+import requests
+
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+class ZenodoRemote():
+
+    def __init__(self):
+        self.deposit = None
+        self.deposit_id = None
+
+    # method to handle all the basic queries
+    def query(self, query_method: str, url, id=None, headers=None, data=None):
+        # id = key (!= KEY or access token to the API): to be stored in the remote. 
+        # In most cases, this is going to be the remote file name. It should be at 
+        # least be unambigiously derived from it.
+        import requests
+
+        # making sure that the headers are specified before sending the request
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
+
+        # we use the same access key for all the queries. 
+        # for put / post   
+        if id is not None:    
+            params = {'access_token': KEY, 'identifier' : id}   
+        # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
+        else:
+            params = {'access_token': KEY}
+
+        # depending on the query, some of the arguments might be null
+        if query_method == 'get':
+            request = requests.get(url, json={}, params = params)
+        else:
+            if query_method == 'post': 
+                request = requests.post(url, params=params, json={}, headers=headers)
+            else:
+                request = requests.put(url, params=params, json={}, data=data)
+                
+        # informing the user of the currint state of the operation        
+        print("finished the " + query_method + "operation. Here is the returned message \n")
+        print(request.status_code)
+        #returning the resulting request for later uses
+        return request
+
+
+    # methods to implement
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        #self.key = input("inter the token \n")
+	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+    def prepare(self):
+        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
+        # raise RemoteError if not ready to use
+
+        # let's try to connect to the API, if the status code is not 200: there is an error 
+        r = self.query('get', URL_SANDBOX)
+        if r.status_code != 200:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+        
+        # we first need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        print(r.json())
+
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        # finished preparing the remote
+
+
+    def transfer_store(self, key):
+        # store the file in `filename` to a unique location derived from `key`
+        # raise RemoteError if the file couldn't be stored
+        
+        # uploading the file:
+        r = self.deposit
+        # now, we upload the file (cf the tips in the tutorial)
+        # to do so, we will fetch the bucket_url which will be the folder containing the files
+        URL_BUCKET = r.json()["links"]["bucket"]
+
+        # todo: extract the path and the filename from arg 'filename'
+
+        # and then we upload it
+        filename = 'notes.pdf'
+        path = '/home/nubudi/Downloads/notes.pdf'
+        
+        # The target URL is a combination of the bucket link with the desired filename
+        # seperated by a slash.
+        with open(path, "rb") as fp:
+            r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
+        
+        with open('/home/nubudi/Downloads/AirPollutionInGrenoble.pdf', "rb") as fp:
+            r = self.query('put', "%s/%s" % (URL_BUCKET, 'AirPollutionInGrenoble.pdf'), key, data=fp)
+        
+
+        if r.status_code < 400:
+            print("finished exporting the file... \n")
+        
+        # todo: publishing the file 
+        # simply by using a post query
+
+    def transfer_retrieve(self, key):
+        # get the file identified by `key` and store it to `filename`
+        # raise RemoteError if the file couldn't be retrieved
+	    
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == key:
+                print('yes, this file exists in the remote: ' + key )
+                return True
+        return False 
+
+        
+
+    # Redirect output to stderr to avoid messing up the protocol
+remote = ZenodoRemote()
+remote.initremote()
+remote.prepare()
+remote.transfer_store('notes.pdf')
+remote.transfer_retrieve('notes.pdf')
+    
+
+  #+end_src
