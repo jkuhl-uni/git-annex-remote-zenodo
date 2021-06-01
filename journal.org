@@ -1299,3 +1299,57 @@ trying to access the files with the self link
 
 As we can see in the response to the get query we sent, the files can
 no longer be accessed via the urls.
+
+
+** retrying to publish by adding some metadata before senfing the request
+
+   #+begin_src python :results output :exports both
+import requests
+import json
+
+ACCESS_TOKEN = '6sqEMQpgWZUUNFg3G3rTyzSTAQGKeM0po9PLtedL42gzEC2RG3yTjK4uBcu3'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions', params={'access_token': ACCESS_TOKEN})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+
+headers = {"Content-Type": "application/json"}
+params = {'access_token': '6sqEMQpgWZUUNFg3G3rTyzSTAQGKeM0po9PLtedL42gzEC2RG3yTjK4uBcu3'}
+r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', params=params, json={})
+
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+
+   #+end_src
+
+   #+RESULTS:
+
+   
+   #+begin_src python :results output :exports both
+
+import requests
+import json
+
+headers = {"Content-Type": "application/json"}
+params = {'access_token': '6sqEMQpgWZUUNFg3G3rTyzSTAQGKeM0po9PLtedL42gzEC2RG3yTjK4uBcu3'}
+
+bucket_id = 845033
+
+data = {
+     'metadata': {
+         'title': 'My first upload',
+         'upload_type': 'poster',
+         'description': 'This is my first upload',
+         'creators': [{'name': 'Doe, John',
+                       'affiliation': 'Zenodo'}]
+     }
+}
+
+r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' % bucket_id, params=params, data=json.dumps(data), headers=headers, json={})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+
+r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' % bucket_id , params={'access_token': '6sqEMQpgWZUUNFg3G3rTyzSTAQGKeM0po9PLtedL42gzEC2RG3yTjK4uBcu3'}, json={})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+
+   #+end_src
