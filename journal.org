@@ -524,8 +524,6 @@ class ZenodoRemote():
                 return True
         return False 
 
-        
-
     # Redirect output to stderr to avoid messing up the protocol
 remote = ZenodoRemote()
 remote.initremote()
@@ -535,3 +533,49 @@ remote.transfer_retrieve('notes.pdf')
     
 
   #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  finished the getoperation. Here is the returned message 
+
+  200
+  finished the postoperation. Here is the returned message 
+
+  201
+  {'conceptrecid': '844203', 'created': '2021-06-01T00:54:44.267674+00:00', 'files': [], 'id': 844204, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/177c01e5-af2b-4295-8ba5-4ffd5d3ae418', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/files', 'html': 'https://sandbox.zenodo.org/deposit/844204', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/844204', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/844204', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844204'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844204', 'recid': 844204}}, 'modified': '2021-06-01T00:54:44.267682+00:00', 'owner': 72937, 'record_id': 844204, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished exporting the file... 
+
+  finished the getoperation. Here is the returned message 
+
+  200
+  yes, this file exists in the remote: notes.pdf
+  #+end_example
+
+
+
+
+  #+begin_src shell :session *shell* :results output :exports both 
+cd code
+chmod +x git-annex-remote-zenodo
+  #+end_src
+
+  #+RESULTS:
+
+
+    #+begin_src shell :session *shell* :results output :exports both 
+git init
+git annex init
+export PATH=$PATH:/path_to_file
+git annex initremote choose_name externaltype=zenodo encryption=none type=external
+  #+end_src
+
+  #+RESULTS:
+  : Initialized empty Git repository in /home/nubudi/Desktop/Internship/code/.git/
+  : init  ok
+  : (recording state in git...)

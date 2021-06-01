@@ -15,7 +15,6 @@ KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
 class ZenodoRemote(ExportRemote):
 
     def __init__(self, *args):
-        super().__init__(*args)
         self.deposit = None
         self.deposit_id = None
 
