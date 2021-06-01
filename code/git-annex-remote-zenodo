@@ -58,6 +58,13 @@ class ZenodoRemote(ExportRemote):
     # raise RemoteError if the remote couldn't be initialized
 	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
 
+        # need to get the key by using the getconfig method
+        # the key is passed as an argument when using the commant initremote (ex: key='')
+        #self.key = self.annex.getconfig('key')
+        # if it's not been added as an argument, we raise an 
+        #if not self.key:
+        #    raise RemoteError("You need to add the access token () =")
+
 
     def prepare(self):
         # prepare to be used, eg. open TCP connection, authenticate with the server etc.
