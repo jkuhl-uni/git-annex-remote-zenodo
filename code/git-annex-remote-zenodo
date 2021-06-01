@@ -9,48 +9,54 @@ import sys, os, errno
 
 import requests
 
-URL_API = 'https://zenodo.org/api/deposit/depositions'
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
 KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
 
 class ZenodoRemote(ExportRemote):
 
-    # method to handle the basic queries
-    def query(self, query_method, url, headers=None, data=None):
+    def __init__(self, *args):
+        self.deposit = None
+        self.deposit_id = None
 
-        # query_method: depending on the case, could be requests.put, requests.post, or requests.get.
-        # url: could be that of the API, or that of the bucket where we want to deposit a file.
-        # headers: ex: {"Content-Type": "application/json"}
-        # data: information we want to deposit. we can import the json package and use it to convert it into json.
+    # method to handle all the basic queries
+    def query(self, query_method, url, id=None, headers=None, data=None):
+        # id = key (!= KEY or access token to the API): to be stored in the remote. 
+        # In most cases, this is going to be the remote file name. It should be at 
+        # least be unambigiously derived from it.
 
-        import json
-        import requests
-
+        # making sure that the headers are specified before sending the request
         if headers is None:
-            headers = {}
+            headers = {"Content-Type": "application/json"}
 
-        # formatting the data
-        if data is not None:
-            data = json.dumps(data)
-
-        params = {'access_token': KEY}    
+        # we use the same access key for all the queries. 
+        # for put / post   
+        if id is not None:    
+            params = {'access_token': KEY, 'identifier' : id}   
+        # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
+        else:
+            params = {'access_token': KEY}
 
         # depending on the query, some of the arguments might be null
-        request = query_method(url, params=params, headers=headers, data=data)
+        if query_method == 'get':
+            request = requests.get(url, params = params)
+        else:
+            if query_method == 'post': 
+                request = requests.post(url, params=params, json={}, headers=headers)
+            else:
+                request = requests.put(url, params=params, json={}, data=data)
+                
+        # informing the user of the currint state of the operation        
+        print("finished the " + query_method + "operation. Here is the returned message \n")
         print(request.status_code)
-
-        # maybe pass this as an argument as well?
-        #print("do you want to see the json return of the query? \n")
-        #n = input()
-        #if n == "yes":
-        #	print(request.json())
+        #returning the resulting request for later uses
         return request
+
 
     # methods to implement
     def initremote(self):
     # initialize the remote, eg. create the folders
     # raise RemoteError if the remote couldn't be initialized
-        #self.key = input("inter the token \n")
-	    KEY = 'WgYPkomVp1HpJniDmwS2ylFBhwsNpntxFzKqo02HGij94nVFlO0tAefboqtn'
+	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
 
 
     def prepare(self):
@@ -58,93 +64,132 @@ class ZenodoRemote(ExportRemote):
         # raise RemoteError if not ready to use
         import requests
         # let's try to connect to the API, if the status code is not 200: there is an error 
-        r = self.query(requests.get, URL_API)
+        r = self.query('get', URL_SANDBOX)
         if r.status_code != 200:
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a get query to the API')
+        
+        # we first need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a post query to the API')
+        
+        # setting the id for this deposit
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        # finished preparing the remote
 
 
     def transfer_store(self, key, filename):
         # store the file in `filename` to a unique location derived from `key`
         # raise RemoteError if the file couldn't be stored
         
-        import requests
-
         # uploading the file:
-
-        # we first need to create an empty upload
-        r = self.query(requests.post, URL_API)
-
+        r = self.deposit
         # now, we upload the file (cf the tips in the tutorial)
         # to do so, we will fetch the bucket_url which will be the folder containing the files
         URL_BUCKET = r.json()["links"]["bucket"]
 
-        # and then we upload it
-        filename = input("inter the name of the file you want to send (ex: toto.zip) \n")
-        path = input("inter the path to the file (ex: /path/to/toto.zip) \n")
+        # todo: extract the path and the filename from arg 'filename'
 
+        # and then we upload it
+        filename = 'notes.pdf'
+        path = '/home/nubudi/Downloads/notes.pdf'
+        
         # The target URL is a combination of the bucket link with the desired filename
         # seperated by a slash.
         with open(path, "rb") as fp:
-            r = self.query(requests.put, "%s/%s" % (URL_BUCKET, filename), data=fp)
+            r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
         
         if r.status_code < 400:
             print("finished exporting the file... \n")
         else:
-            raise RemoteError ('error')
+            raise RemoteError ('error while exporting the file... \n')
 
-        # Publishing the file 
+        # todo: publishing the file 
+        # simply by using a post query
 
 
     def transfer_retrieve(self, key, filename):
         # get the file identified by `key` and store it to `filename`
         # raise RemoteError if the file couldn't be retrieved
-        print("a")
+
+        # get request to: https://sandbox.zenodo.org/api/deposit/depositions
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a get query to the API')
+        
 
     def checkpresent(self, key):
         # return True if the key is present in the remote
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
-        print("not implemented")
+
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == key:
+                print('yes, this file exists in the remote: ' + key )
+                return True
+        return False 
+
 
     def remove(self, key):
         # remove the key from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
-        print("not implemented")
 
-    # Additional methods:
+        print("not implemented")
 
     def transferexport_store(self, key, local_file, remote_file):
         # store the file located at `local_file` to `remote_file` on the remote
         # raise RemoteError if the file couldn't be stored
-        print("not implemented")
+
+        return self.transfer_store(key, local_file)
+        # and set the key later on using a put command to be able to retrieve files
+        # or: self.transfer_store(remote_file, local_file) which means setting 
+        # the name of the file in the remote as the key.
+        
         
     def transferexport_retrieve(self, key, local_file, remote_file):
         # get the file located at `remote_file` from the remote and store it to `local_file`
         # raise RemoteError if the file couldn't be retrieved
-        print("not implemented")
+
+        return self.transfer_retrieve(key, local_file)
+        # same idea
 
     def checkpresentexport(self, key, remote_file):
         # return True if the file `remote_file` is present in the remote
         # return False if not
         # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
-        print("not implemented")
+        
+        return self.checkpresentexport(key)
+        # same idea
 
     def removeexport(self, key, remote_file):
         # remove the file in `remote_file` from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
-        print("not implemented")
+
+        return self.remove(key)
+        # same idea
 
     def removeexportdirectory(self, remote_directory):
         # remove the directory `remote_directory` from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing directory isn't considered an error
+
         print("not implemented")
 
     def renameexport(self, key, filename, new_filename):
         # move the remote file in `name` to `new_name`
         # raise RemoteError if it couldn't be moved
+
         print("not implemented")
 
 

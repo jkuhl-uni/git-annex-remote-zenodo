@@ -1,0 +1,581 @@
+
+
+* Monday 31/05.
+
+** first step: get.
+  We start off by writing a small function to test the get query on
+  the API. To do this, it is imperative to have the token (can
+  be easily created on sandbox.zenodo) and have the access to do all
+  queries. 
+
+  #+begin_src python :results output :exports both
+import requests
+import json
+def api():
+    # get 
+    ACCESS_TOKEN = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions', params={'access_token': ACCESS_TOKEN})
+    print(r.status_code)
+    print(r.json())
+
+api()
+#+end_src
+
+  #+RESULTS:
+  : 200
+  : [{'conceptrecid': '844091', 'created': '2021-05-31T23:11:39.973087', 'id': 844092, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/files', 'html': 'https://sandbox.zenodo.org/deposit/844092', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844092/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844092'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844092', 'recid': 844092}}, 'modified': '2021-05-31T23:11:39.973105', 'owner': 72937, 'record_id': 844092, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844087', 'created': '2021-05-31T23:08:34.076159', 'id': 844088, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/files', 'html': 'https://sandbox.zenodo.org/deposit/844088', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844088'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844088', 'recid': 844088}}, 'modified': '2021-05-31T23:08:34.076183', 'owner': 72937, 'record_id': 844088, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844081', 'created': '2021-05-31T23:04:59.816588', 'id': 844082, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/files', 'html': 'https://sandbox.zenodo.org/deposit/844082', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844082/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844082'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844082', 'recid': 844082}}, 'modified': '2021-05-31T23:04:59.816597', 'owner': 72937, 'record_id': 844082, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844079', 'created': '2021-05-31T23:04:39.914423', 'id': 844080, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/files', 'html': 'https://sandbox.zenodo.org/deposit/844080', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844080/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844080'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844080', 'recid': 844080}}, 'modified': '2021-05-31T23:04:39.914448', 'owner': 72937, 'record_id': 844080, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844077', 'created': '2021-05-31T23:03:47.160325', 'id': 844078, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/files', 'html': 'https://sandbox.zenodo.org/deposit/844078', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844078/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844078'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844078', 'recid': 844078}}, 'modified': '2021-05-31T23:03:47.160356', 'owner': 72937, 'record_id': 844078, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844075', 'created': '2021-05-31T23:02:36.003019', 'id': 844076, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/files', 'html': 'https://sandbox.zenodo.org/deposit/844076', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844076/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844076'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844076', 'recid': 844076}}, 'modified': '2021-05-31T23:02:36.003036', 'owner': 72937, 'record_id': 844076, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844069', 'created': '2021-05-31T22:59:46.066747', 'id': 844070, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/files', 'html': 'https://sandbox.zenodo.org/deposit/844070', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844070/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844070'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844070', 'recid': 844070}}, 'modified': '2021-05-31T22:59:46.066761', 'owner': 72937, 'record_id': 844070, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844061', 'created': '2021-05-31T22:43:13.506703', 'id': 844062, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/files', 'html': 'https://sandbox.zenodo.org/deposit/844062', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844062'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844062', 'recid': 844062}}, 'modified': '2021-05-31T22:43:13.506716', 'owner': 72937, 'record_id': 844062, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844059', 'created': '2021-05-31T22:42:36.075462', 'id': 844060, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/files', 'html': 'https://sandbox.zenodo.org/deposit/844060', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844060/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844060'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844060', 'recid': 844060}}, 'modified': '2021-05-31T22:42:36.075482', 'owner': 72937, 'record_id': 844060, 'state': 'unsubmitted', 'submitted': False, 'title': ''}, {'conceptrecid': '844049', 'created': '2021-05-31T22:22:00.989030', 'id': 844050, 'links': {'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/files', 'html': 'https://sandbox.zenodo.org/deposit/844050', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844050/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844050'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844050', 'recid': 844050}}, 'modified': '2021-05-31T22:22:00.989047', 'owner': 72937, 'record_id': 844050, 'state': 'unsubmitted', 'submitted': False, 'title': ''}]
+
+** second step: post.
+   Adding the argument headers to specify the content type because we
+   want a json app. We also still need the access token because we
+   can't make any query to the API without it.
+   When we don't use the argument json={} we get an error and we can't
+   use the response message to move on.
+
+  #+begin_src python :results output :exports both
+def apipost():
+    import requests
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'}
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', params=params, headers=headers)
+    print(r.status_code)
+
+apipost()
+
+  #+end_src
+
+  #+RESULTS:
+  : 400
+
+  Now that we've added the argument json={}, we get the message 201,
+  meaning that the request succeeded.
+  
+  #+begin_src python :results output :exports both
+def apipost():
+    import requests
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'}
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', json={}, params=params, headers=headers)
+    print(r.status_code)
+
+apipost()
+
+  #+end_src
+
+  #+RESULTS:
+  : 201
+
+  
+   Headers are not necessary here since "requests" automatically adds
+   "Content-Type: application/json", because we're using the "json="
+   keyword argument headers=headers.
+   A test without the headers argument:
+     
+  #+begin_src python :results output :exports both
+def apipost():
+    import requests
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'}
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', json={}, params=params)
+    print(r.status_code)
+
+apipost()
+
+  #+end_src
+
+  #+RESULTS:
+  : 201
+
+** step three: merging the two and posting on the API
+   now we just write a bigger program where we do the necessary steps
+   to communicate with the API in chronological order. First, we send
+   a get request to check the access. Then, we create an empty
+   depository and we upload a file.
+   
+  #+begin_src python :results output :exports both
+
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+import os
+import json
+import requests
+
+# method to handle all the basic queries
+def query(query_method, url, headers=None, data=None):
+    
+    # making sure that the headers are specified before sending the request
+    if headers is None:
+        headers = {"Content-Type": "application/json"}
+        
+    # we use the same access key for all the queries.    
+    params = {'access_token': KEY}
+
+    # depending on the query, some of the arguments might be null
+    if query_method == 'get':
+        request = requests.get(url, params = params)
+    else:
+        if query_method == 'post': 
+            request = requests.post(url, params=params, json={}, headers=headers)
+        else:
+            request = requests.put(url, params=params, json={}, data=data)
+            
+    # informing the user of the currint state of the operation        
+    print("finished the " + query_method + "operation. Here is the returned message \n")
+    print(request.status_code)
+
+    #returning the resulting request for later uses
+    return request
+
+
+# this is the main method to call to transfer data
+def transfer_store():
+    # first step: get
+    r = query('get', URL_SANDBOX)
+    
+    #creating an empty upload with post
+    r = query('post', URL_SANDBOX)
+    print(r.json())
+    
+    # now, we upload the file (cf the tips in the tutorial)
+    # to do so, we will fetch the bucket_url which will be the folder containing the files
+    URL_BUCKET = r.json()['links']['bucket']
+
+    # and then we upload it
+    filename = 'AirPollutionInGrenoble.pdf'
+    path = '/home/nubudi/Downloads/AirPollutionInGrenoble.pdf'
+    #filename = input("inter the name of the file you want to send (ex: toto.zip) \n")
+    #path = input("inter the path to the file (ex: /path/to/toto.zip) \n")
+
+    # The target URL is a combination of the bucket link with the desired filename
+    # seperated by a slash.
+    with open(path, "rb") as fp:
+        r = query('put', "%s/%s" % (URL_BUCKET, filename), data=fp)
+        
+    if r.status_code < 400:
+        print("finished exporting the file... \n")
+
+transfer_store()
+
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  finished the getoperation. Here is the returned message 
+
+  200
+  finished the postoperation. Here is the returned message 
+
+  201
+  {'conceptrecid': '844061', 'created': '2021-05-31T22:43:13.506703+00:00', 'files': [], 'id': 844062, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/ae0afa09-a65e-4f53-b6a0-e355753f9f40', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/files', 'html': 'https://sandbox.zenodo.org/deposit/844062', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/844062', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/844062', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844062/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844062'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844062', 'recid': 844062}}, 'modified': '2021-05-31T22:43:13.506716+00:00', 'owner': 72937, 'record_id': 844062, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished exporting the file... 
+
+  #+end_example
+
+  - new version with added functionalities
+
+  #+begin_src python :results output :exports both
+
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+import os
+import json
+import requests
+
+# method to handle all the basic queries
+def query(query_method, url, key_id=None,  headers=None, data=None):
+    
+    # making sure that the headers are specified before sending the request
+    if headers is None:
+        headers = {"Content-Type": "application/json"}
+        
+    # we use the same access key for all the queries.    
+    params = {'access_token': KEY}
+
+    # depending on the query, some of the arguments might be null
+    if query_method == 'get':
+        request = requests.get(url, params = params)
+    else:
+        if query_method == 'post': 
+            request = requests.post(url, params=params, json={}, headers=headers)
+        else:
+            request = requests.put(url, params=params, json={}, data=data)
+            
+    # informing the user of the currint state of the operation        
+    print("finished the " + query_method + "operation. Here is the returned message \n")
+    print(request.status_code)
+
+    #returning the resulting request for later uses
+    return request
+
+
+# this is the main method to call to transfer data
+def transfer_store (key):
+    # first step: get
+    r = query('get', URL_SANDBOX)
+    
+    #creating an empty upload with post
+    r = query('post', URL_SANDBOX)
+    print(r.json())
+    
+    # now, we upload the file (cf the tips in the tutorial)
+    # to do so, we will fetch the bucket_url which will be the folder containing the files
+    URL_BUCKET = r.json()['links']['bucket']
+
+    # and then we upload it
+    filename = 'AirPollutionInGrenoble.pdf'
+    path = '/home/nubudi/Downloads/AirPollutionInGrenoble.pdf'
+    #filename = input("inter the name of the file you want to send (ex: toto.zip) \n")
+    #path = input("inter the path to the file (ex: /path/to/toto.zip) \n")
+
+    # The target URL is a combination of the bucket link with the desired filename
+    # seperated by a slash.
+    with open(path, "rb") as fp:
+        r = query('put', "%s/%s" % (URL_BUCKET, filename), data=fp)
+
+    print(r.json())
+    """
+    # now, we set the key in the remote by sending a put query
+    deposition_id = r.json()['id']
+    data = {'key_id': key}
+    r = query('put', 'https://zenodo.org/api/deposit/depositions/%s' % deposition_id, data=json.dumps(data))
+    """
+    if r.status_code < 400:
+        print("finished exporting the file... \n")
+
+
+def transfer_retrieve(key):
+        # get the file identified by `key` and store it to `filename`
+        # raise RemoteError if the file couldn't be retrieved
+
+        # get request to: https://sandbox.zenodo.org/api/deposit/depositions 
+    uuuurl = 'https://sandbox.zenodo.org/api/deposit/depositions/844128/files'
+    r = query('get', uuuurl)
+    print(r.json())
+
+#transfer_store('testet')
+transfer_retrieve('testet')
+
+
+  #+end_src
+
+  #+RESULTS:
+  : finished the getoperation. Here is the returned message 
+  : 
+  : 200
+  : [{'checksum': '96379d6f2dfdbdd68ee0fa48a31ee07c', 'filename': 'AirPollutionInGrenoble.pdf', 'filesize': 1107977, 'id': 'd4ecf116-ff2d-4fcb-8c1e-c31065f73b31', 'links': {'download': 'https://sandbox.zenodo.org/api/files/28c34351-9840-4b62-b297-699ec90bd027/AirPollutionInGrenoble.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844088/files/d4ecf116-ff2d-4fcb-8c1e-c31065f73b31'}}]
+
+  #+begin_src python :results output :exports both
+import requests
+
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+class ZenodoRemote():
+
+    def __init__(self):
+        self.deposit = None
+        self.deposit_id = None
+
+    # method to handle all the basic queries
+    def query(self, query_method: str, url, id=None, headers=None, data=None):
+        # id = key (!= KEY or access token to the API): to be stored in the remote. 
+        # In most cases, this is going to be the remote file name. It should be at 
+        # least be unambigiously derived from it.
+        import requests
+
+        # making sure that the headers are specified before sending the request
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
+
+        # we use the same access key for all the queries. 
+        # for put / post   
+        if id is not None:    
+            params = {'access_token': KEY, 'identifier' : id}   
+        # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
+        else:
+            params = {'access_token': KEY}
+
+        # depending on the query, some of the arguments might be null
+        if query_method == 'get':
+            request = requests.get(url, json={}, params = params)
+        else:
+            if query_method == 'post': 
+                request = requests.post(url, params=params, json={}, headers=headers)
+            else:
+                request = requests.put(url, params=params, json={}, data=data)
+                
+        # informing the user of the currint state of the operation        
+        print("finished the " + query_method + "operation. Here is the returned message \n")
+        print(request.status_code)
+        #returning the resulting request for later uses
+        return request
+
+
+    # methods to implement
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        #self.key = input("inter the token \n")
+	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+    def prepare(self):
+        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
+        # raise RemoteError if not ready to use
+
+        # let's try to connect to the API, if the status code is not 200: there is an error 
+        r = self.query('get', URL_SANDBOX)
+        if r.status_code != 200:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+        
+        # we first need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        print(r.json())
+
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        # finished preparing the remote
+
+
+    def transfer_store(self, key):
+        # store the file in `filename` to a unique location derived from `key`
+        # raise RemoteError if the file couldn't be stored
+        
+        # uploading the file:
+        r = self.deposit
+        # now, we upload the file (cf the tips in the tutorial)
+        # to do so, we will fetch the bucket_url which will be the folder containing the files
+        URL_BUCKET = r.json()["links"]["bucket"]
+
+        # todo: extract the path and the filename from arg 'filename'
+
+        # and then we upload it
+        filename = 'notes.pdf'
+        path = '/home/nubudi/Downloads/notes.pdf'
+        
+        # The target URL is a combination of the bucket link with the desired filename
+        # seperated by a slash.
+        with open(path, "rb") as fp:
+            r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
+        
+        if r.status_code < 400:
+            print("finished exporting the file... \n")
+        
+        # todo: publishing the file 
+        # simply by using a post query
+
+    def transfer_retrieve(self, key):
+        # get the file identified by `key` and store it to `filename`
+        # raise RemoteError if the file couldn't be retrieved
+	    
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        print(r.json())
+        
+
+    # Redirect output to stderr to avoid messing up the protocol
+remote = ZenodoRemote()
+remote.initremote()
+remote.prepare()
+remote.transfer_store('notes.pdf')
+remote.transfer_retrieve('notes.pdf') 
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  finished the getoperation. Here is the returned message 
+
+  200
+  finished the postoperation. Here is the returned message 
+
+  201
+  {'conceptrecid': '844143', 'created': '2021-06-01T00:13:57.858160+00:00', 'files': [], 'id': 844144, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/4e680567-c908-4a94-88b0-af5ab11551f6', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/files', 'html': 'https://sandbox.zenodo.org/deposit/844144', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/844144', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/844144', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844144'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844144', 'recid': 844144}}, 'modified': '2021-06-01T00:13:57.858173+00:00', 'owner': 72937, 'record_id': 844144, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished exporting the file... 
+
+  finished the getoperation. Here is the returned message 
+
+  200
+  [{'checksum': '2d2d364fe89375260446330175bd832f', 'filename': 'notes.pdf', 'filesize': 180064, 'id': 'a05fa9ca-0087-4c3f-9915-4e657e39312e', 'links': {'download': 'https://sandbox.zenodo.org/api/files/4e680567-c908-4a94-88b0-af5ab11551f6/notes.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/files/a05fa9ca-0087-4c3f-9915-4e657e39312e'}}]
+  #+end_example
+
+
+  #+begin_src python :results output :exports both
+import requests
+
+URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
+KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+class ZenodoRemote():
+
+    def __init__(self):
+        self.deposit = None
+        self.deposit_id = None
+
+    # method to handle all the basic queries
+    def query(self, query_method: str, url, id=None, headers=None, data=None):
+        # id = key (!= KEY or access token to the API): to be stored in the remote. 
+        # In most cases, this is going to be the remote file name. It should be at 
+        # least be unambigiously derived from it.
+        import requests
+
+        # making sure that the headers are specified before sending the request
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
+
+        # we use the same access key for all the queries. 
+        # for put / post   
+        if id is not None:    
+            params = {'access_token': KEY, 'identifier' : id}   
+        # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
+        else:
+            params = {'access_token': KEY}
+
+        # depending on the query, some of the arguments might be null
+        if query_method == 'get':
+            request = requests.get(url, json={}, params = params)
+        else:
+            if query_method == 'post': 
+                request = requests.post(url, params=params, json={}, headers=headers)
+            else:
+                request = requests.put(url, params=params, json={}, data=data)
+                
+        # informing the user of the currint state of the operation        
+        print("finished the " + query_method + "operation. Here is the returned message \n")
+        print(request.status_code)
+        #returning the resulting request for later uses
+        return request
+
+
+    # methods to implement
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        #self.key = input("inter the token \n")
+	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
+
+
+    def prepare(self):
+        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
+        # raise RemoteError if not ready to use
+
+        # let's try to connect to the API, if the status code is not 200: there is an error 
+        r = self.query('get', URL_SANDBOX)
+        if r.status_code != 200:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+        
+        # we first need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        print(r.json())
+
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        # finished preparing the remote
+
+
+    def transfer_store(self, key):
+        # store the file in `filename` to a unique location derived from `key`
+        # raise RemoteError if the file couldn't be stored
+        
+        # uploading the file:
+        r = self.deposit
+        # now, we upload the file (cf the tips in the tutorial)
+        # to do so, we will fetch the bucket_url which will be the folder containing the files
+        URL_BUCKET = r.json()["links"]["bucket"]
+
+        # todo: extract the path and the filename from arg 'filename'
+
+        # and then we upload it
+        filename = 'notes.pdf'
+        path = '/home/nubudi/Downloads/notes.pdf'
+        
+        # The target URL is a combination of the bucket link with the desired filename
+        # seperated by a slash.
+        with open(path, "rb") as fp:
+            r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
+        
+        with open('/home/nubudi/Downloads/AirPollutionInGrenoble.pdf', "rb") as fp:
+            r = self.query('put', "%s/%s" % (URL_BUCKET, 'AirPollutionInGrenoble.pdf'), key, data=fp)
+        
+
+        if r.status_code < 400:
+            print("finished exporting the file... \n")
+        
+        # todo: publishing the file 
+        # simply by using a post query
+
+    def transfer_retrieve(self, key):
+        # get the file identified by `key` and store it to `filename`
+        # raise RemoteError if the file couldn't be retrieved
+	    
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == key:
+                print('yes, this file exists in the remote: ' + key )
+                return True
+        return False 
+
+    # Redirect output to stderr to avoid messing up the protocol
+remote = ZenodoRemote()
+remote.initremote()
+remote.prepare()
+remote.transfer_store('notes.pdf')
+remote.transfer_retrieve('notes.pdf')
+    
+
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  finished the getoperation. Here is the returned message 
+
+  200
+  finished the postoperation. Here is the returned message 
+
+  201
+  {'conceptrecid': '844203', 'created': '2021-06-01T00:54:44.267674+00:00', 'files': [], 'id': 844204, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/177c01e5-af2b-4295-8ba5-4ffd5d3ae418', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/files', 'html': 'https://sandbox.zenodo.org/deposit/844204', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/844204', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/844204', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/844204/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844204'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.844204', 'recid': 844204}}, 'modified': '2021-06-01T00:54:44.267682+00:00', 'owner': 72937, 'record_id': 844204, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished the putoperation. Here is the returned message 
+
+  200
+  finished exporting the file... 
+
+  finished the getoperation. Here is the returned message 
+
+  200
+  yes, this file exists in the remote: notes.pdf
+  #+end_example
+
+
+
+
+  #+begin_src shell :session *shell* :results output :exports both 
+cd code
+chmod +x git-annex-remote-zenodo
+  #+end_src
+
+  #+RESULTS:
+
+
+    #+begin_src shell :session *shell* :results output :exports both 
+git init
+git annex init
+export PATH=$PATH:/path_to_file
+git annex initremote choose_name externaltype=zenodo encryption=none type=external
+  #+end_src
+
+  #+RESULTS:
+  : Initialized empty Git repository in /home/nubudi/Desktop/Internship/code/.git/
+  : init  ok
+  : (recording state in git...)
