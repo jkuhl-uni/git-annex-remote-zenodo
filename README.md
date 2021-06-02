@@ -77,19 +77,24 @@ En fin, on peut fusionner les deux approches pour atteindre le meilleur résulta
 
 
 ### Mercredi 26/05:
+- Manipulation des remotes git annex en utilisant des tutos pour déplacer des données entre un remote usb et un répertoire.
 
 ### Jeudi 27/05:
+- Début de l'implémentation de la fonction principale qui définit Zenodo comme un nouveau remote de git annex. Implémentation des fonctions initiales: init, initremote, prepare.
 
 ### Vendredi 28/05:
-
+- Reunion avec les profs pour discuter des problèmes rencontrés lors de l'implémentation de la fonction qui upload sur l'api et correction de ces problèmes. Changement du modèle de la fonction git-annex-remote-zenodo pour voir où est la meilleure position pour créer le dépôt.
 
 ## Semaine 4 (31/05 - 06/06):
 
 ### Lundi 31/05:
+- Fusion des fonctions qui passent les requêtes get/post/put à l'API avec des autres fonctions qui sont données par la bibliothèque à implémenter (ex: la fonction qui traite l'export, la préparation du remote, ..) 
 
 ### Mardi 01/06:
+- Reunion avec les profs pour discuter comment structurer le modèle et comment fusionner les fonctionnalités de Zenodo et de git-annex pour mieux utiliser les resources présentes. 
 
 ### Mercredi 02/06:
+- Finalisation de la fonction à utiliser pour publier sur Zenodo en utilisant l'api. 
 
 ### Jeudi 03/06:
 

@@ -1,5 +1,4 @@
 
-
 * Monday 31/05.
 
 ** first step: get.
@@ -278,6 +277,7 @@ api()
   ]
   #+end_example
 
+  
 ** second step: post.
    Adding the argument headers to specify the content type because we
    want a json app. We also still need the access token because we
@@ -372,6 +372,7 @@ apipost()
   #+RESULTS:
   : 201
 
+  
 ** step three: merging the two and posting on the API
    now we just write a bigger program where we do the necessary steps
    to communicate with the API in chronological order. First, we send
@@ -709,6 +710,7 @@ remote.transfer_retrieve('notes.pdf')
   [{'checksum': '2d2d364fe89375260446330175bd832f', 'filename': 'notes.pdf', 'filesize': 180064, 'id': 'a05fa9ca-0087-4c3f-9915-4e657e39312e', 'links': {'download': 'https://sandbox.zenodo.org/api/files/4e680567-c908-4a94-88b0-af5ab11551f6/notes.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/files/a05fa9ca-0087-4c3f-9915-4e657e39312e'}}]
   #+end_example
 
+  
 ** fct
   #+begin_src python :results output :exports both
 import requests
@@ -923,6 +925,7 @@ print(json.dumps(r.json(), indent=4))
 
   
 
+* Tuesday 01/06.
 ** new test with a new access token.
    #+begin_src python :results output :exports both
 import requests
@@ -1201,7 +1204,7 @@ import requests
 import json
 
 headers = {"Content-Type": "application/json"}
-params = {'access_token': 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'}
+params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
 
 r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', params=params, json={}, headers=headers)
 print(r.status_code)
@@ -1232,26 +1235,26 @@ print(json.dumps(r.json(), indent=4))
   #+RESULTS:
   #+begin_example
   201
-  {'conceptrecid': '845188', 'created': '2021-06-01T14:50:48.717307+00:00', 'files': [], 'id': 845189, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/679deb7b-69cf-4499-bc6c-dc6c2e285678', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/845189/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/845189/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/845189/files', 'html': 'https://sandbox.zenodo.org/deposit/845189', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/845189', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/845189', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/845189/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/845189'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.845189', 'recid': 845189}}, 'modified': '2021-06-01T14:50:48.717316+00:00', 'owner': 72937, 'record_id': 845189, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+  {'conceptrecid': '846316', 'created': '2021-06-02T13:00:02.044350+00:00', 'files': [], 'id': 846317, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/2197cc94-bb26-4958-8bee-5d3111346d8a', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/846317/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/846317/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/846317/files', 'html': 'https://sandbox.zenodo.org/deposit/846317', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/846317', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/846317', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/846317/actions/publish', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/846317'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.846317', 'recid': 846317}}, 'modified': '2021-06-02T13:00:02.044360+00:00', 'owner': 75563, 'record_id': 846317, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
   [
       {
 	  "checksum": "96379d6f2dfdbdd68ee0fa48a31ee07c",
 	  "filename": "AirPollutionInGrenoble.pdf",
 	  "filesize": 1107977,
-	  "id": "4e8a5c8f-f295-4bb8-ae04-2cb6bde56078",
+	  "id": "7c75fc07-a11b-432e-b8a1-2c7ebd96c060",
 	  "links": {
-	      "download": "https://sandbox.zenodo.org/api/files/679deb7b-69cf-4499-bc6c-dc6c2e285678/AirPollutionInGrenoble.pdf",
-	      "self": "https://sandbox.zenodo.org/api/deposit/depositions/845189/files/4e8a5c8f-f295-4bb8-ae04-2cb6bde56078"
+	      "download": "https://sandbox.zenodo.org/api/files/2197cc94-bb26-4958-8bee-5d3111346d8a/AirPollutionInGrenoble.pdf",
+	      "self": "https://sandbox.zenodo.org/api/deposit/depositions/846317/files/7c75fc07-a11b-432e-b8a1-2c7ebd96c060"
 	  }
       },
       {
 	  "checksum": "2d2d364fe89375260446330175bd832f",
 	  "filename": "notes.pdf",
 	  "filesize": 180064,
-	  "id": "017b9d94-8fed-4655-a11e-74b020e19a61",
+	  "id": "01b77826-1ecb-478f-9853-bddc98a3cb3a",
 	  "links": {
-	      "download": "https://sandbox.zenodo.org/api/files/679deb7b-69cf-4499-bc6c-dc6c2e285678/notes.pdf",
-	      "self": "https://sandbox.zenodo.org/api/deposit/depositions/845189/files/017b9d94-8fed-4655-a11e-74b020e19a61"
+	      "download": "https://sandbox.zenodo.org/api/files/2197cc94-bb26-4958-8bee-5d3111346d8a/notes.pdf",
+	      "self": "https://sandbox.zenodo.org/api/deposit/depositions/846317/files/01b77826-1ecb-478f-9853-bddc98a3cb3a"
 	  }
       }
   ]
@@ -1353,3 +1356,198 @@ print(r.status_code)
 print(json.dumps(r.json(), indent=4))
 
    #+end_src
+
+
+* Wednesday 02/06.
+
+** publishing through the api.
+
+    retrying to publish by adding some metadata before senfing the request
+
+    - first: creating the deposit
+   #+begin_src python :results output :exports both
+import requests
+import json
+
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+headers = {"Content-Type": "application/json"}
+params = {'access_token': ACCESS_TOKEN}
+
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions', params=params)
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+
+
+r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions', params=params, json={}, headers= headers)
+print(r.json()["id"])
+print(r.json()["links"]["bucket"])
+
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   200
+   []
+   846331
+   https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca
+   201
+   {
+       "conceptrecid": "846330",
+       "created": "2021-06-02T13:12:08.831740+00:00",
+       "files": [],
+       "id": 846331,
+       "links": {
+	   "bucket": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca",
+	   "discard": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/discard",
+	   "edit": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/edit",
+	   "files": "https://sandbox.zenodo.org/api/deposit/depositions/846331/files",
+	   "html": "https://sandbox.zenodo.org/deposit/846331",
+	   "latest_draft": "https://sandbox.zenodo.org/api/deposit/depositions/846331",
+	   "latest_draft_html": "https://sandbox.zenodo.org/deposit/846331",
+	   "publish": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/publish",
+	   "self": "https://sandbox.zenodo.org/api/deposit/depositions/846331"
+       },
+       "metadata": {
+	   "prereserve_doi": {
+	       "doi": "10.5072/zenodo.846331",
+	       "recid": 846331
+	   }
+       },
+       "modified": "2021-06-02T13:12:08.831748+00:00",
+       "owner": 75563,
+       "record_id": 846331,
+       "state": "unsubmitted",
+       "submitted": false,
+       "title": ""
+   }
+   #+end_example
+
+     
+   #+begin_src python :results output :exports both
+
+import requests
+import json
+
+headers = {"Content-Type": "application/json"}
+params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+
+bucket_id = 846331  # we get this by choosing the id of one of the deposits we created
+
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/%s' % bucket_id, params=params)
+print(r.status_code)
+
+# getting the url of the bucket using the id that we have
+# to do this, we go through the list of the deposits that we have created and compare the id
+"""
+found = False
+for i in range(2):
+    if r.json()[i]["id"] == bucket_id:
+        bucket_url =  r.json()[i]["links"]["bucket"]
+        found = True
+if found == False:
+    print("oups, couldn't find the bucket url using this id")
+
+print(bucket_url)
+"""
+
+# getting the url
+bucket_url = r.json()["links"]["bucket"]
+
+# uploading a file to the deposit
+filename = 'AirPollutionInGrenoble.pdf'
+path = '/home/nubudi/Downloads/AirPollutionInGrenoble.pdf'
+
+with open(path, "rb") as fp:
+    r = requests.put("%s/%s" % (bucket_url, filename), data=fp, params=params, json={})
+
+# adding metadata to the deposit
+data = {
+     'metadata': {
+         'title': 'Air pollution in Grenoble',
+         'upload_type': 'poster',
+         'description': 'first upload',
+         'creators': [{'name': 'H, O',
+                       'affiliation': 'Zenodo'}]
+     }
+}
+
+r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' % bucket_id, params=params, data=json.dumps(data), headers=headers, json={})
+print(r.status_code)
+
+# publishing
+r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' % bucket_id , params=params, json={})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   200
+   200
+   202
+   {
+       "conceptdoi": "10.5072/zenodo.846330",
+       "conceptrecid": "846330",
+       "created": "2021-06-02T13:12:08.831740+00:00",
+       "doi": "10.5072/zenodo.846331",
+       "doi_url": "https://doi.org/10.5072/zenodo.846331",
+       "files": [
+	   {
+	       "checksum": "96379d6f2dfdbdd68ee0fa48a31ee07c",
+	       "filename": "AirPollutionInGrenoble.pdf",
+	       "filesize": 1107977,
+	       "id": "8b14ada3-07a2-4da4-a0af-6c18ce58ced4",
+	       "links": {
+		   "download": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca/AirPollutionInGrenoble.pdf",
+		   "self": "https://sandbox.zenodo.org/api/deposit/depositions/846331/files/8b14ada3-07a2-4da4-a0af-6c18ce58ced4"
+	       }
+	   }
+       ],
+       "id": 846331,
+       "links": {
+	   "badge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846331.svg",
+	   "bucket": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca",
+	   "conceptbadge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846330.svg",
+	   "conceptdoi": "https://doi.org/10.5072/zenodo.846330",
+	   "doi": "https://doi.org/10.5072/zenodo.846331",
+	   "latest": "https://sandbox.zenodo.org/api/records/846331",
+	   "latest_html": "https://sandbox.zenodo.org/record/846331",
+	   "record": "https://sandbox.zenodo.org/api/records/846331",
+	   "record_html": "https://sandbox.zenodo.org/record/846331"
+       },
+       "metadata": {
+	   "access_right": "open",
+	   "communities": [
+	       {
+		   "identifier": "zenodo"
+	       }
+	   ],
+	   "creators": [
+	       {
+		   "affiliation": "Zenodo",
+		   "name": "H, O"
+	       }
+	   ],
+	   "description": "first upload",
+	   "doi": "10.5072/zenodo.846331",
+	   "license": "CC-BY-4.0",
+	   "prereserve_doi": {
+	       "doi": "10.5072/zenodo.846331",
+	       "recid": 846331
+	   },
+	   "publication_date": "2021-06-02",
+	   "title": "Air pollution in Grenoble",
+	   "upload_type": "poster"
+       },
+       "modified": "2021-06-02T13:18:25.798500+00:00",
+       "owner": 75563,
+       "record_id": 846331,
+       "state": "done",
+       "submitted": true,
+       "title": "Air pollution in Grenoble"
+   }
+   #+end_example
