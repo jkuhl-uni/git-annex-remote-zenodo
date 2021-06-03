@@ -1,3 +1,8 @@
+#+TITLE:       lab book
+#+AUTHOR:      Oumaima Hajji
+#+STARTUP: overview indent inlineimages logdrawer
+#+TAGS: R(R) Python(p) OrgMode(O) 
+
 
 * Monday 31/05.
 
@@ -1551,3 +1556,208 @@ print(json.dumps(r.json(), indent=4))
        "title": "Air pollution in Grenoble"
    }
    #+end_example
+
+
+* Thursday 03/06.
+  We will be using the Python library that already implements the
+  external special remote protocol in order to create the new remote
+  for Zenodo.
+  Link: https://github.com/Lykos153/AnnexRemote
+
+  The blueprint of the class is given with a few methods to
+  implement. 
+
+** Step 0: init.
+   Initiating the instances of this class by defining the main
+   attributes that are needed for the remote to function. This is
+   where we define the key that is used to do all the basic API
+   queries and where we initiate the id of the deposit that will be
+   created once the remote is initiated with initremote.  
+
+      #+begin_src python :results output :exports both
+    def __init__(self, *args):
+        self.deposit = None
+        self.deposit_id = None
+        self.deposit_bucket = None
+        self.key = ''
+      #+end_src
+
+   
+** Step 1: query.
+   This is the method that we will be using to handle the basic
+   queries to the API.
+   
+     #+begin_src python :results output :exports both
+    def query(self, query_method, url, id=None, headers=None, data=None):
+        # making sure that the headers are specified before sending the request
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
+
+        # we use the same access key for all the queries. 
+        # for put / post   
+        if id is not None:    
+            params = {'access_token': self.key, 'identifier' : id}   
+        # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
+        else:
+            params = {'access_token': self.key}
+
+        # depending on the query, some of the arguments might be null
+        if query_method == 'get':
+            request = requests.get(url, params = params)
+        else:
+            if query_method == 'post': 
+                request = requests.post(url, params=params, json={}, headers=headers)
+            else:
+                request = requests.put(url, params=params, json={}, data=data)
+                
+        # informing the user of the currint state of the operation        
+        print("finished the " + query_method + " operation. Here is the returned message \n")
+        print(request.status_code)
+        #returning the resulting request for later uses
+        return request
+        
+    #+end_src
+
+    
+** Step 2: initremote.
+   "Gets called when git annex initremote or git annex enableremote are
+   run. This is where any one-time setup tasks can be done, for
+   example creating the remote folder. Note: This may be run
+   repeatedly over time, as a remote is initialized in different
+   repositories, or as the configuration of a remote is changed."
+   
+   We can fetch the access token (given by the user as an argument
+   while initializing the remote) by using the function getconfig.  
+   We then create an upload by sending a post request to the API. 
+   We fetch the id of the bucket and the url of the bucket so that we
+   can use it in the other functions.
+   
+    #+begin_src python :results output :exports both
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        import requests
+        # need to get the key by using the getconfig method
+        # the key is passed as an argument when using the commant initremote (ex: key='')
+        self.key = self.annex.getconfig('key')
+        # if it's not been added as an argument, we raise an 
+        if not self.key:
+            raise RemoteError("You need to add the access token (key = TOKEN)")
+
+        # now, we need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a post query to the API')
+        
+        # setting the id for this deposit
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        self.deposit_bucket = r.json()['links']['bucket']
+        
+    #+end_src
+
+    
+** Step 3: prepare.
+    "Tells the remote that it's time to prepare itself to be used. Gets
+    called whenever git annex is about to access any of the below
+    methods, so it shouldn't be too expensive."
+
+    We send a get request to the API just to make sure that the
+    connection to the API is well established and that there is no
+    problem with the access token for instance.
+
+    #+begin_src python :results output :exports both
+      def prepare(self):
+        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
+        # raise RemoteError if not ready to use
+          
+        import requests
+        # let's try to connect to the API, if the status code is not 200: there is an error 
+        r = self.query('get', URL_SANDBOX)
+        if r.status_code != 200:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a get query to the API')
+        
+    #+end_src    
+
+    
+** Step 4: transferstore.
+
+    
+    #+begin_src python :results output :exports both
+
+    #+end_src
+
+    
+** Step 5: transferretrieve.
+
+
+      #+begin_src python :results output :exports both
+
+
+      #+end_src
+
+      
+** Step 6: checkpresent.
+	
+    #+begin_src python :results output :exports both
+
+def checkpresentexport(self, key, remote_file):
+        # return True if the file `remote_file` is present in the remote
+        # return False if not
+        # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
+
+    #+end_src
+
+    
+** Step 7: remove.
+
+
+      #+begin_src python :results output :exports both
+
+      #+end_src
+
+      
+** Step 8: transferexportstore.
+
+
+       #+begin_src python :results output :exports both
+
+
+       #+end_src
+
+       
+** Step 9: transferexportretrieve.
+
+      #+begin_src python :results output :exports both
+
+      #+end_src
+  
+
+
+** Step 10: checkpresentexport.
+      #+begin_src python :results output :exports both
+
+      #+end_src
+
+      
+** Step 11: removeexport.
+   
+      #+begin_src python :results output :exports both
+
+      #+end_src
+
+      
+** Step 12: removeexportdirectory.
+   
+      #+begin_src python :results output :exports both
+
+      #+end_src
+
+      
+** Step 13: renameexport.
+   
+      #+begin_src python :results output :exports both
+
+      #+end_src

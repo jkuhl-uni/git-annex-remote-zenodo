@@ -10,13 +10,13 @@ import sys, os, errno
 import requests
 
 URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
-KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
 
 class ZenodoRemote(ExportRemote):
 
     def __init__(self, *args):
         self.deposit = None
         self.deposit_id = None
+        self.key = ''
 
     # method to handle all the basic queries
     def query(self, query_method, url, id=None, headers=None, data=None):
@@ -31,10 +31,10 @@ class ZenodoRemote(ExportRemote):
         # we use the same access key for all the queries. 
         # for put / post   
         if id is not None:    
-            params = {'access_token': KEY, 'identifier' : id}   
+            params = {'access_token': self.key, 'identifier' : id}   
         # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
         else:
-            params = {'access_token': KEY}
+            params = {'access_token': self.key}
 
         # depending on the query, some of the arguments might be null
         if query_method == 'get':
@@ -52,31 +52,18 @@ class ZenodoRemote(ExportRemote):
         return request
 
 
-    # methods to implement
     def initremote(self):
     # initialize the remote, eg. create the folders
     # raise RemoteError if the remote couldn't be initialized
-	    KEY = 'kBs8SX4CBQmUQb3ygRn3HkmZNgDoIGzYzdW2wuuBv5xQpQmZ2zzJo6iql7fY'
-
-        # need to get the key by using the getconfig method
-        # the key is passed as an argument when using the commant initremote (ex: key='')
-        #self.key = self.annex.getconfig('key')
-        # if it's not been added as an argument, we raise an 
-        #if not self.key:
-        #    raise RemoteError("You need to add the access token () =")
-
-
-    def prepare(self):
-        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
-        # raise RemoteError if not ready to use
         import requests
-        # let's try to connect to the API, if the status code is not 200: there is an error 
-        r = self.query('get', URL_SANDBOX)
-        if r.status_code != 200:
-            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
-            raise RemoteError('could not send a get query to the API')
-        
-        # we first need to create an empty upload that we will be using from now on
+        # need to get the key by using the getconfig method
+        self.key = self.annex.getconfig('key')
+        # the key is passed as an argument when using the commant initremote (ex: key='')
+        # if it's not been added as an argument, we raise an 
+        if self.annex.getconfig('key') is None:
+            raise RemoteError("You need to add the access token (key = TOKEN)")
+
+        # now, we need to create an empty upload that we will be using from now on
         r = self.query('post', URL_SANDBOX)
         if r.status_code > 204:
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
@@ -85,8 +72,21 @@ class ZenodoRemote(ExportRemote):
         # setting the id for this deposit
         self.deposit = r
         self.deposit_id = r.json()['id']
-        # finished preparing the remote
+        self.deposit_bucket = r.json()['links']['bucket']
+        
 
+
+    def prepare(self):
+        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
+        # raise RemoteError if not ready to use
+        import requests
+        # let's try to connect to the API, if the status code is not 200: there is an error 
+        self.key = self.annex.getconfig('key')
+        r = self.query('get', URL_SANDBOX)
+        if r.status_code != 200:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a get query to the API')
+                
 
     def transfer_store(self, key, filename):
         # store the file in `filename` to a unique location derived from `key`
