@@ -19,7 +19,7 @@ class ZenodoRemote(ExportRemote):
         self.key = ''
 
     # method to handle all the basic queries
-    def query(self, query_method, url, id=None, headers=None, data=None):
+    def query(self, query_method, url, id=None, headers=None, data=None, stream = None):
         # id = key (!= KEY or access token to the API): to be stored in the remote. 
         # In most cases, this is going to be the remote file name. It should be at 
         # least be unambigiously derived from it.
@@ -38,7 +38,11 @@ class ZenodoRemote(ExportRemote):
 
         # depending on the query, some of the arguments might be null
         if query_method == 'get':
-            request = requests.get(url, params = params)
+            # this is for when we want to retrieve and download the file
+            if stream == True:
+                request = requests.get(url, params = params, stream = True)
+            else:
+                request = requests.get(url, params = params)
         else:
             if query_method == 'post': 
                 request = requests.post(url, params=params, json={}, headers=headers)
@@ -143,7 +147,16 @@ class ZenodoRemote(ExportRemote):
                 file_id =  r.json()[i]['id']
                 # getting the download link of the file
                 url = r.json()[i]['links']['download']
-                r = self('get', url)        
+                r = self('get', url, stream = True)        
+                r.raise_for_status()
+                # storing the file in the path given in filename
+                # this is done by reading the content of the file and writing it in the new file
+                # if the files are very large, we can make the chunk size bigger 
+                with open(filename, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=120): 
+                        f.write(chunk)
+                # once we finish writing into the file we can close it
+                f.close()
 
         if r.status_code > 204:
             print("error while fetching the file from the remote" + str(r.status_code))
