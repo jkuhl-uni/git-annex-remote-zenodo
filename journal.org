@@ -1683,31 +1683,107 @@ print(json.dumps(r.json(), indent=4))
 
     
 ** Step 4: transferstore.
+"Store the file in localfile to a unique location derived from key."
 
+We only need to upload the file into the deposit. This is done by
+getting the url of the deposit that was created and by then making a
+put request to the API to send the file.
     
     #+begin_src python :results output :exports both
+    def transfer_store(self, key, filename):
+        # store the file in `filename` to a unique location derived from `key`
+        # raise RemoteError if the file couldn't be stored
+        
+        try:
+            # fetching the url of the bucket
+            URL_BUCKET = self.deposit_bucket
 
+            # and then we upload it
+
+            #filename = 'notes.pdf'
+            #path = '/home/nubudi/Downloads/notes.pdf'
+
+            # extracting the filename and the path from filename
+            # the argument filename of the function contains the full path to the path.
+            # we  can get the name of the file by using the function rsplit to split 
+            # the string at the specified separator '/' and we can get the filename by 
+            # getting the lest element of the file.
+            list = filename.rsplit("/")
+            file = list[-1]
+            path = filename
+
+            # The target URL is a combination of the bucket link with the desired filename
+            # seperated by a slash.
+            with open(path, "rb") as fp:
+                r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
+            
+            if r.status_code < 400:
+                print("finished exporting the file... \n")
+            else:
+                raise RemoteError ('error while exporting the file... \n')
+
+        except Exception as error:
+            raise RemoteError(error)
     #+end_src
 
     
 ** Step 5: transferretrieve.
+"Get the file identified by key from the remote and store it in
+localfile."
 
+We check if the file exists by comparing the key (= the name of the
+file in this case) and then we send a get request to check information
+on the file.
+
+#+begin_src python :results output :exports both
+
+#+end_src
 
       #+begin_src python :results output :exports both
+    def checkpresent(self, key, filename):
+        # return True if the key is present in the remote
+        # return False if the key is not present
+        # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
 
+        try:
+            url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+            r = self.query('get', url)
+            # going through the list of the files in this deposit
+            for i in range(len(r.json())):
+                if r.json()[i]['filename'] == key:
+                    url = r.json()[i]['links']['download']
+                    r = self('get', url)   
+        except Exception as error:
+            raise RemoteError(error)
 
       #+end_src
 
       
 ** Step 6: checkpresent.
-	
+"Requests the remote to check if a key is present in it."
+
+We can compare the key to the files that are already stored in the
+deposit and then return true or false depending on the case. If there
+is a problem with the determining of this, we can raise an exception.
+
     #+begin_src python :results output :exports both
+    def checkpresent(self, key):
+        # return True if the key is present in the remote
+        # return False if the key is not present
+        # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
 
-def checkpresentexport(self, key, remote_file):
-        # return True if the file `remote_file` is present in the remote
-        # return False if not
-        # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
-
+        try:
+            url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+            r = self.query('get', url)
+            # going through the list of the files in this deposit
+            for i in range(len(r.json())):
+                if r.json()[i]['filename'] == key:
+                    print('yes, this file exists in the remote: ' + key )
+                    return True
+            return False 
+            
+        except Exception as error:
+            raise RemoteError(error)
     #+end_src
 
     
@@ -1761,3 +1837,37 @@ def checkpresentexport(self, key, remote_file):
       #+begin_src python :results output :exports both
 
       #+end_src
+
+
+      
+
+
+* Friday 04/06.
+
+#+begin_src python :results output :exports both
+import requests
+import json
+
+params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+deposit_id = 846331
+url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(deposit_id) + '/files'
+r = requests.get(url, params = params)
+# going through the list of the files in this deposit
+for i in range(len(r.json())):
+    # checking if the file exists by comparing the key/filename
+    # sending a get request to check information on the file
+    if r.json()[i]['filename'] == 'AirPollutionInGrenoble.pdf':
+        # we can retrieve a single deposition file with: 
+        #url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(deposit_id) + '/files/' + str(file_id)
+        # getting the id of the file that we want to download
+        file_id =  r.json()[i]['id']
+        # getting the download link of the file
+        url = r.json()[i]['links']['download']
+        r = requests.get(url, params = params)
+        #print(json.dumps(r.json(), indent=4))
+        print(r.status_code)
+        
+#+end_src
+
+#+RESULTS:
+: 200

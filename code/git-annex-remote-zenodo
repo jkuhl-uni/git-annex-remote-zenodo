@@ -92,42 +92,61 @@ class ZenodoRemote(ExportRemote):
         # store the file in `filename` to a unique location derived from `key`
         # raise RemoteError if the file couldn't be stored
         
-        # uploading the file:
-        r = self.deposit
-        # now, we upload the file (cf the tips in the tutorial)
-        # to do so, we will fetch the bucket_url which will be the folder containing the files
-        URL_BUCKET = r.json()["links"]["bucket"]
+        try:
+            # fetching the url of the bucket
+            URL_BUCKET = self.deposit_bucket
 
-        # todo: extract the path and the filename from arg 'filename'
+            # and then we upload it
 
-        # and then we upload it
-        filename = 'notes.pdf'
-        path = '/home/nubudi/Downloads/notes.pdf'
-        
-        # The target URL is a combination of the bucket link with the desired filename
-        # seperated by a slash.
-        with open(path, "rb") as fp:
-            r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
-        
-        if r.status_code < 400:
-            print("finished exporting the file... \n")
-        else:
-            raise RemoteError ('error while exporting the file... \n')
+            #filename = 'notes.pdf'
+            #path = '/home/nubudi/Downloads/notes.pdf'
 
-        # todo: publishing the file 
-        # simply by using a post query
+            # extracting the filename and the path from filename
+            # the argument filename of the function contains the full path to the path.
+            # we  can get the name of the file by using the function rsplit to split 
+            # the string at the specified separator '/' and we can get the filename by 
+            # getting the lest element of the file.
+            list = filename.rsplit("/")
+            file = list[-1]
+            path = filename
+
+            # The target URL is a combination of the bucket link with the desired filename
+            # seperated by a slash.
+            with open(path, "rb") as fp:
+                r = self.query('put', "%s/%s" % (URL_BUCKET, filename), key, data=fp)
+            
+            if r.status_code < 400:
+                print("finished exporting the file... \n")
+            else:
+                raise RemoteError ('error while exporting the file... \n')
+
+        except Exception as error:
+            raise RemoteError(error)
 
 
     def transfer_retrieve(self, key, filename):
         # get the file identified by `key` and store it to `filename`
         # raise RemoteError if the file couldn't be retrieved
+        import json
 
-        # get request to: https://sandbox.zenodo.org/api/deposit/depositions
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
         r = self.query('get', url)
 
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            # checking if the file exists by comparing the key/filename
+            # sending a get request to check information on the file
+            if r.json()[i]['filename'] == key:
+                # we can retrieve a single deposition file with: 
+                # url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(deposit_id) + '/files/' + str(file_id)
+                # getting the id of the file that we want to download
+                file_id =  r.json()[i]['id']
+                # getting the download link of the file
+                url = r.json()[i]['links']['download']
+                r = self('get', url)        
+
         if r.status_code > 204:
-            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            print("error while fetching the file from the remote" + str(r.status_code))
             raise RemoteError('could not send a get query to the API')
         
 
@@ -136,14 +155,18 @@ class ZenodoRemote(ExportRemote):
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
 
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
-        r = self.query('get', url)
-        # going through the list of the files in this deposit
-        for i in range(len(r.json())):
-            if r.json()[i]['filename'] == key:
-                print('yes, this file exists in the remote: ' + key )
-                return True
-        return False 
+        try:
+            url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+            r = self.query('get', url)
+            # going through the list of the files in this deposit
+            for i in range(len(r.json())):
+                if r.json()[i]['filename'] == key:
+                    print('yes, this file exists in the remote: ' + key )
+                    return True
+            return False 
+            
+        except Exception as error:
+            raise RemoteError(error)
 
 
     def remove(self, key):
