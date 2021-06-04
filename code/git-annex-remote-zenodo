@@ -19,7 +19,7 @@ class ZenodoRemote(ExportRemote):
         self.key = ''
 
     # method to handle all the basic queries
-    def query(self, query_method, url, id=None, headers=None, data=None, stream = None):
+    def query(self, query_method, url, headers=None, data=None, stream = None):
         # id = key (!= KEY or access token to the API): to be stored in the remote. 
         # In most cases, this is going to be the remote file name. It should be at 
         # least be unambigiously derived from it.
@@ -29,12 +29,7 @@ class ZenodoRemote(ExportRemote):
             headers = {"Content-Type": "application/json"}
 
         # we use the same access key for all the queries. 
-        # for put / post   
-        if id is not None:    
-            params = {'access_token': self.key, 'identifier' : id}   
-        # for get (when we don't have an identifier for the file, ie: when we still haven't uploaded it)
-        else:
-            params = {'access_token': self.key}
+        params = {'access_token': self.key}
 
         # depending on the query, some of the arguments might be null
         if query_method == 'get':
@@ -43,12 +38,13 @@ class ZenodoRemote(ExportRemote):
                 request = requests.get(url, params = params, stream = True)
             else:
                 request = requests.get(url, params = params)
+        elif query_method == 'post':
+            request = requests.post(url, params=params, json={}, headers=headers)
+        elif query_method == 'put':
+            request = requests.put(url, params=params, json={}, data=data)
         else:
-            if query_method == 'post': 
-                request = requests.post(url, params=params, json={}, headers=headers)
-            else:
-                request = requests.put(url, params=params, json={}, data=data)
-                
+            request = requests.delete(url, params)
+            
         # informing the user of the currint state of the operation        
         print("finished the " + query_method + "operation. Here is the returned message \n")
         print(request.status_code)
@@ -132,7 +128,7 @@ class ZenodoRemote(ExportRemote):
         # get the file identified by `key` and store it to `filename`
         # raise RemoteError if the file couldn't be retrieved
         import json
-
+        # getting the information on the files that are in the deposit
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
         r = self.query('get', url)
 
@@ -174,7 +170,7 @@ class ZenodoRemote(ExportRemote):
             # going through the list of the files in this deposit
             for i in range(len(r.json())):
                 if r.json()[i]['filename'] == key:
-                    print('yes, this file exists in the remote: ' + key )
+                    print('Yes, this file exists in the remote: ' + key )
                     return True
             return False 
             
@@ -187,7 +183,32 @@ class ZenodoRemote(ExportRemote):
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
 
-        print("not implemented")
+        # checking if the key exists in the remote deposit
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        # going through the list of the files in this deposit
+        file_id = None
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == key:
+                file_id = r.json()[i]['id']
+
+        # if the key is non existing, we shouldn't raise an exception        
+        if file_id is None:
+            return
+        
+        # Delete an existing deposition file resource. Note, only deposition 
+        # files for unpublished depositions may be deleted.
+
+        # first, we update the url so as to use it to delete the file
+        url = url + '/' + str(file_id)
+        # we then make the query to delete the file
+        r = self.query('delete', url)
+
+        # raising RemoteError if there is a problem with the removal of the file
+        if r.status_code > 204:
+            print("error while deleting the file from the remote" + str(r.status_code))
+            raise RemoteError('could not send a delete query to the API')
+        
 
     def transferexport_store(self, key, local_file, remote_file):
         # store the file located at `local_file` to `remote_file` on the remote

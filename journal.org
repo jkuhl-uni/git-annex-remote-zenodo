@@ -1843,6 +1843,8 @@ is a problem with the determining of this, we can raise an exception.
 
 
 * Friday 04/06.
+** fetching and downloading files.
+
 - Writing this function to fetch a particular file from the the
 deposit. This is done by looking up a file in the deposit that has a
 name that is the same as the key that is passed to the function. We
@@ -1954,5 +1956,59 @@ the function looks now:
             raise RemoteError('could not send a get query to the API')
 
 #+end_example
+
+
+
+
+** deleting a file.
+- First, we have to have the id of a deposit that isn't published to
+  be able to delete files. So, we can create a deposit easily with a
+  post request or directly via the the sandbox website. We then fetch
+  the id of this deposit (ie: 848907) and we go through the list of
+  the files that are stored in the deposit and compare their title to
+  the key (we can use the url /api/deposit/depositions/:id/files).
+  We also have to retrieve the id of the file and append it the url to
+  be able to access this file directly. Lastly, we can send a delete
+  request to the API to delete it.
+     + The Success response that we want: 204
+     + Error response: 403 / 404
+  
+#+begin_src python :results output :exports both
+import requests
+import json
+
+# the id of the deposit where we want to delete the file
+deposit_id = 848907
+url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(deposit_id) + '/files'
+params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+
+r = requests.get(url, params=params)
+
+# going through the list of the files in this deposit
+file_id = None
+for i in range(len(r.json())):
+    if r.json()[i]['filename'] == 'notes.pdf':
+        file_id = r.json()[i]['id']
+        
+# Delete an existing deposition file resource. Note, only deposition 
+# files for unpublished depositions may be deleted.
+
+# first, we update the url so as to use it to delete the file
+url = url + '/' + str(file_id)
+
+# we then make the query to delete the file
+r = requests.delete(url, params=params)
+print(r.status_code)
+
+#+end_src
+
+#+RESULTS:
+: 204
+
+As we can see, the response code is 204 which means that the request
+was successfully executed and that the file was deleted. We can also
+check this by looking up the url of the deposit on
+https://sandbox.zenodo.org/deposit/848907 or by sending a get request
+to the API.
 
 
