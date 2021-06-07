@@ -2130,7 +2130,6 @@ and to remove the file whose key corresponds to the one given here.
       #+end_src
 
 
-
 ** Test: renaming unpublished files on Zenodo.
 *** Renaming using the edit action: non functionnal. 
 We can use the action edit to try to edit the name of the file we want
@@ -2257,6 +2256,7 @@ rename_file()
 :     "message": "Wrong file on input."
 : }
 
+
 ** Step 13: renameexport.
  "Requests the remote rename a file stored on it from filename to
  newfilename. Remotes that support exports but not renaming do not
@@ -2267,3 +2267,175 @@ rename_file()
       #+end_src
 
       
+** Step 14: publishing.
+To publish a deposit on Zenodo using the API we can use the publish
+action but we need to add some information to the deposit
+metadata. The required data depend on what type of publication we need
+to do and sometimes extra information needs to be given.
+Here is an example of the basic data to add using a put request before
+publishing:
+
+#+begin_example
+data = {
+     'metadata': {
+         'title': 'example',
+         'upload_type': 'poster',
+         'description': 'first upload',
+         'creators': [{'name': 'lastname, firstname',
+                       'affiliation': 'Zenodo'}]
+     }
+}
+
+#+end_example
+
+Here are the required attributes to specify:
+
+#+begin_example
+
+- upload_type:
+   + publication
+   + poster
+   + presentation
+   + dataset
+   + image
+   + video
+   + software
+   + lesson
+   + physicalobject
+   + other
+- publication_date.
+- title.
+- creators: name (optional: affiliation / orcid / gnd)
+- description.
+- access_right: open / embargoed / restricted / closed.
+- license (if access_right = open | embargoed): "The selected license applies 
+to all files in this deposition, but not to the metadata."
+- embargo_date (if access_right = embargoed): "When the deposited files will 
+be made automatically made publicly available by the system. 
+Defaults to current date."
+- access_conditions (if access_right = restricted): "Specify the conditions 
+under which you grant users access to the files in your upload. User requesting 
+access will be asked to justify how they fulfil the conditions. Based on the 
+justification, you decide who to grant/deny access."
+- publication_type (if upload_type = publication):
+   + annotationcollection
+   + book
+   + section
+   + conferencepaper
+   + datamanagementplan
+   + article
+   + patent
+   + preprint
+   + deliverable
+   + milestone
+   + proposal
+   + report
+   + softwaredocumentation
+   + taxonomictreatment
+   + technicalnote
+   + thesis
+   + workingpaper
+   + other
+- image_type (if upload_type = image):
+   + figure
+   + plot
+   + drawing
+   + diagram
+   + photo
+   + other
+#+end_example
+
+So, keeping these restrictions in mind, we can take the basic publish
+function we have written and add all these information into it.
+
+
+#+begin_src python :results output :exports both
+def publish():
+    import requests
+    import json
+
+    publicationtypes = ['annotationcollection', 'book', 'section', 'conferencepaper', 'datamanagementplan', 
+                        'article', 'patent', 'prepint', 'deliverable', 'milestone', 'proposal', 'report', 
+                        'softwaredocumentation', 'taxonomictreatment', 'technicalnote', 'thesis', 'workingpaper', 'other']
+
+    imagetypes = ['figure', 'plot', 'drawing', 'diagram', 'photo', 'other']
+
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+
+    bucket_id = 851823  # we get this by choosing the id of one of the deposits we created
+
+    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/%s' % bucket_id, params=params)
+    print(r.status_code)
+
+    # initializing the required metadata
+    upload_type = ''
+    title = ''
+    creators = []
+    description = ''
+    access_right = ''
+
+    # taking care of the extra information concerning all the possible access rights
+    if access_right == 'embargoed':
+        # need to specify embargo_date
+        embargo_date = ''
+    if access_right == 'embargoed' or access_right == 'open':
+        # need to specify the license
+        license = ''
+    if access_right == 'restricted':
+        # need to specify access_conditions
+        access_conditions = ''
+
+    # taking care of the information concerning the publication type:
+    if upload_type == 'publication':
+        print('Here are the possible types of publication. Please choose one of them (ex: 5) \n')
+        print("0 - annotation collection \n")
+        print("1 - book \n")
+        print("2 - section \n")
+        print("3 - data management plan \n")
+        print("4 - article \n")
+        print("5 - patent \n")
+        print("6 - preprint \n")
+        print("7 - deliverable \n")
+        print("8 - milestone \n")
+        print("9 - proposal \n")
+        print("10 - software documentation \n")
+        print("11 - taxonomic treatment \n")
+        print("12 - technical note \n")
+        print("13 - thesis \n")
+        print("14 - working paper \n")
+        print("15 - other \n")
+        n = int(input())
+        publication_type = publicationtypes[n]
+
+    if upload_type == 'image':
+        print('Here are the possible types of images. Please choose one of them (ex: 5) \n')
+        print("0 - figure \n")
+        print("1 - plot \n")
+        print("2 - drawing \n")
+        print("3 - diagram \n")
+        print("4 - photo \n")
+        print("5 - other \n")
+        n = int(input())
+        image_type = imagetypes[n]
+
+    # adding metadata to the deposit
+    data = {
+        'metadata': {
+            'title': title,
+            'upload_type': upload_type,
+            'description': description,
+            'creators': creators,
+            'access_right': access_right
+        }
+    }
+
+    # updating the deposit with the needed metadata
+    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' % bucket_id, params=params, data=json.dumps(data), headers=headers, json={})
+    print(r.status_code)
+
+    # publishing
+    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' % bucket_id , params=params, json={})
+    print(r.status_code)
+    print(json.dumps(r.json(), indent=4))
+#+end_src
