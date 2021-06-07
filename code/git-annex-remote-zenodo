@@ -279,7 +279,7 @@ class ZenodoRemote(ExportRemote):
     # added methods
 
     # function to call whenever we can to choose an upload type:
-    def choosetype(self):
+    def setting_uploadtype(self):
         # the possible types of the uploads
         uploadtypes = ['publication', 'poster', 'presentation', 'dataset', 'image', 
                         'video', 'software', 'lesson', 'physicalobject', 'other']
@@ -342,7 +342,9 @@ class ZenodoRemote(ExportRemote):
         
         return upload_type 
 
-    def settingcreators(self):
+    # function to call to set the creators of the upload. 
+    # This function is called whenever the user wants to publish an upload.
+    def setting_creators(self):
         creators = []
         c = {}
         nbcreators = int(input("Enter the number of the creators of this upload. \n"))
@@ -363,41 +365,69 @@ class ZenodoRemote(ExportRemote):
             creators.append(c)
 
         return creators
-        
 
-    # this is the function that will be used to publish the deposit
-    def publish(self):
-        import json
-        # initializing the required metadata
-        # setting the type of the upload using the choosetype function
-        upload_type = self.choosetype() 
-        # setting the title of the upload
-        title = input('Enter the title of the upload: ')
-        # setting the description of the upload
-        description = input('Enter a basic description of the upload')
-        # setting the access right of the upload
+    # function to call to set the access right to the publication. The user 
+    # chooses which type of access to give and takes care of any additional 
+    # information that depends on the chosen access. 
+    # This function is called whenever the user wants to publish an upload.
+    def setting_accessright (self):
+        
+        # initializing the list of options
         accessrights = ['open', 'embargoed', 'restricted', 'closed']
+        licenses = ['Creative Commons Attribution 4.0 International', 'Creative Commons Attribution 1.0 Generic', 
+                    'Creative Commons Attribution 2.0 Generic', 'Creative Commons Attribution 3.0 Unported']
+        
+        # choosing the access right 
         print("What is the access right of the upload? Please choose one of these options (ex: 2) \n")
         print("0 - open \n")
         print("1 - embargoed \n")
         print("2 - restricted \n")
         print("3 - closed \n")        
         n = int(input('Enter the correspoding number: '))
-        access_right = accessrights[n]
-        # getting information about the creators of the publication
-        creators = self.settingcreators()
-  
+        access_right = accessrights[n]        
 
         # taking care of the extra information concerning all the possible access rights
+        
         if access_right == 'embargoed':
             # need to specify embargo_date
-            embargo_date = ''
+            print('Specify the Embargo date. The format is: YYYY-MM-DD. \n')
+            embargo_date = input()
+
         if access_right == 'embargoed' or access_right == 'open':
             # need to specify the license
-            license = ''
+            print('Specify the license. Choose one of these options: \n')
+            print("0 - Creative Commons Attribution 4.0 International \n")
+            print("1 - Creative Commons Attribution 1.0 Generic \n")
+            print("2 - Creative Commons Attribution 2.0 Generic \n")
+            print("3 - Creative Commons Attribution 3.0 Unported \n")               
+            n = int(input('Enter the correspoding number: ')) 
+            license = licenses[n]
+
         if access_right == 'restricted':
             # need to specify access_conditions
-            access_conditions = ''
+            print('Specify the conditions under which you grant users access to the files in your upload. \n')
+            access_conditions = input()
+
+    # this is the function that will be used to publish the deposit
+    def publish(self):
+        import json
+        # initializing the required metadata
+        
+        # setting the type of the upload using the choosetype function
+        upload_type = self.setting_uploadtype() 
+        
+        # setting the title of the upload
+        title = input('Enter the title of the upload: ')
+        
+        # setting the description of the upload
+        description = input('Enter a basic description of the upload')
+        
+        # setting the access right of the upload
+        access_right = self.setting_accessright()
+        
+        # getting information about the creators of the publication
+        creators = self.setting_creators()
+  
 
     # adding metadata to the deposit
         data = {
