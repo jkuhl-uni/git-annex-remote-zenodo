@@ -97,13 +97,17 @@ En fin, on peut fusionner les deux approches pour atteindre le meilleur résulta
 - Finalisation de la fonction à utiliser pour publier sur Zenodo en utilisant l'api. 
 
 ### Jeudi 03/06:
+- Modification des fonctions de la classe pour implementer les nouvelles fonctionnalités qui permettent le fonctionnement du nouveau modèle. 
+- Implémentation de query, initremote, prepare, transferstore, transferretrieve, checkpredent.
 
 ### Vendredi 04/06:
-
+- Tests pour manipuler des autres fonctionnalités de l'API dont on avait besoin pour implémenter des fonctions de la classe. Tests pour récupérer et télécharger des fichiers choisis dans un dépôt ou de supprimer des fichiers en utilisant la clé comme identifiant.
+- Implémentation des fonctions remove, transferexportstore, transferexportretrieve, checkpresentexport. 
 
 ## Semaine 5 (07/06 - 13/06):
 
 ### Lundi 07/06:
+- 
 
 ### Mardi 08/06:
 
