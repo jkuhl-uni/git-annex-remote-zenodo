@@ -301,7 +301,7 @@ def apipost():
 apipost()
 
   #+end_src
-
+  
   #+RESULTS:
   : 400
 
@@ -2129,7 +2129,134 @@ and to remove the file whose key corresponds to the one given here.
                     raise RemoteError('could not send a delete query to the API')
       #+end_src
 
-      
+
+
+** Test: renaming unpublished files on Zenodo.
+*** Renaming using the edit action: non functionnal. 
+We can use the action edit to try to edit the name of the file we want
+to rename. So, first we need to send a get query to get all the
+information about the deposit, before sending the edit query to make
+the changes we want to make.
+ 
+#+begin_src python :results output :exports both
+    params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+    deposit_id = 851823
+    url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(deposit_id) + '/files'
+
+    # first: the get request
+    r = requests.get(url, params = params)
+    print(r.status_code)
+    print(json.dumps(r.json(), indent=4))
+    print()
+
+    # second: the post request with the edit action to unlock the deposition for editing
+    r = requests.post('https://zenodo.org/api/deposit/depositions/' + str(deposit_id) +'/actions/edit', params=params, json={})
+    print(r.status_code)
+    print(json.dumps(r.json(), indent=4))
+    print()
+
+    r = requests.post('https://zenodo.org/api/deposit/depositions/' + str(deposit_id) +'/actions/discard', params=params, json={})
+    print(r.status_code)
+    print(json.dumps(r.json(), indent=4))
+    print()
+
+"""
+    # going through the list of the files in this deposit
+    for i in range(len(r.json())):
+        # checking if the file exists by comparing the key/filename
+        # sending a get request to check information on the file
+        if r.json()[i]['files']['filename'] == 'AirPollutionInGrenoble.pdf':
+          
+    """  
+#+end_src
+
+#+RESULTS:
+
+
+*** Renaming using the Update action.
+https://github.com/zenodo/zenodo/issues/1459
+
+#+begin_src python :results output :exports both
+import json
+import requests
+
+deposit_id = '851823'
+params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(deposit_id) + '/files'
+
+# first, we get the id of the file we want to name
+r = requests.get(url, params = params)
+print(r.status_code)
+
+for i in range(len(r.json())):
+    if r.json()[i]['filename'] == 'AirPollutionInGrenoble.pdf':
+        file_id = r.json()[i]['id']
+        break;
+
+url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ deposit_id + '/files/' + file_id
+headers = {"Content-Type": "application/json"}
+data = {"name": "airpollutionstudy.pdf"}
+
+r = requests.put(url, data=json.dumps(data), params = params, headers=headers, json={})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+: 200
+: 400
+: {
+:     "status": 400,
+:     "message": "Wrong file on input."
+: }
+
+*** Another try with the put request.
+
+#+begin_src python :results output :exports both
+def rename_file():
+    # trying to rename the file in a different way
+    import json
+    import requests
+
+    headers = {"Content-Type": "application/json"}
+    deposit_id = '851823'
+    params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+    url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ deposit_id + '/files'
+
+    # first, we get the id of the file we want to name
+    r = requests.get(url, params = params)
+    print(r.status_code)
+
+    # getting the id of the file
+    for i in range(len(r.json())):
+        if r.json()[i]['filename'] == 'AirPollutionInGrenoble.pdf':
+            file_id = r.json()[i]['id']
+            break;
+
+    # first, we get the id of the file we want to name
+    url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ deposit_id + '/files/' + file_id 
+    r = requests.get(url, params = params)
+    print(r.status_code)
+   
+    file_desc = r.json()
+    if file_desc['filename'] != 'airpollutionstudy.pdf':
+        r = requests.put(file_desc['links']['self'], json={'name': 'airpollutionstudy.pdf'}, params=params, headers= headers )
+        print(r.status_code)
+        print(json.dumps(r.json(), indent=4))
+
+
+rename_file()
+#+end_src
+
+#+RESULTS:
+: 200
+: 200
+: 400
+: {
+:     "status": 400,
+:     "message": "Wrong file on input."
+: }
+
 ** Step 13: renameexport.
  "Requests the remote rename a file stored on it from filename to
  newfilename. Remotes that support exports but not renaming do not
