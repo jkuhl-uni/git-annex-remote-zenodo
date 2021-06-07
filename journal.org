@@ -1787,59 +1787,6 @@ is a problem with the determining of this, we can raise an exception.
     #+end_src
 
     
-** Step 7: remove.
-
-
-      #+begin_src python :results output :exports both
-
-      #+end_src
-
-      
-** Step 8: transferexportstore.
-
-
-       #+begin_src python :results output :exports both
-
-
-       #+end_src
-
-       
-** Step 9: transferexportretrieve.
-
-      #+begin_src python :results output :exports both
-
-      #+end_src
-  
-
-
-** Step 10: checkpresentexport.
-      #+begin_src python :results output :exports both
-
-      #+end_src
-
-      
-** Step 11: removeexport.
-   
-      #+begin_src python :results output :exports both
-
-      #+end_src
-
-      
-** Step 12: removeexportdirectory.
-   
-      #+begin_src python :results output :exports both
-
-      #+end_src
-
-      
-** Step 13: renameexport.
-   
-      #+begin_src python :results output :exports both
-
-      #+end_src
-
-
-      
 
 
 * Friday 04/06.
@@ -2010,5 +1957,156 @@ was successfully executed and that the file was deleted. We can also
 check this by looking up the url of the deposit on
 https://sandbox.zenodo.org/deposit/848907 or by sending a get request
 to the API.
+We implement this into the remove function so as to delete files from
+the deposit.
 
 
+
+** Step 7: remove.
+"Requests the remote to remove a key's contents."
+
+We first look in the list of the exported files to see if the file
+whose name corresponds with the key exists in that deposit. Then, we
+fetch the id of the file. Now, we can delete the file using the delete
+query (this could only be done to unpublished depositions seeing that
+we can not edit pblished ones).
+The status code that we want to get in response is 204, so we can
+look into that to make sure that the operation was done successfully. 
+
+      #+begin_src python :results output :exports both
+    def remove(self, key):
+        # remove the key from the remote
+        # raise RemoteError if it couldn't be removed
+        # note that removing a not existing key isn't considered an error
+
+        # checking if the key exists in the remote deposit
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(self.deposit_id) + '/files'
+        r = self.query('get', url)
+        # going through the list of the files in this deposit
+        file_id = None
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == key:
+                file_id = r.json()[i]['id']
+
+        # if the key is non existing, we shouldn't raise an exception        
+        if file_id is None:
+            return
+        
+        # Delete an existing deposition file resource. Note, only deposition 
+        # files for unpublished depositions may be deleted.
+
+        # first, we update the url so as to use it to delete the file
+        url = url + '/' + str(file_id)
+        # we then make the query to delete the file
+        r = self.query('delete', url)
+
+        # raising RemoteError if there is a problem with the removal of the file
+        if r.status_code > 204:
+            print("error while deleting the file from the remote" + str(r.status_code))
+            raise RemoteError('could not send a delete query to the API')
+   
+      #+end_src
+
+      
+** Step 8: transferexportstore.
+"Requests the transfer of a file on local disk to the special
+remote. Note that it's important that, while a file is being stored,
+checkpresentexport() not indicate it's present until all the data has
+been transferred. While the transfer is running, the remote can send
+any number of progess(size) messages."
+
+We have already implemented a function that does the job of uploading
+files into the deposit. So all we have to do now is to use this
+function by calling it here and giving as arguments the names of the
+remotefile and the localfile. By giving the name of the remotefile as
+key, we set the keys as the name of the files which facilitates the
+search.
+
+       #+begin_src python :results output :exports both
+    def transferexport_store(self, key, local_file, remote_file):
+        # store the file located at `local_file` to `remote_file` on the remote
+        # raise RemoteError if the file couldn't be stored
+
+        return self.transfer_store(remote_file, local_file)
+
+       #+end_src
+
+       
+** Step 9: transferexportretrieve.
+"Requests the transfer of a file from the special remote to the local
+disk. Note that it's important that, while a file is being stored,
+checkpresentexport() not indicate it's present until all the data has
+been transferred. While the transfer is running, the remote can send
+any number of progess(size) messages."
+
+We have already implemented a function that does the job of fetching
+and downloading files from the deposit. So all we have to do now is to use this
+function by calling it here and giving as arguments the names of the
+remotefile/key and the localfile.
+Seeing that the key in this case is the same as the name of the
+remotefile we can use either of them.
+
+      #+begin_src python :results output :exports both
+    def transferexport_retrieve(self, key, local_file, remote_file):
+        # get the file located at `remote_file` from the remote and store it to `local_file`
+        # raise RemoteError if the file couldn't be retrieved
+
+        return self.transfer_retrieve(key, local_file)
+      #+end_src
+  
+
+
+** Step 10: checkpresentexport.
+"Requests the remote to check if the file is present in it."
+
+We use the function checkpresent which we have already implemented to
+look in the remote deposit for the file whose key corresponds to the
+one given. 
+
+      #+begin_src python :results output :exports both
+    def checkpresentexport(self, key, remote_file):
+        # return True if the file `remote_file` is present in the remote
+        # return False if not
+        # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
+        
+        return self.checkpresent(key)
+      #+end_src
+
+      
+** Step 11: removeexport.
+"Requests the remote to remove content stored by
+transferexportstore()."
+
+We use the remove function to look into the list of the uploaded files
+and to remove the file whose key corresponds to the one given here.
+
+      #+begin_src python :results output :exports both
+    def removeexport(self, key, remote_file):
+        # remove the file in `remote_file` from the remote
+        # raise RemoteError if it couldn't be removed
+        # note that removing a not existing key isn't considered an error
+
+        return self.remove(key)
+      #+end_src
+
+      
+** Step 12: removeexportdirectory.
+ "Requests the remote to remove an exported directory. If the remote
+ does not use directories, or removeexport() cleans up directories
+ that are empty, this does not need to be implemented."
+ 
+      #+begin_src python :results output :exports both
+
+      #+end_src
+
+      
+** Step 13: renameexport.
+ "Requests the remote rename a file stored on it from filename to
+ newfilename. Remotes that support exports but not renaming do not
+ need to implement this."
+ 
+      #+begin_src python :results output :exports both
+
+      #+end_src
+
+      

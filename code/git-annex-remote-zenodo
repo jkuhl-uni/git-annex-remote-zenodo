@@ -232,7 +232,7 @@ class ZenodoRemote(ExportRemote):
         # return False if not
         # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
         
-        return self.checkpresentexport(key)
+        return self.checkpresent(key)
         # same idea
 
     def removeexport(self, key, remote_file):
@@ -254,6 +254,7 @@ class ZenodoRemote(ExportRemote):
         # move the remote file in `name` to `new_name`
         # raise RemoteError if it couldn't be moved
 
+        # when it's not published we can simply edit the name with the edit function
         print("not implemented")
 
 
