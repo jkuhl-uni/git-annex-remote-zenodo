@@ -2614,10 +2614,22 @@ list()
 + keep looking into Datalad issues to see if Zenodo was mentionned by
   someone and if yes see why it's not been looked into as a possible
   special remote.
-+ look at how  
++ look at how the datalad export-to-figshare is implemented. 
   
 - We can have a method (ex: getrefs) that gets the references that are
   kept in a dedicated file in the remote.
+ 
+- For bigger datasets why not also upload the files that are at the
+  top of the hierarchy first and then upload the subdirectories as
+  archives later on.
+
+- "An ideal "data publishing/hosting" should allow both push/pull
+  (download/publish) for any of the files while retaining original
+  directory structure. Then interactions could be established back at
+  the level of git-annex itself, like it does e.g. for S3 now. And if
+  download of a full or subset is needed - would generate
+  (reproducibly, so sorting the files and injecting consistent archive
+  header) a zipball on the fly."
 
 - 
 
