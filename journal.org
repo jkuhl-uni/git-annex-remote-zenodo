@@ -2090,7 +2090,7 @@ and to remove the file whose key corresponds to the one given here.
       #+end_src
 
 
-* Monday 07/06.      
+* Monday 07/06.
 ** Step 12: removeexportdirectory.
  "Requests the remote to remove an exported directory. If the remote
  does not use directories, or removeexport() cleans up directories
@@ -2527,4 +2527,97 @@ list()
 #+end_src
 
 
+
+
+
+* Tuesday 08/06.
+- checksum: look into storing it when we  upload a file into zenodo so
+  that we can compare it to the checksum and know the versions when we
+  want to check later.
+
+- if we want to keep the hierarchy of the files and the folders when
+  we upload them, there is a problem seeing that zenodo doesn't
+  support folders. If we add an archive when we upload to keep the
+  state of the repository when we upload it (we can publish the
+  content of the git repository as a zip).
+
+  have a file (script) that keeps the right place for each of the
+  files. We can store the correct hierarchy of the files in this file
+  that is written in a simple format. 
+
+-  git annex init zenodo: when we init a new version of a deposit for
+  example we have to find a way to keep a link between the files that
+  we have already published and the versions of these files that are
+  in the new deposit. We can for instance look in the list of the
+  annexed files and compare the ids of these files that have already
+  been annexed in an old deposit and make a new link with the copies
+  of these files that are in the new version of the deposit. (ex: git
+  annex init zenodo --from id)
+
+  the flow of the commands:
+  git annex init zenodo --from id
+  git annex add
+  git annex sync
+  git tree-to-zenodo --bucket-id     // doesn't really go through git
+  annex, we can do this before publishing the deposit so that we can
+  add the file that keeps the state of the repository 
+  git annex zenodo-to-web
+
+  We can remove the command to take care of uploading the tree to
+  zenodo and add an option instead to the zenodo-to-web command
+  (--with-tree --with-link) where we add a file / zip containing the
+  git information about this file and the sym link referencing each
+  one of the files.
+
+  If there is a problem for instance when we upload a file that isn't
+  referenced we can for example (git annex remove-unreferenced --backend-zenodo) which removes
+  the files from the deposit that aren't referenced and that don't
+  have a symbolic link for us to reach them later on. 
+
+  We can have this as the blueprint of the list of commands to make
+  when we want to manipulate the datasets/files and upload them into
+  zenodo while still keeping the heirarchy of the files and the
+  referencing the git symbolic links that they have been annexed with
+  so as to be able to reuse them if we for instance want to init a new
+  version of a deposit:
+  
+  git annex init zenodo --from id
+  git annex add
+  git annex sync
+  git annex remove-unreferenced --backend-zenodo
+  git annex zenodo-to-web
+
+  Look into a command that adds referenced / remove unreferenced
+  automatically for all the backend remotes in git annex. ! 
+
+- for the publishing step we can create a file where we set up all the
+  necessary information to give to the api to be able to
+  publish. Instead of asking for the user to insert all the details
+  while passing the command, we can keep a json file containing all
+  this information and then just read from it when we want to sent the
+  put query to the API before we publish.
+
+- For datalad the issue had been discussed as to how to add this
+  functionality to datalad when working with some remotes that don't
+  really support directories and file hierarchy. For instance, the use
+  of git/refs or git-repo.zip could be interesting to upload with the
+  flat hierarchy.  
+    + link: https://github.com/datalad/datalad/issues/5221
+  
+- RIA:
+  https://github.com/datalad/datalad/blob/master/datalad/distributed/create_sibling_ria.py
+
+
+- to do:
++ play a little with remote directory to see how it works / the
+  representation of the data and the functioning of the commands.
++ keep looking into Datalad issues to see if Zenodo was mentionned by
+  someone and if yes see why it's not been looked into as a possible
+  special remote.
++ look at how  
+  
+- We can have a method (ex: getrefs) that gets the references that are
+  kept in a dedicated file in the remote.
+
+- 
 

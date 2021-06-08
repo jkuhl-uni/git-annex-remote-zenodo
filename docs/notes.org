@@ -694,7 +694,7 @@ ok
 We can see that the file that we had in the first repository appears
 as if it has been added in the second repository. However, this isn't
 the case since git-annex in this case only copied the metadata (and
-now the entire content of the file).
+not the entire content of the file).
 If you want to get the content of the file, you can use the command
 get.
 
