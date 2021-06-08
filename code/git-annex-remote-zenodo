@@ -5,7 +5,7 @@ from annexremote import Master
 from annexremote import ExportRemote
 from annexremote import RemoteError, ProtocolError
 
-import sys, os, errno
+import sys
 
 import requests
 

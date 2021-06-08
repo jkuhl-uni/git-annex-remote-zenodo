@@ -2131,7 +2131,7 @@ and to remove the file whose key corresponds to the one given here.
 
 
 ** Test: renaming unpublished files on Zenodo.
-*** Renaming using the edit action: non functionnal. 
+*** Renaming using the edit action. 
 We can use the action edit to try to edit the name of the file we want
 to rename. So, first we need to send a get query to get all the
 information about the deposit, before sending the edit query to make
@@ -2209,6 +2209,7 @@ print(json.dumps(r.json(), indent=4))
 :     "message": "Wrong file on input."
 : }
 
+
 *** Another try with the put request.
 
 #+begin_src python :results output :exports both
@@ -2268,6 +2269,7 @@ rename_file()
 
       
 ** Step 14: publishing.
+*** The things that need to be tackled.
 To publish a deposit on Zenodo using the API we can use the publish
 action but we need to add some information to the deposit
 metadata. The required data depend on what type of publication we need
@@ -2348,94 +2350,181 @@ justification, you decide who to grant/deny access."
 So, keeping these restrictions in mind, we can take the basic publish
 function we have written and add all these information into it.
 
+We can devise the functionalities done by the publish function into
+multiple methods that we can call whenever a task is needed to be
+completed.
+
+*** Setting the type of the upload.
+In this case, we will need to ask the user the type of the update as
+well as some extra information in the case of some types that require
+them.
 
 #+begin_src python :results output :exports both
-def publish():
+    # function to call whenever we can to choose an upload type:
+    def setting_uploadtype(self):
+        # the possible types of the uploads
+        uploadtypes = ['publication', 'poster', 'presentation', 'dataset', 'image', 
+                        'video', 'software', 'lesson', 'physicalobject', 'other']
+
+        # in the case: upload_type == 'publication'
+        publicationtypes = ['annotationcollection', 'book', 'section', 'conferencepaper', 'datamanagementplan', 
+                            'article', 'patent', 'prepint', 'deliverable', 'milestone', 'proposal', 'report', 
+                            'softwaredocumentation', 'taxonomictreatment', 'technicalnote', 'thesis', 'workingpaper', 'other']
+        # in the case: upload_type == 'image'
+        imagetypes = ['figure', 'plot', 'drawing', 'diagram', 'photo', 'other']
+
+        # asking for the initial type of the upload:
+        print("What is the type of the upload? Please choose one of these options (ex: 5) \n")
+        print("0 - publication \n")
+        print("1 - poster \n")
+        print("2 - presentation \n")
+        print("3 - dataset \n")
+        print("4 - image \n")
+        print("5 - video \n")        
+        print("6 - software \n")
+        print("7 - lesson \n")
+        print("8 - physical object \n")
+        print("9 - other \n")
+        n = int(input('Enter the correspoding number: '))
+        upload_type = uploadtypes[n]
+        
+        # taking care of the information concerning the publication type:
+        if upload_type == 'publication':
+            print('Here are the possible types of publication. Please choose one of them (ex: 5) \n')
+            print("0 - annotation collection \n")
+            print("1 - book \n")
+            print("2 - section \n")
+            print("3 - data management plan \n")
+            print("4 - article \n")
+            print("5 - patent \n")
+            print("6 - preprint \n")
+            print("7 - deliverable \n")
+            print("8 - milestone \n")
+            print("9 - proposal \n")
+            print("10 - software documentation \n")
+            print("11 - taxonomic treatment \n")
+            print("12 - technical note \n")
+            print("13 - thesis \n")
+            print("14 - working paper \n")
+            print("15 - other \n")
+            n = int(input('Enter the correspoding number: '))
+            upload_type = publicationtypes[n]
+
+        elif upload_type == 'image':
+            print('Here are the possible types of images. Please choose one of them (ex: 5) \n')
+            print("0 - figure \n")
+            print("1 - plot \n")
+            print("2 - drawing \n")
+            print("3 - diagram \n")
+            print("4 - photo \n")
+            print("5 - other \n")
+            n = int(input('Enter the correspoding number: '))
+            upload_type = imagetypes[n]
+        
+        return upload_type 
+#+end_src
+
+*** Setting the list of the creators.
+Since some publications have multiple authors, we need to use a list
+containing information about all of them instead of using a single
+dictionary with the required attributes as the keys.
+We initialize an empty list and then we ask the user to give
+information about each one of the creators. Some of the attributes are
+required (familyname and givenname) whereas others can be given
+optionally. After receiving the values, we can finally add the
+attributes as keys and the values into a dictinnary which will be
+stocked in the list. This is done for each creator.
+
+#+begin_src python :results output :exports both
+    def setting_creators(self):
+        creators = []
+        c = {}
+        nbcreators = int(input("Enter the number of the creators of this upload. \n"))
+        for i in range(nbcreators):
+            print("For the " + str(i) + " creator: \n")
+            family_name = input('Enter the Family name (Required): \n')
+            given_name = input('Enter the Given name (Required): \n')
+            affiliation = input('Enter the affiliation of the creator or press enter to pass (Optional): \n')
+            orcid = input('Enter the orcid of the creator or press enter to pass (Optional): \n')
+            gnd = input('Enter the gnd of the creator or press enter to pass (Optional): \n')
+            c['name'] = "%s, %s" % (family_name, given_name)
+            if affiliation != '':
+                c['affiliation'] = affiliation
+            if orcid != '':
+                c['orcid'] = orcid
+            if gnd != '':
+                c['gnd'] = gnd
+            creators.append(c)
+
+        return creators
+#+end_src
+
+*** Setting the access rights.
+This function to call to set the access right to the publication. The
+user chooses which type of access to give and takes care of any
+additional information that depends on the chosen access.
+
+For instance, when we want to create a new version of a deposit
+without having to make it publicly available (seeing that it needs to
+be published), we can publish it while choosing the accessright as
+closed. This will allow us to manipulate the new version however we
+please while still keeping the content closed.
+
+#+begin_src python :results output :exports both
+    def setting_accessright (self):
+        
+        # initializing the list of options
+        accessrights = ['open', 'embargoed', 'restricted', 'closed']
+        licenses = ['Creative Commons Attribution 4.0 International', 'Creative Commons Attribution 1.0 Generic', 
+                    'Creative Commons Attribution 2.0 Generic', 'Creative Commons Attribution 3.0 Unported']
+        
+        # choosing the access right 
+        print("What is the access right of the upload? Please choose one of these options (ex: 2) \n")
+        print("0 - open \n")
+        print("1 - embargoed \n")
+        print("2 - restricted \n")
+        print("3 - closed \n")        
+        n = int(input('Enter the correspoding number: '))
+        access_right = accessrights[n]        
+
+        # taking care of the extra information concerning all the possible access rights
+        
+        if access_right == 'embargoed':
+            # need to specify embargo_date
+            print('Specify the Embargo date. The format is: YYYY-MM-DD. \n')
+            embargo_date = input()
+
+        if access_right == 'embargoed' or access_right == 'open':
+            # need to specify the license
+            print('Specify the license. Choose one of these options: \n')
+            print("0 - Creative Commons Attribution 4.0 International \n")
+            print("1 - Creative Commons Attribution 1.0 Generic \n")
+            print("2 - Creative Commons Attribution 2.0 Generic \n")
+            print("3 - Creative Commons Attribution 3.0 Unported \n")               
+            n = int(input('Enter the correspoding number: ')) 
+            license = licenses[n]
+
+        if access_right == 'restricted':
+            # need to specify access_conditions
+            print('Specify the conditions under which you grant users access to the files in your upload. \n')
+            access_conditions = input()
+
+#+end_src
+
+*** Getting the licenses.
+if we need to get all the possible licenses, we can send a get query
+to api (url: /api/licenses/') and we will get in response a list
+containing all the licenses with extra information.
+
+#+begin_src python :results output :exports both
+def list():
     import requests
     import json
+    r = requests.get('https://sandbox.zenodo.org/api/licenses/')
+    print(json.dumps(r.json(), indent=4))  
 
-    publicationtypes = ['annotationcollection', 'book', 'section', 'conferencepaper', 'datamanagementplan', 
-                        'article', 'patent', 'prepint', 'deliverable', 'milestone', 'proposal', 'report', 
-                        'softwaredocumentation', 'taxonomictreatment', 'technicalnote', 'thesis', 'workingpaper', 'other']
-
-    imagetypes = ['figure', 'plot', 'drawing', 'diagram', 'photo', 'other']
-
-    headers = {"Content-Type": "application/json"}
-    params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
-
-    bucket_id = 851823  # we get this by choosing the id of one of the deposits we created
-
-    r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/%s' % bucket_id, params=params)
-    print(r.status_code)
-
-    # initializing the required metadata
-    upload_type = ''
-    title = ''
-    creators = []
-    description = ''
-    access_right = ''
-
-    # taking care of the extra information concerning all the possible access rights
-    if access_right == 'embargoed':
-        # need to specify embargo_date
-        embargo_date = ''
-    if access_right == 'embargoed' or access_right == 'open':
-        # need to specify the license
-        license = ''
-    if access_right == 'restricted':
-        # need to specify access_conditions
-        access_conditions = ''
-
-    # taking care of the information concerning the publication type:
-    if upload_type == 'publication':
-        print('Here are the possible types of publication. Please choose one of them (ex: 5) \n')
-        print("0 - annotation collection \n")
-        print("1 - book \n")
-        print("2 - section \n")
-        print("3 - data management plan \n")
-        print("4 - article \n")
-        print("5 - patent \n")
-        print("6 - preprint \n")
-        print("7 - deliverable \n")
-        print("8 - milestone \n")
-        print("9 - proposal \n")
-        print("10 - software documentation \n")
-        print("11 - taxonomic treatment \n")
-        print("12 - technical note \n")
-        print("13 - thesis \n")
-        print("14 - working paper \n")
-        print("15 - other \n")
-        n = int(input())
-        publication_type = publicationtypes[n]
-
-    if upload_type == 'image':
-        print('Here are the possible types of images. Please choose one of them (ex: 5) \n')
-        print("0 - figure \n")
-        print("1 - plot \n")
-        print("2 - drawing \n")
-        print("3 - diagram \n")
-        print("4 - photo \n")
-        print("5 - other \n")
-        n = int(input())
-        image_type = imagetypes[n]
-
-    # adding metadata to the deposit
-    data = {
-        'metadata': {
-            'title': title,
-            'upload_type': upload_type,
-            'description': description,
-            'creators': creators,
-            'access_right': access_right
-        }
-    }
-
-    # updating the deposit with the needed metadata
-    r = requests.put('https://sandbox.zenodo.org/api/deposit/depositions/%s' % bucket_id, params=params, data=json.dumps(data), headers=headers, json={})
-    print(r.status_code)
-
-    # publishing
-    r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' % bucket_id , params=params, json={})
-    print(r.status_code)
-    print(json.dumps(r.json(), indent=4))
+list()
 #+end_src
+
+
+
