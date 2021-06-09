@@ -2606,7 +2606,7 @@ list()
   
 - RIA:
   https://github.com/datalad/datalad/blob/master/datalad/distributed/create_sibling_ria.py
-
+  http://handbook.datalad.org/en/latest/beyond_basics/101-147-riastores.html
 
 - to do:
 + play a little with remote directory to see how it works / the
@@ -2633,3 +2633,51 @@ list()
 
 - 
 
+
+
+* Wednesday 09/06.
+
+- Looking into possible example of implementation of Zenodo as a
+  remote for Datalad: There hasn't been any addition to the
+  implementation of this remote since the initial idea of making it.
+  There is, however, a crawler implemented by CONP to facilitate the
+  uploads to the database. This is done by uploading the files and the
+  datasets into Zenodo (using the ZenodoCrawler, cf:
+  https://github.com/CONP-PCNO/conp-dataset/blob/master/scripts/Crawlers/ZenodoCrawler.py
+  which implements methods from the Basecrawler library).
+  This crawler is used specifically to crawl data from the Zenodo
+  remote and to update the conp database whenever there are
+  changes. This is done by retrieving the metadata from the conp
+  dataset (conceptdoi and versiondoi most importantly) and then
+  getting all the metadata from the zenodo datasets that are related
+  to conp (this could be done by comparing the keywords). And for each
+  of the datasets retrieved from Zenodo we can look to see if it
+  already exists in the conp database: if this is the case, we update
+  it if it's a new version (this is done by comparing the conp
+  versiondoi to the zenodo latestversiondoi). If it doesn't figure in
+  the database (we can know this by comparing the conceptdoi of the
+  dataset from Zenodo to the one that we have retrived from conp), we
+  can then download the Zenodo dataset into a new Datalad dataset and
+  update the collection.
+  This is explained here:
+  https://github.com/CONP-PCNO/conp-dataset/issues/79
+
+- How Datalad implements the figshare export: the content of datasets
+  is exported to figshare after having been made into a zip archive
+  because figshare doesn't allow file hierarchy and doesn't support
+  directories (which is also the case for Zenodo). This also hinders
+  the use of git annex special remotes seeing that it's impossible to
+  publish complete directories. Following this path, Datalad
+  implemented a way to navigate the zip archives that are exported to
+  figshare so as to be able to manipulate them.
+
+  https://github.com/datalad/datalad/blob/master/datalad/distributed/export_to_figshare.py
+  
+  
+- While initializing the remote on git annex, we can set up the uuid
+  as well by getting it from git annex with the getconfig
+  function. With this we can keep a link between the remote deposit we
+  will be creating with initremote and the identifier of the local
+  git-annex directory (ex: self.uuid = self.annex.getconfig('uuid')).
+  
+  
