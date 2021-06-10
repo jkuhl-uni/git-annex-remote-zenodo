@@ -2679,5 +2679,54 @@ list()
   function. With this we can keep a link between the remote deposit we
   will be creating with initremote and the identifier of the local
   git-annex directory (ex: self.uuid = self.annex.getconfig('uuid')).
+
+- version controlling: The git-annex tool is a distributed system that can manage and
+  share large files independent from a central service or
+  server. git-annex manages all file content in a separate directory
+  in the repository (.git/annex/objects, the so-called annex) and
+  only places file names with some metadata into version control by
+  Git. When a Git repository with an annex is pushed to a web-hosting
+  service such as GitHub, the contents stored in the annex are not
+  uploaded. Instead, they can be pushed to a storage system.
+  If a repository with an annex is cloned, the clone will not
+  contain the contents of all annexed files by default, but display
+  only file names. This makes the repository small, even if it tracks
+  hundreds of gigabytes of data, and cloning fast, while file
+  contents are stored in one or more free or commercial external
+  storage solutions.
+  Versions can be controlled when uploaded to Zenodo because of the
+  doi id that is given by Zenodo once a record has been
+  published. Knowing this, we can track the versions of a record as we
+  edit it or update it.
+  We can get all versions with the concept doi so this means we will
+  have access to all versions of our record to look through whenever
+  needed. This could also help us when we want to see if the published
+  version of a record that's been uploaded through the API to Zenodo
+  is the same as the version we have locally. We can have a function
+  that looks into this whenever needed.
+  What is DOI versioning?
   
+- Pointers on the DOI versioning:
+  + DOI versioning allows you to:
+    edit/update the record’s files after they have been published.
+    cite a specific version of a record.
+    cite all of versions of a record.
+  + How does DOI versioning work?
+    When you publish an upload on Zenodo for the first time, we
+    register two DOIs:
+    a DOI representing the specific version of your record.
+    a DOI representing all of the versions of your record.
+    Afterwards, we register a DOI for every new version of your upload.
+    This is best illustrated by an example of a software package. If
+    the software has been released in two versions (v1.0 and v1.1) on
+    Zenodo, then the following DOIs would have been registered:
+       v1.0 (specific version): 10.5281/zenodo.60943
+       v1.1 (specific version): 10.5281/zenodo.800648
+       Concept (all versions): 10.5281/zenodo.705645
+    The first two DOIs for versions v1.0 and v.1.1 represent the specific
+    versions of the software. The last DOI represents all the versions of
+    the given software package, i.e. the concept of the software package
+    and the ensemble of versions. We therefore also call the them Version
+    DOIs and Concept DOIs (note, technically both are just normal DOIs).
+
   
