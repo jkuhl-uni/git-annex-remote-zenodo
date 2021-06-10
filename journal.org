@@ -2730,3 +2730,47 @@ list()
     DOIs and Concept DOIs (note, technically both are just normal DOIs).
 
   
+
+
+* Thursday 10/06.
+** A new start.
+- When we initialize a new deposit on Zenodo, do one of these things:
+  + We initialize an empty deposit by creating a new one simply by
+    using the normal methods of creation and then we can also set up
+    the uuid of the deposit as well by getting it with the function getconfig. With this we can keep a link between the remote deposit we
+    will be creating with initremote and the identifier of the local
+    git-annex directory.
+  + We can initialize a new version of a deposit (we can have an
+    argument to specify the id of the deposit (in this case the id of
+    the record since it's published) and then we can create the new
+    version and retieve the id of the new deposit for later use.
+    We also have to find a way to keep a link between the files that
+    we have already published (we can get their id and the version doi
+    of the record easily) and the files we have in this new deposit.
+    A way to do this is to look through the list of the annexed files
+    (this tracking is done by git-annex) and compare the ids of these
+    files to the new ones to make a link between the two (we can know
+    that a file X has been published in the record Y and it's the same
+    file that's uploaded to the deposit Z).
+ - To upload files, there are different possible implementations:
+  + Having a deposit where all the files are uploaded directly without
+    taking care of their hierarchy. Since Zenodo doesn't allow
+    uploading folders, we can only have a flat architecture inside the
+    deposits, which will be a problem when working with already
+    defines folders. This is what we have been doing so far by just
+    uploading the chosen files into the initiated deposit. This
+    implementation facilitatesthe tasks of uploading and looking
+    through the list of documents.
+  + Follow the Datalad example and export the files into the remote as
+    archives. This would keep the hierarchy of the files and we can
+    have a function that takes care of navigating the chosen files (or
+    the folder) and turns them into a zip archive. git-annex should
+    also still be able to track these files by using this method.
+    datalad works with this method because it manipulates entire
+    datasests so when the user wants to fetch and download their
+    dataset, they cant use a datalad get command to retrieve the whole
+    archive. When it comes to single files, this could be a problem
+    since we will be wanting to fetch and download a single file of
+    the deposit sometimes and to do this, we will have to be able to
+    work with them individually when searching and downloading.
+  + 
