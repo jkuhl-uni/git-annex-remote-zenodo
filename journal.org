@@ -2868,10 +2868,11 @@ list()
 
     
 * Friday 11/06.
+** continuing with initremote.
    - Now, let's take care of the case of when the user chooses to
      create a new version of a published deposit and work with this
      version. We can do this by adding a setting in the command (ex:
-     git annex init zenodo --from id) where the user specifies the id
+     git annex init zenodo newversion=idoldrecord) where the user specifies the id
      of the record that they want to update. This is also done in the
      initremote function.
      First, let's make sure that the id of the deposit (record in
@@ -2880,11 +2881,42 @@ list()
      continue working normally with this deposit as we would have any
      other deposit.
 
+   + create newversion:
+     #+begin_src python :results output :exports both
+def create_newversion(self, oldrecord_id):
+    import requests
+
+    # making sure that the given id for the old record is correct
+    url = self.url + '/' + str(oldrecord_id) 
+    r = self.query('get', url)
+
+    # raise error if there is a problem (the success code is 200)
+    if r.status_code != 200:
+        raise RemoteError('error while retrieving the old deposit')
+    
+    # making the post request to create the new version
+    url = self.url + '/' +  str(oldrecord_id) + '/actions/newversion'
+    r = self.query('post', url)
+    
+    # raise error if there is a problem (the success code is 201)
+    if r.status_code != 201:
+        raise RemoteError('error while creating the newversion')
+
+    # fetching the deposition id of the new version
+    # we can only access it this way because it's not given as a field
+    newdeposit_id = r.json()['links']['latest_draft'].split('/')[-1]
+
+    # making a new get request to get the information about this reposit and returning the response
+    url = self.url + '/' + str(newdeposit_id) 
+    r = self.query('get', url)
+    return r
+     #+end_src
+     
    + initremote change3:
       #+begin_src python :results output :exports both
     def initremote(self):
-    # initialize the remote, eg. create the folders
-    # raise RemoteError if the remote couldn't be initialized
+        # initialize the remote, eg. create the folders
+        # raise RemoteError if the remote couldn't be initialized
         import requests
         
         # need to get the key by using the getconfig method
@@ -2903,23 +2935,30 @@ list()
             raise RemoteError("You need to add the access token (key = TOKEN)")
 
         # now, we need to create an empty upload that we will be using from now on
-        r = self.query('post', URL_SANDBOX)
-        if r.status_code > 204:
+        # it's either a new version of a deposit or a brand new one
+        if self.getconfig('newversion') is not None:
+            r = self.create_newversion(self.getconfig('newversion'))
+        else:   
+            r = self.query('post', self.url)
+            
+        # making sure that we got the correct success response for creating a new deposit
+        if r.status_code != 201:
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
-            raise RemoteError('could not send a post query to the API')
-        
-        # setting the id for this deposit
+                raise RemoteError('could not send a post query to the API')
+
+        # other settings
         self.annex.setconfig('deposit', r)
-        self.annex.setconfig('deposit_id', r.json()['id'])
-        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
         self.annex.setconfig('url', self.url)
         self.annex.setconfig('key', self.key)
+        # setting the id for this deposit
+        self.annex.setconfig('deposit_id', r.json()['id'])
+        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
+            
+
       #+end_src
-
-
-
-   - adding configs:
-     config Contains the settings which the remote uses (with getconfig() and
+      
+** Configs / creds.
+   - config Contains the settings which the remote uses (with getconfig() and
      setconfig()) in the form of {'Name': 'Description', …} Note: Name
      must not contain spaces. Description should be reasonably
      short. Example: {'directory': "store data here"} Providing them
@@ -2927,4 +2966,33 @@ list()
      user's input, and can also display a list of settings with
      descriptions. Note that the user is not required to provided all
      the settings listed here.
+     So we need to add them to the init function before the function
+     initremote is called.
      
+   - setting the credentials: since the user doesn't need to give
+     their user and password to access the Zenodo remote and only
+     needs the access token, should it be stored in the settings
+     (setconfig and getconfig) or should we use this instead (setcreds
+     and getcreds). 
+     Note that creds are normally only stored in the remote's
+     configuration when it's surely safe to do so; when gpg encryption
+     is used, in which case the creds will be encrypted using it.
+
+   - The list of configs we have:
+     configs = {
+        'key': "the access token that's needed to do any operation on
+     the Zenodo API. Depending on whether the user wants to use the
+     sandbox or the official site, they need to create a token (see:
+     base/account/settings/applications/)."
+        'url': "the url of the site to use when working with this
+     remote (could either be zenodo.org or sandbox.zenodo.org). If the
+     user wants to work on the sandbox, they need to specify
+     url=sandbox. If this is not specified in the command when
+     initiating the remote, the official will be used.
+        'newversion': "this is optional and is just used if a user
+     wants to create a new version of an old record inheriting all its
+     files. To use it, the user needs to give the id of the old
+     deposit (ex: newversion=111111)
+    }
+
+** -

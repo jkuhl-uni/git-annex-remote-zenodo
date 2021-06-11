@@ -17,7 +17,8 @@ class ZenodoRemote(ExportRemote):
         self.deposit = None
         self.deposit_id = None
         self.key = ''
-        self.url = ''
+        # the remote is for main Zenodo unless specified otherwise
+        self.url = 'https://zenodo.org/api/deposit/depositions'
 
 
     # method to handle all the basic queries
