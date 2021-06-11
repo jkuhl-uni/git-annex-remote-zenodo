@@ -1,4 +1,4 @@
-#+TITLE:       lab book
+v#+TITLE:       lab book
 #+AUTHOR:      Oumaima Hajji
 #+STARTUP: overview indent inlineimages logdrawer
 #+TAGS: R(R) Python(p) OrgMode(O) 
@@ -2773,4 +2773,158 @@ list()
     since we will be wanting to fetch and download a single file of
     the deposit sometimes and to do this, we will have to be able to
     work with them individually when searching and downloading.
-  + 
+  + Add an archive when we upload to keep the state of the repository
+    when we upload it (we can publish the content of the git
+    repository as a zip). Have a file (script) that keeps the right
+    place for each of the files. We can store the correct hierarchy of
+    the files in this file that is written in a simple format.
+      
+** Making changes in the classe.
+
+  - Choosing if the user wants to use the sandbox or the official
+    website of Zenodo tp create the remote. Passing an argument
+    url=zenodo for instance if they want to use zenodo.
+    We can then fetch the argument when we want to initiate the deposit
+    and create the it accordingly.
+
+  + initremote change1:
+  #+begin_src python :results output :exports both
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        import requests
+        
+        # need to get the key by using the getconfig method
+        self.key = self.annex.getconfig('key')
+        
+        # getting the url of the remote (Zenodo or Sandbox)
+        # the user would need the key for both of them and it's created on the website of the one they chose
+        if self.annex.getconfig('url') is None:
+            self.url = 'https://zenodo.org/api/deposit/depositions'
+        else:
+            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+
+        # the key is passed as an argument when using the commant initremote (ex: key='')
+        # if it's not been added as an argument, we raise an 
+        if self.annex.getconfig('key') is None:
+            raise RemoteError("You need to add the access token (key = TOKEN)")
+
+        # now, we need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a post query to the API')
+        
+        # setting the id for this deposit
+        self.deposit = r
+        self.deposit_id = r.json()['id']
+        self.deposit_bucket = r.json()['links']['bucket']
+  #+end_src
+  
+  - We also need to use the method setconfig when we fetch all the
+    important arguments (sent by the user in the command
+    initremote). This allows these settings to be stored in the
+    git-annex branch, so will be available if the same special remote
+    is used elsewhere. We can do this during initremote() so that we
+    can use the settings after since the changes will only be
+    available while the remote is running if we use setconfig after
+    initremote(). 
+        
+   + initremote change2:
+    #+begin_src python :results output :exports both
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        import requests
+        
+        # need to get the key by using the getconfig method
+        self.key = self.annex.getconfig('key')
+        
+        # getting the url of the remote (Zenodo or Sandbox)
+        # the user would need the key for both of them and it's created on the website of the one they chose
+        if self.annex.getconfig('url') is None:
+            self.url = 'https://zenodo.org/api/deposit/depositions'
+        else:
+            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+
+        # the key is passed as an argument when using the commant initremote (ex: key='')
+        # if it's not been added as an argument, we raise an 
+        if self.annex.getconfig('key') is None:
+            raise RemoteError("You need to add the access token (key = TOKEN)")
+
+        # now, we need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a post query to the API')
+        
+        # setting the id for this deposit
+        self.annex.setconfig('deposit', r)
+        self.annex.setconfig('deposit_id', r.json()['id'])
+        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
+        self.annex.setconfig('url', self.url)
+        self.annex.setconfig('key', self.key)
+    #+end_src
+
+    
+* Friday 11/06.
+   - Now, let's take care of the case of when the user chooses to
+     create a new version of a published deposit and work with this
+     version. We can do this by adding a setting in the command (ex:
+     git annex init zenodo --from id) where the user specifies the id
+     of the record that they want to update. This is also done in the
+     initremote function.
+     First, let's make sure that the id of the deposit (record in
+     this case since it's published) exists, before calling a method
+     that creates the new version. We can then set the new config and
+     continue working normally with this deposit as we would have any
+     other deposit.
+
+   + initremote change3:
+      #+begin_src python :results output :exports both
+    def initremote(self):
+    # initialize the remote, eg. create the folders
+    # raise RemoteError if the remote couldn't be initialized
+        import requests
+        
+        # need to get the key by using the getconfig method
+        self.key = self.annex.getconfig('key')
+        
+        # getting the url of the remote (Zenodo or Sandbox)
+        # the user would need the key for both of them and it's created on the website of the one they chose
+        if self.annex.getconfig('url') is None:
+            self.url = 'https://zenodo.org/api/deposit/depositions'
+        else:
+            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+
+        # the key is passed as an argument when using the commant initremote (ex: key='')
+        # if it's not been added as an argument, we raise an 
+        if self.annex.getconfig('key') is None:
+            raise RemoteError("You need to add the access token (key = TOKEN)")
+
+        # now, we need to create an empty upload that we will be using from now on
+        r = self.query('post', URL_SANDBOX)
+        if r.status_code > 204:
+            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            raise RemoteError('could not send a post query to the API')
+        
+        # setting the id for this deposit
+        self.annex.setconfig('deposit', r)
+        self.annex.setconfig('deposit_id', r.json()['id'])
+        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
+        self.annex.setconfig('url', self.url)
+        self.annex.setconfig('key', self.key)
+      #+end_src
+
+
+
+   - adding configs:
+     config Contains the settings which the remote uses (with getconfig() and
+     setconfig()) in the form of {'Name': 'Description', …} Note: Name
+     must not contain spaces. Description should be reasonably
+     short. Example: {'directory': "store data here"} Providing them
+     makes git annex initremote work better, because it can check the
+     user's input, and can also display a list of settings with
+     descriptions. Note that the user is not required to provided all
+     the settings listed here.
+     
