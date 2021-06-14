@@ -276,15 +276,27 @@ class ZenodoRemote(ExportRemote):
                 if r.status_code > 204: 
                     print("error while deleting the " + str(i) + " file from the remote" + str(r.status_code))
                     raise RemoteError('could not send a delete query to the API')
-        
 
+
+    # renaming files doesn't work 
     def renameexport(self, key, filename, new_filename):
         # move the remote file in `name` to `new_name`
         # raise RemoteError if it couldn't be moved
-
+        import json
         # when it's not published we can simply edit the name with the edit function
-        print("not implemented")
+        url = self.url + '%s/files' % self.deposit_id
+        r = self.query('get, url')
 
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == filename:
+                id = r.json()[i]['id']
+
+        data = {"name": new_filename}
+        url = url + '/' + str(id)    
+        r = self.query('put', url, data=json.dumps(data))   
+
+        if r.status_code != 200:
+            raise RemoteError('Failed to rename the file')
 
 
 def main():

@@ -1,7 +1,7 @@
     # added methods
 
     # function to call whenever we can to choose an upload type:
-    def setting_uploadtype(self):
+def setting_uploadtype(self):
         # the possible types of the uploads
         uploadtypes = ['publication', 'poster', 'presentation', 'dataset', 'image', 
                         'video', 'software', 'lesson', 'physicalobject', 'other']
@@ -66,7 +66,7 @@
 
     # function to call to set the creators of the upload. 
     # This function is called whenever the user wants to publish an upload.
-    def setting_creators(self):
+def setting_creators(self):
         creators = []
         c = {}
         nbcreators = int(input("Enter the number of the creators of this upload. \n"))
@@ -92,7 +92,7 @@
     # chooses which type of access to give and takes care of any additional 
     # information that depends on the chosen access. 
     # This function is called whenever the user wants to publish an upload.
-    def setting_accessright (self):
+def setting_accessright (self):
         
         # initializing the list of options
         accessrights = ['open', 'embargoed', 'restricted', 'closed']
@@ -131,7 +131,7 @@
             access_conditions = input()
 
     # this is the function that will be used to publish the deposit
-    def publish(self):
+def publish(self):
         import json
         # initializing the required metadata
         
