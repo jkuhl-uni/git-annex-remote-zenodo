@@ -1,32 +1,18 @@
 #!/usr/bin/env python
 
+import sys
 
 from annexremote import Master
 from annexremote import ExportRemote
 from annexremote import RemoteError, ProtocolError
 
-import sys
-
-import requests
-
-URL_SANDBOX = 'https://sandbox.zenodo.org/api/deposit/depositions'
-
 class ZenodoRemote(ExportRemote):
 
-    def __init__(self):
-        self.deposit = None
-        self.deposit_id = None
-        self.key = ''
-        # the remote is for main Zenodo unless specified otherwise
-        self.url = 'https://zenodo.org/api/deposit/depositions'
-
-
-    # method to handle all the basic queries
     def query(self, query_method, url, headers=None, data=None, stream = None):
         # id = key (!= KEY or access token to the API): to be stored in the remote. 
         # In most cases, this is going to be the remote file name. It should be at 
         # least be unambigiously derived from it.
-
+        import requests
         # making sure that the headers are specified before sending the request
         if headers is None:
             headers = {"Content-Type": "application/json"}
@@ -50,43 +36,45 @@ class ZenodoRemote(ExportRemote):
             
         # informing the user of the currint state of the operation        
         print("finished the " + query_method + " operation. Here is the returned message \n")
-        print(request.status_code)
         #returning the resulting request for later uses
+        print(request.status_code)
         return request
-        
 
     def initremote(self):
-        # initialize the remote, eg. create the folders
-        # raise RemoteError if the remote couldn't be initialized
-        import requests
-        
-        # need to get the key by using the getconfig method
-        self.key = self.annex.getconfig('key')
-        
         # getting the url of the remote (Zenodo or Sandbox)
         # the user would need the key for both of them and it's created on the website of the one they chose
-        if self.annex.getconfig('url') is None:
+        """if self.annex.getconfig('url') is None:
             self.url = 'https://zenodo.org/api/deposit/depositions'
         else:
             self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+        """
+        self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
 
         # the key is passed as an argument when using the commant initremote (ex: key='')
         # if it's not been added as an argument, we raise an 
-        if self.annex.getconfig('key') is None:
+        if not self.annex.getconfig('key'):
             raise RemoteError("You need to add the access token (key=TOKEN)")
+        else:
+            # need to get the key by using the getconfig method
+            self.key = self.annex.getconfig('key')
 
+        """
         # now, we need to create an empty upload that we will be using from now on
         # it's either a new version of a deposit or a brand new one
         if self.getconfig('newversion') is not None:
             r = self.create_newversion(self.getconfig('newversion'))
         else:   
             r = self.query('post', self.url)
-            
+        """
+        r = self.query('post', self.url)
+
         # making sure that we got the correct success response for creating a new deposit
         if r.status_code != 201:
-            print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
+            print("error while preparing the remote: cannot communicate with the remote " + str(r.status_code))
             raise RemoteError('could not send a post query to the API')
 
+        self.annex.setconfig('deposit_id', r.json()['id'])
+        
         # other settings
         self.annex.setconfig('deposit', r)
         self.annex.setconfig('url', self.url)
@@ -94,25 +82,24 @@ class ZenodoRemote(ExportRemote):
         # setting the id for this deposit
         self.annex.setconfig('deposit_id', r.json()['id'])
         self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
-            
-
-
+        
+                
     def prepare(self):
-        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
-        # raise RemoteError if not ready to use
-        import requests
-        # let's try to connect to the API, if the status code is not 200: there is an error 
+        import json
         self.key = self.annex.getconfig('key')
+        self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+
         r = self.query('get', self.url)
         if r.status_code != 200:
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
             raise RemoteError('could not send a get query to the API')
-                
 
-    def transfer_store(self, key, filename):
-        # store the file in `filename` to a unique location derived from `key`
-        # raise RemoteError if the file couldn't be stored
+
+        self.deposit_id = self.annex.getconfig('deposit_id')
         
+
+   
+    def transfer_store(self, key, filename):
         try:
             # fetching the url of the bucket
             URL_BUCKET = self.deposit_bucket
@@ -138,12 +125,10 @@ class ZenodoRemote(ExportRemote):
                 raise RemoteError ('error while exporting the file... \n')
 
         except Exception as error:
-            raise RemoteError(error)
+            raise RemoteError(error)        
 
 
     def transfer_retrieve(self, key, filename):
-        # get the file identified by `key` and store it to `filename`
-        # raise RemoteError if the file couldn't be retrieved
         import json
         
         # getting the information on the files that are in the deposit
@@ -155,8 +140,6 @@ class ZenodoRemote(ExportRemote):
             # checking if the file exists by comparing the key/filename
             # sending a get request to check information on the file
             if r.json()[i]['filename'] == key:
-                # we can retrieve a single deposition file with: 
-                # url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(deposit_id) + '/files/' + str(file_id)
                 # getting the id of the file that we want to download
                 file_id =  r.json()[i]['id']
                 # getting the download link of the file
@@ -175,13 +158,9 @@ class ZenodoRemote(ExportRemote):
         if r.status_code > 204:
             print("error while fetching the file from the remote" + str(r.status_code))
             raise RemoteError('could not send a get query to the API')
-        
+     
 
     def checkpresent(self, key):
-        # return True if the key is present in the remote
-        # return False if the key is not present
-        # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
-
         try:
             url = self.url + str(self.deposit_id) + '/files'
             r = self.query('get', url)
@@ -190,17 +169,12 @@ class ZenodoRemote(ExportRemote):
                 if r.json()[i]['filename'] == key:
                     print('Yes, this file exists in the remote: ' + key )
                     return True
-            return False 
-            
+            return False             
         except Exception as error:
             raise RemoteError(error)
 
 
     def remove(self, key):
-        # remove the key from the remote
-        # raise RemoteError if it couldn't be removed
-        # note that removing a not existing key isn't considered an error
-
         # checking if the key exists in the remote deposit
         url = self.url + str(self.deposit_id) + '/files'
         r = self.query('get', url)
@@ -226,46 +200,26 @@ class ZenodoRemote(ExportRemote):
         if r.status_code > 204:
             print("error while deleting the file from the remote" + str(r.status_code))
             raise RemoteError('could not send a delete query to the API')
-        
 
+
+    ## Export methods
     def transferexport_store(self, key, local_file, remote_file):
-        # store the file located at `local_file` to `remote_file` on the remote
-        # raise RemoteError if the file couldn't be stored
-
         return self.transfer_store(key, local_file)
-        # and set the key later on using a put command to be able to retrieve files
-        # or: self.transfer_store(remote_file, local_file) which means setting 
-        # the name of the file in the remote as the key.
-        
-        
-    def transferexport_retrieve(self, key, local_file, remote_file):
-        # get the file located at `remote_file` from the remote and store it to `local_file`
-        # raise RemoteError if the file couldn't be retrieved
 
+
+    def transferexport_retrieve(self, key, local_file, remote_file):
         return self.transfer_retrieve(key, local_file)
-        # same idea
+
 
     def checkpresentexport(self, key, remote_file):
-        # return True if the file `remote_file` is present in the remote
-        # return False if not
-        # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
-        
         return self.checkpresent(key)
-        # same idea
+
 
     def removeexport(self, key, remote_file):
-        # remove the file in `remote_file` from the remote
-        # raise RemoteError if it couldn't be removed
-        # note that removing a not existing key isn't considered an error
-
         return self.remove(key)
-        # same idea
+
 
     def removeexportdirectory(self, remote_directory):
-        # remove the directory `remote_directory` from the remote
-        # raise RemoteError if it couldn't be removed
-        # note that removing a not existing directory isn't considered an error
-
         url = self.url + str(self.deposit_id) + '/files'
         r = self.query('get', url)
         # going through the list of the files in this deposit
@@ -287,10 +241,8 @@ class ZenodoRemote(ExportRemote):
                     raise RemoteError('could not send a delete query to the API')
 
 
-    # renaming files doesn't work 
     def renameexport(self, key, filename, new_filename):
-        # move the remote file in `name` to `new_name`
-        # raise RemoteError if it couldn't be moved
+        """
         import json
         # when it's not published we can simply edit the name with the edit function
         url = self.url + '%s/files' % self.deposit_id
@@ -306,9 +258,17 @@ class ZenodoRemote(ExportRemote):
 
         if r.status_code != 200:
             raise RemoteError('Failed to rename the file')
-
-
+        """
+        pass
+        
+    def _info(self, message):
+        try:
+            self.annex.info(message)
+        except ProtocolError:
+            print(message)
+            
 def main():
+
     # Redirect output to stderr to avoid messing up the protocol
     output = sys.stdout
     sys.stdout = sys.stderr
@@ -320,5 +280,3 @@ def main():
 
 if __name__ == "__main__":
     main()        
-
-
