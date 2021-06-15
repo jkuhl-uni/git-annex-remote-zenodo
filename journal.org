@@ -3293,7 +3293,8 @@ f()
 * _
 
 ** Commands to get the needed information about a file before uploading it to Zenodo.
-> use 'git annex calckey' to calculate the key that would be used to
+*** calckey.
+Use 'git annex calckey' to calculate the key that would be used to
 refer to a file. This could be done to rename the file before adding
 it to the annexed files and uploading it to the remote so as to keep
 the same names between the two.
@@ -3306,18 +3307,18 @@ git annex calckey notes.org
 #+RESULTS:
 : 
 : SHA256E-s33173--0aeb5832762f16a00438b5718137c9c61db03628c2ac02f163afb41ac46b5470.org
-
-> use the command 'git annex list' to list all the files that have been
-  annexed in this repository. This also shows which remote contains
-  files.
-
-> Or, use the command 'git annex find' which lists all the available
+*** list.
+Use the command 'git annex list' to list all the files that have been
+annexed in this repository. This also shows which remote contains
+files.
+*** find.
+Or, use the command 'git annex find' which lists all the available
 files in this repository. The use of either this or 'list' would
 depend on how the user keeps their files and if they keep them in
 different remotes all the time or if they have them just here locally
 and in Zenodo.
-
-> use 'git annex info' with the name of the file to get all the
+*** info.
+Use 'git annex info' with the name of the file to get all the
 information concerning an annexed file. This could be useful in the
 case where we want to retrieve the key of this file to use it when
 uploading it into zenodo.
@@ -3335,8 +3336,8 @@ git annex info S8/ARI/TP2/Collection_tokens/CACM-1748.flt
 : size: 872 bytes
 : key: SHA256E-s872--8358b2a8169727737d6ab442aef4ba53a06e06d6e74d395be911724d15737756.flt
 : present: true
-
-> 'git annex metadata' could be useful for when we want to get or set
+*** metadata.
+The command 'git annex metadata' could be useful for when we want to get or set
 metadata for a file.
 
 #+BEGIN_SRC shell :session *shell* :results output :exports both
@@ -3389,28 +3390,47 @@ git annex find --metadata tag=test_metadata
   and then we can use the info command to get information concerning
   just this file.
 
+  #+start_example
   git add files
   git commit
-  git initremote (with or without option newversion=id)
-  < working with the files normally >
+  git initremote (w/wo option newversion=id)
+  #+end_example
 
-  and then when we copy / move files to the remote, we can look into
-  the list of the annexed files when we want to do the uploading and
-  use the commands find / info to get the key for the files so as to
-  change their names into the key used by git annex.
+  Then,when we want to do the uploading, we can look into the list of
+  the annexed files in this repository (find / list) and use metadata
+  to limit the search to the files we are interested in. When we get
+  the names of the files, we can use the command info to get all the
+  information about them (most importantly in this case, we get the key).
+
+  We can execute these commands, for instance, before uploading a file
+  into the deposit:
 
   
+  #+start_example
+  git annex list (?, + gives info about files that are stored in elsewhere)
+  git annex find --metadata tag=example
+  git annex info fileX (for each of the files)
+  #+end_example
 
+- If we want to do a single upload, we can just look up the name of
+  the file in the list of annexed files and then retrieve its key and
+  rename it into the key before uploading it to the remote. 
 
 
 - To be able to execute shell commands (mostly git annex commands)
   from within the python program we can use some libraries that allow
   the interactions between the two.
-  + the subprocess library (more flexible than os): https://docs.python.org/3/library/subprocess.html#module-subprocess
+  + the subprocess library (more flexible/secure than os): https://docs.python.org/3/library/subprocess.html#module-subprocess
   + the os library (basic functionalities): https://docs.python.org/3/library/os.html 
   + the git-annex-adapter library: https://github.com/alpernebbi/git-annex-adapter
 
--  test with subprocess:
+  link explaining some differences:
+  https://stackoverflow.com/questions/89228/how-to-execute-a-program-or-call-a-system-command-from-python
+  
+- Test with subprocess:
+  this is a simple test that looks to see if there are any untracked
+  changes in the git repository and then add the untracked files,
+  commits the changes, and pushes into the git remote.
 
 #+begin_src python :results output :exports both
 import subprocess
@@ -3427,26 +3447,22 @@ subprocess.run(["/usr/bin/git", "push"])
 total 172
 drwxr-xr-x 4 nubudi nubudi   4096 juin  15 00:25 code
 drwxr-xr-x 2 nubudi nubudi   4096 juin  10 09:44 docs
--rw-r--r-- 1 nubudi nubudi 149913 juin  15 14:12 journal.org
+-rw-r--r-- 1 nubudi nubudi 149946 juin  15 14:18 journal.org
 -rw-r--r-- 1 nubudi nubudi  13310 juin   7 09:41 README.md
 /home/nubudi/Desktop/Internship
 On branch main
-Your branch is ahead of 'origin/main' by 1 commit.
+Your branch is ahead of 'origin/main' by 3 commits.
   (use "git push" to publish your local commits)
 
 Changes not staged for commit:
-  (use "git add/rm <file>..." to update what will be committed)
+  (use "git add <file>..." to update what will be committed)
   (use "git checkout -- <file>..." to discard changes in working directory)
 
-	deleted:    #journal.org#
-	deleted:    .#journal.org
 	modified:   journal.org
 
 no changes added to commit (use "git add" and/or "git commit -a")
-[main ea6a5a8] testing a new library
- 3 files changed, 64 insertions(+), 3829 deletions(-)
- delete mode 100644 #journal.org#
- delete mode 120000 .#journal.org
+[main 6f77ec6] testing a new library to execute git commands in a python file
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 #+end_example
    
 ** Exporting a tree of files.
