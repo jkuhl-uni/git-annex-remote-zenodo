@@ -3381,14 +3381,13 @@ git annex find --metadata tag=test_metadata
 : S8/ARI/TP2/Collection_tokens/CACM-1748.flt
 
 
-
 ** The succession of commands in this case.
 - When we add the file to the annexed files, we can easily retrieve
   the information about this file using the find command (here we have
   to have already set tags to differentiate the topics of the files
   especially when this depository handles a large amount of files),
   and then we can use the info command to get information concerning
-  just this file.
+  just this file. 
    
 ** Exporting a tree of files.
 To do this, we can use the command 'git annex export' so as to store a
@@ -3407,3 +3406,359 @@ export a subdirectory from a branch.'
   disabled if not specified. 
 
 link: https://git-annex.branchable.com/git-annex-export/
+
+
+
+
+- Testing export: we will use directory as a special remote and try to
+  export a tree to this remote.
+
+  
+creating the directory where we will be testing the export command and
+where we will initialize a new directory remote
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+mkdir tests_export
+cd tests_export
+pwd
+#+END_SRC
+
+#+RESULTS:
+: 
+: (base) nubudi@ubunto:~/tests_export$ /home/nubudi/tests_export
+
+initiating the git and the git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/tests_export/.git/
+: init  ok
+: (recording state in git...)
+
+adding a bunch of files to do the test
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp -R ~/Downloads/writing /home/nubudi/tests_export
+#+END_SRC
+
+#+RESULTS:
+
+now we can check the test directory to see that the the other
+directory has been copied into it.
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+ls
+cd writing
+ls
+#+END_SRC
+
+#+RESULTS:
+: writing
+: (base) nubudi@ubunto:~/tests_export/writing$ drafts  essays  notes
+
+
+Now, we can add the files to the repository and commit all the
+changes.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ..
+git add --all
+git commit -m "adding a directory containing a few folders and files into this git repository"
+#+END_SRC
+
+#+RESULTS:
+: 
+: (base) nubudi@ubunto:~/tests_export$ [master (root-commit) 1e38f40] adding a directory containing a few folders and files into this git repository
+:  5 files changed, 0 insertions(+), 0 deletions(-)
+:  create mode 100644 writing/drafts/_Project Pain.pdf
+:  create mode 100644 writing/drafts/the quest for mortality.pdf
+:  create mode 100644 writing/essays/OumaimaHajji_5G.pdf
+:  create mode 100644 writing/notes/Internship_Notes.pdf
+:  create mode 100644 writing/notes/notes.pdf
+
+Now, we can initialize the remote that we will be exporting the tree
+of files to.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex initremote myremote type=directory directory=/home/nubudi/tests_export2 exporttree=yes encryption=none
+#+END_SRC
+
+#+RESULTS:
+: initremote myremote ok
+: (recording state in git...)
+
+We export the master branch to the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex export master --to myremote
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+export myremote writing/drafts/_Project Pain.pdf 
+31.98 KiB        10 MiB/s                         ok
+export myremote writing/drafts/the quest for mortality.pdf 
+31.98 KiB        12 MiB/s                         ok
+export myremote writing/essays/OumaimaHajji_5G.pdf 
+31.98 KiB        34 MiB/s                         ok
+export myremote writing/notes/Internship_Notes.pdf 
+31.98 KiB         2 MiB/s                         ok
+export myremote writing/notes/notes.pdf 
+31.98 KiB         4 MiB/s                         ok
+(recording state in git...)
+#+end_example
+
+
+We can check to see if the tree has been exported to the remote.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ..
+cd tests_export2
+ls
+cd writing
+ls
+#+END_SRC
+
+#+RESULTS:
+: 
+: bash: cd: tests_export2: No such file or directory
+: writing
+: (base) nubudi@ubunto:~/tests_export/writing$ drafts  essays  notes
+
+Now, we can go back to the test repository and make changes.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_export
+pwd
+#+END_SRC
+
+#+RESULTS:
+: 
+: /home/nubudi/tests_export
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/AirPollutionInGrenoble.pdf /home/nubudi/tests_export
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git add --all
+git commit -m "added a file"
+git annex export master --to myremote
+#+END_SRC
+
+#+RESULTS:
+: 
+: [master 4b4fc7f] added a file
+:  1 file changed, 0 insertions(+), 0 deletions(-)
+:  create mode 100644 AirPollutionInGrenoble.pdf
+: export myremote AirPollutionInGrenoble.pdf 
+: 31.98 KiB         5 MiB/s                         ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git mv AirPollutionInGrenoble.pdf AirPollution.pdf
+git commit -m "changed"
+#+END_SRC
+
+#+RESULTS:
+: 
+: [master 3ad0627] changed
+:  1 file changed, 0 insertions(+), 0 deletions(-)
+: AirPollution.pdf (100%)
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex export master --to myremote
+#+END_SRC
+
+#+RESULTS:
+: 
+: .git-annex-tmp-content-SHA1--0295c5f5fdea625e2191b79eccf8e9b7020302dd ok
+: AirPollution.pdf ok
+: (recording state in git...)
+
+
+- Now, on the other side, we can try to make changes in the remote and
+  see if we can import them into the test repository. To do this, we
+  can choose to add/edit something on the remote and then to use the
+  command import to fetch the changes.
+
+NB: this is a stupid mistake, i copied the file into the wrong
+directory (the one that i use for tests and not the remote) so i just
+ended up adding the file and exporting it. The actual test is down (*).
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_export
+mv /home/nubudi/Downloads/Essay.pdf .
+ls
+#+END_SRC
+
+#+RESULTS:
+: 
+: (base) nubudi@ubunto:~/tests_export$ AirPollution.pdf  Essay.pdf  writing
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git add Essay.pdf
+git commit -m "added a new file to the remote"
+#+END_SRC
+
+#+RESULTS:
+: 
+: [master 7267281] added a new file to the remote
+:  1 file changed, 0 insertions(+), 0 deletions(-)
+:  create mode 100644 Essay.pdf
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex export master --to myremote
+#+END_SRC
+
+#+RESULTS:
+: export myremote Essay.pdf 
+: 31.98 KiB        34 MiB/s                         ok
+: (recording state in git...)
+
+(*) Here starts the test of adding a file into the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_export2
+cp /home/nubudi/Downloads/marco.jpeg .
+ls
+#+END_SRC
+
+#+RESULTS:
+: 
+: (base) nubudi@ubunto:~/tests_export2$ AirPollution.pdf  Essay.pdf  marco.jpeg  writing
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex import master --from myremote
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Invalid option `--from'
+
+Usage: git-annex COMMAND
+  git-annex - manage files with git, without checking their contents in
+  
+  Commonly used commands:
+  
+  add             PATH ...         add files to annex
+  addurl          URL ...          add urls to annex
+  assistant                        automatically sync changes
+  copy            PATH ...         copy content of files to/from another repository
+  drop            PATH ...         remove content of files from repository
+  edit            PATH ...         same as unlock
+  export          TREEISH          export content to a remote
+  get             PATH ...         make content of annexed files available
+  help            COMMAND          display help
+  import          PATH ...         move and add files from outside git working copy
+  importfeed      URL ...          import files from podcast feeds
+  lock            PATH ...         undo unlock command
+  mirror          PATH ...         mirror content of files to/from another repository
+  move            PATH ...         move content of files to/from another repository
+  multicast                        multicast file distribution
+  rmurl           FILE URL ...     record file is not available at url
+  status          PATH ...         show the working tree status
+  sync            REMOTE ...       synchronize local repository with remotes
+  undo            PATH ...         undo last change to a file or directory
+  unlock          PATH ...         unlock files for modification
+  watch                            watch for changes and autocommit
+  webapp                           launch webapp
+  
+  Repository setup commands:
+  
+  adjust                           enter adjusted branch
+  config                           configuration stored in git-annex branch
+  dead            REMOTE ...       hide a lost repository or key
+  describe        REMOTE DESC      change description of a repository
+  direct                           switch repository to direct mode
+  enable-tor      uid              enable tor hidden service
+  enableremote    NAME K=V ...     enables git-annex to use a remote
+  group           REMOTE DESC      add a repository to a group
+  groupwanted     GROUP EXPR       get or set groupwanted expression
+  indirect                         switch repository to indirect mode
+  init            DESC             initialize git-annex
+  initremote      NAME K=V ...     creates a special (non-git) remote
+  numcopies       NUMBER           configure desired number of copies
+  p2p                              configure peer-2-peer links between repositories
+  required        REMOTE EXPR      get or set required content expression
+  schedule        REMOTE EXPR      get or set scheduled jobs
+  semitrust       REMOTE ...       return repository to default trust level
+  trust           REMOTE ...       trust a repository
+  ungroup         REMOTE DESC      remove a repository from a group
+  untrust         REMOTE ...       do not trust a repository
+  vicfg                            edit configuration in git-annex branch
+  wanted          REMOTE EXPR      get or set preferred content expression
+  
+  Repository maintenance commands:
+  
+  addunused       NUM|RANGE ...    add back unused files
+  dropunused      NUM|RANGE ...    drop unused file content
+  expire          REMOTE:TIME ...  expire inactive repositories
+  fix             PATH ...         fix up links to annexed content
+  forget                           prune git-annex branch history
+  fsck            PATH ...         find and fix problems
+  merge                            automatically merge changes from remotes
+  remotedaemon                     persistent communication with remotes
+  repair                           recover broken git repository
+  unused                           look for unused file content
+  upgrade                          upgrade repository layout
+  
+  Query commands:
+  
+  find            PATH ...         lists available files
+  info            ITEM ...         shows  information about the specified item or the repository as a whole
+  inprogress      PATH ...         access files while they're being downloaded
+  list            PATH ...         show which remotes contain files
+  log             PATH ...         shows location log
+  map                              generate map of repositories
+  version                          show version info
+  whereis         PATH ...         lists repositories that have file content
+  
+  Metadata commands:
+  
+  metadata        PATH ...         sets or gets metadata of a file
+  vadd            FIELD=GLOB ...   add subdirs to current view
+  vcycle                           switch view to next layout
+  vfilter         FIELD=VALUE ...  filter current view
+  view            FIELD=VALUE ...  enter a view branch
+  vpop            NUMBER           switch back to previous view
+  
+  Utility commands:
+  
+  migrate         PATH ...         switch data to different backend
+  reinit          UUID|DESC        initialize repository, reusing old UUID
+  reinject        SRC DEST ...     inject content of file back into annex
+  unannex         PATH ...         undo accidental add command
+  uninit          PATH ...         de-initialize git-annex and clean out repository
+  
+  Plumbing commands:
+  
+  calckey         FILE ...         calculates the key that would be used to refer to a file
+  checkpresentkey KEY REMOTE       check if key is present in remote
+  contentlocation KEY ...          looks up content for a key
+  diffdriver      -- cmd --        external git diff driver shim
+  dropkey         KEY ...          drops annexed content for specified keys
+  examinekey      KEY ...          prints information from a key
+  findref         REF              lists files in a git ref
+  fromkey         KEY PATH ...     adds a file using a specific key
+  lookupkey       FILE ...         looks up key used for file
+  matchexpression EXPR             checks if a preferred content expression matches
+  post-receive                     run by git post-receive hook
+  pre-commit      PATH ...         run by git pre-commit hook
+  proxy           -- git command   safely bypass direct mode guard
+  readpresentkey  KEY UUID         read records of where key is present
+  registerurl     KEY URL          registers an url for a key
+  rekey           PATH KEY ...     change keys used for files
+  resolvemerge                     resolve merge conflicts
+  setkey          KEY PATH         sets annexed content for a key
+  setpresentkey   KEY UUID [1|0]   change records of where key is present
+  smudge          FILE             git smudge filter
+  transferkey     KEY              transfers a key from or to a remote
+  transferkeys                     transfers keys
+  
+  Testing commands:
+  
+  fuzztest                         generates fuzz test files
+  test                             run built-in test suite
+  testremote      REMOTE           test transfers to/from a remote
+#+end_example
