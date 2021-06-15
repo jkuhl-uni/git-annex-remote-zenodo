@@ -3387,7 +3387,70 @@ git annex find --metadata tag=test_metadata
   to have already set tags to differentiate the topics of the files
   especially when this depository handles a large amount of files),
   and then we can use the info command to get information concerning
-  just this file. 
+  just this file.
+
+  git add files
+  git commit
+  git initremote (with or without option newversion=id)
+  < working with the files normally >
+
+  and then when we copy / move files to the remote, we can look into
+  the list of the annexed files when we want to do the uploading and
+  use the commands find / info to get the key for the files so as to
+  change their names into the key used by git annex.
+
+  
+
+
+
+- To be able to execute shell commands (mostly git annex commands)
+  from within the python program we can use some libraries that allow
+  the interactions between the two.
+  + the subprocess library (more flexible than os): https://docs.python.org/3/library/subprocess.html#module-subprocess
+  + the os library (basic functionalities): https://docs.python.org/3/library/os.html 
+  + the git-annex-adapter library: https://github.com/alpernebbi/git-annex-adapter
+
+-  test with subprocess:
+
+#+begin_src python :results output :exports both
+import subprocess
+subprocess.run(["ls", "-l"])
+subprocess.run("pwd")
+subprocess.run(["/usr/bin/git", "status"])
+subprocess.run(["/usr/bin/git", "add", "--all"])
+subprocess.run(["/usr/bin/git", "commit", "-m", "testing a new library"])
+#+end_src
+
+#+RESULTS:
+#+begin_example
+total 320
+drwxr-xr-x 4 nubudi nubudi   4096 juin  15 00:25 code
+drwxr-xr-x 2 nubudi nubudi   4096 juin  10 09:44 docs
+-rw-r--r-- 1 nubudi nubudi 148995 juin  15 14:04 #journal.org#
+-rw-r--r-- 1 nubudi nubudi 147784 juin  15 12:34 journal.org
+-rw-r--r-- 1 nubudi nubudi  13310 juin   7 09:41 README.md
+/home/nubudi/Desktop/Internship
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   journal.org
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	#journal.org#
+	.#journal.org
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[main fe8bc11] testing a new library
+ 3 files changed, 3839 insertions(+)
+ create mode 100644 #journal.org#
+ create mode 120000 .#journal.org
+#+end_example
    
 ** Exporting a tree of files.
 To do this, we can use the command 'git annex export' so as to store a
