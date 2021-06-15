@@ -3418,7 +3418,8 @@ subprocess.run(["ls", "-l"])
 subprocess.run("pwd")
 subprocess.run(["/usr/bin/git", "status"])
 subprocess.run(["/usr/bin/git", "add", "--all"])
-subprocess.run(["/usr/bin/git", "commit", "-m", "testing a new library"])
+subprocess.run(["/usr/bin/git", "commit", "-m", "testing a new library to execute git commands in a python file"])
+subprocess.run(["/usr/bin/git", "push"])
 #+end_src
 
 #+RESULTS:
