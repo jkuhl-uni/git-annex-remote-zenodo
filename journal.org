@@ -3287,3 +3287,123 @@ f()
       "title": "Air pollution in Grenoble"
   }
   #+end_example
+
+ 
+
+* _
+
+** Commands to get the needed information about a file before uploading it to Zenodo.
+> use 'git annex calckey' to calculate the key that would be used to
+refer to a file. This could be done to rename the file before adding
+it to the annexed files and uploading it to the remote so as to keep
+the same names between the two.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd Internship/docs
+git annex calckey notes.org
+#+END_SRC
+
+#+RESULTS:
+: 
+: SHA256E-s33173--0aeb5832762f16a00438b5718137c9c61db03628c2ac02f163afb41ac46b5470.org
+
+> use the command 'git annex list' to list all the files that have been
+  annexed in this repository. This also shows which remote contains
+  files.
+
+> Or, use the command 'git annex find' which lists all the available
+files in this repository. The use of either this or 'list' would
+depend on how the user keeps their files and if they keep them in
+different remotes all the time or if they have them just here locally
+and in Zenodo.
+
+> use 'git annex info' with the name of the file to get all the
+information concerning an annexed file. This could be useful in the
+case where we want to retrieve the key of this file to use it when
+uploading it into zenodo.
+This is an example where we get all the information available about a
+file that's been annexed in a git-annex repository.
+  
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/Desktop
+git annex info S8/ARI/TP2/Collection_tokens/CACM-1748.flt
+#+END_SRC
+
+#+RESULTS:
+: 
+: file: S8/ARI/TP2/Collection_tokens/CACM-1748.flt
+: size: 872 bytes
+: key: SHA256E-s872--8358b2a8169727737d6ab442aef4ba53a06e06d6e74d395be911724d15737756.flt
+: present: true
+
+> 'git annex metadata' could be useful for when we want to get or set
+metadata for a file.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex metadata S8/ARI/TP2/Collection_tokens/CACM-1748.flt
+#+END_SRC
+
+#+RESULTS:
+: metadata S8/ARI/TP2/Collection_tokens/CACM-1748.flt 
+: 
+: ok
+
+A possible case use in this case is when a user has a lot of annexed
+files for different subjects and they want to upload files
+concerning obj X to their Zenodo deposit.
+Using 'git annex find --metadata tag=X --or --metadata tag=Y' they
+could limit the list of files that git-annex looks into when using
+the command info.
+
+- To test this, we first add a tag to the metadata of an annexed file
+  by using the option -s for 'set'.
+  
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex metadata S8/ARI/TP2/Collection_tokens/CACM-1748.flt -s tag=test_metadata
+#+END_SRC
+
+#+RESULTS:
+: metadata S8/ARI/TP2/Collection_tokens/CACM-1748.flt 
+:   lastchanged=2021-06-15@08-27-03
+:   tag=test_metadata
+:   tag-lastchanged=2021-06-15@08-27-03
+: ok
+: (recording state in git...)
+
+- Now, we can find the file whose tag corresponds to the we looked for.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex find --metadata tag=test_metadata
+#+END_SRC
+
+#+RESULTS:
+: S8/ARI/TP/Collection_tokens/CACM-1748.flt
+: S8/ARI/TP2/Collection_tokens/CACM-1748.flt
+
+
+
+** The succession of commands in this case.
+- When we add the file to the annexed files, we can easily retrieve
+  the information about this file using the find command (here we have
+  to have already set tags to differentiate the topics of the files
+  especially when this depository handles a large amount of files),
+  and then we can use the info command to get information concerning
+  just this file.
+   
+** Exporting a tree of files.
+To do this, we can use the command 'git annex export' so as to store a
+tree of files into the special remote. This is especially important in
+our case since Zenodo handles a flat architecture of files and so,
+when we upload the files (after having changed their name into the key
+they were given when they were annexed in the repository) we can lose
+the link.
+'The treeish to export can be the name of a git branch, or a tag, or
+any other treeish accepted by git, including eg master:subdir to only
+export a subdirectory from a branch.'
+
+
+- We need to specify when initializing the remote that we want to
+  enable the export function: exporttree=yes since it's automatically
+  disabled if not specified. 
+
+link: https://git-annex.branchable.com/git-annex-export/
