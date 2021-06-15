@@ -3848,6 +3848,11 @@ Usage: git-annex COMMAND
 #+end_example
 
 ** Importing a tree of files.
+- Importing from a special remote  first  downloads  all  new  content
+from  it,  and  then constructs  a git commit that reflects
+files that have changed on the special remote since the last time git-annex looked at it. Merging that commit into your repository will update
+it to reflect changes made on the special remote.
+       
 - To be able to import a tree of files from a special remote, we need to
 configurate the remote when we first initalize it by using the option
 importtree=yes (not all special remotes allow this but directory at
@@ -4111,10 +4116,7 @@ git annex import /home/nubudi/tests_export_import/dir_remote
 : import dir_remote/AirPollutionGrenoble.pdf ok
 : (recording state in git...)
 
-
-
-
-** Importing/Exproting to/from a special remote.
+** Importing/Exporting to/from a special remote.
 'You can combine using git annex import to fetch changes from a
 special remote with git annex export to send your local changes to the
 special remote. You can only import from special remotes that were
@@ -4135,3 +4137,11 @@ We can choose whether or not we want to import the content of the
 files or just the metadata (--content or --no-content). Even if we
 don't download the content, the keys are generated from information
 provided by the special remote. 
+
+
+links:
+https://git-annex.branchable.com/git-annex-import/
+https://git-annex.branchable.com/git-annex-export/
+
+
+- look into the encryption.
