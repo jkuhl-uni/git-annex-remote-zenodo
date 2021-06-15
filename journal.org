@@ -3393,7 +3393,7 @@ git annex find --metadata tag=test_metadata
   and then we can use the info command to get information concerning
   just this file.
 
-  #+start_example
+  #+begin_example
   git add files
   git commit
   git initremote (w/wo option newversion=id)
@@ -3407,7 +3407,7 @@ git annex find --metadata tag=test_metadata
 
   We can execute these commands, for instance, before uploading a file
   into the deposit:
-  #+start_example
+  #+begin_example
   git annex list (?, + gives info about files that are stored in elsewhere)
   git annex find --metadata tag=example
   git annex info fileX (for each of the files)
@@ -4126,7 +4126,7 @@ Another way to import from special remotes is using the git annex sync
 import from a special remote. To do this, you need to configure
 "remote..annex-tracking-branch" to tell it what branch to track.
 
-#+start_example
+#+begin_example
 git config remote.myremote.annex-tracking-branch master
 git annex sync --content
 #+end_example
