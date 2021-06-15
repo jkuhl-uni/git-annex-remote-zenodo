@@ -3423,33 +3423,29 @@ subprocess.run(["/usr/bin/git", "commit", "-m", "testing a new library"])
 
 #+RESULTS:
 #+begin_example
-total 320
+total 172
 drwxr-xr-x 4 nubudi nubudi   4096 juin  15 00:25 code
 drwxr-xr-x 2 nubudi nubudi   4096 juin  10 09:44 docs
--rw-r--r-- 1 nubudi nubudi 148995 juin  15 14:04 #journal.org#
--rw-r--r-- 1 nubudi nubudi 147784 juin  15 12:34 journal.org
+-rw-r--r-- 1 nubudi nubudi 149913 juin  15 14:12 journal.org
 -rw-r--r-- 1 nubudi nubudi  13310 juin   7 09:41 README.md
 /home/nubudi/Desktop/Internship
 On branch main
-Your branch is up to date with 'origin/main'.
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
 
 Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
+  (use "git add/rm <file>..." to update what will be committed)
   (use "git checkout -- <file>..." to discard changes in working directory)
 
+	deleted:    #journal.org#
+	deleted:    .#journal.org
 	modified:   journal.org
 
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-
-	#journal.org#
-	.#journal.org
-
 no changes added to commit (use "git add" and/or "git commit -a")
-[main fe8bc11] testing a new library
- 3 files changed, 3839 insertions(+)
- create mode 100644 #journal.org#
- create mode 120000 .#journal.org
+[main ea6a5a8] testing a new library
+ 3 files changed, 64 insertions(+), 3829 deletions(-)
+ delete mode 100644 #journal.org#
+ delete mode 120000 .#journal.org
 #+end_example
    
 ** Exporting a tree of files.
