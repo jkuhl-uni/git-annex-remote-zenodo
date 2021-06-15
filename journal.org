@@ -4021,142 +4021,117 @@ cp ~/Downloads/Essay.pdf /home/nubudi/tests_export_import/dir_remote
 
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 cd ~/tests_export_import/dir_test
-git annex import master --from myremote
+git status
+git add --all
+git commit -m "small changes to the file"
+git annex export master --to myremote
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
 
-Invalid option `--from'
+On branch master
+Changes to be committed:
+..." to unstage)
 
-Usage: git-annex COMMAND
-  git-annex - manage files with git, without checking their contents in
-  
-  Commonly used commands:
-  
-  add             PATH ...         add files to annex
-  addurl          URL ...          add urls to annex
-  assistant                        automatically sync changes
-  copy            PATH ...         copy content of files to/from another repository
-  drop            PATH ...         remove content of files from repository
-  edit            PATH ...         same as unlock
-  export          TREEISH          export content to a remote
-  get             PATH ...         make content of annexed files available
-  help            COMMAND          display help
-  import          PATH ...         move and add files from outside git working copy
-  importfeed      URL ...          import files from podcast feeds
-  lock            PATH ...         undo unlock command
-  mirror          PATH ...         mirror content of files to/from another repository
-  move            PATH ...         move content of files to/from another repository
-  multicast                        multicast file distribution
-  rmurl           FILE URL ...     record file is not available at url
-  status          PATH ...         show the working tree status
-  sync            REMOTE ...       synchronize local repository with remotes
-  undo            PATH ...         undo last change to a file or directory
-  unlock          PATH ...         unlock files for modification
-  watch                            watch for changes and autocommit
-  webapp                           launch webapp
-  
-  Repository setup commands:
-  
-  adjust                           enter adjusted branch
-  config                           configuration stored in git-annex branch
-  dead            REMOTE ...       hide a lost repository or key
-  describe        REMOTE DESC      change description of a repository
-  direct                           switch repository to direct mode
-  enable-tor      uid              enable tor hidden service
-  enableremote    NAME K=V ...     enables git-annex to use a remote
-  group           REMOTE DESC      add a repository to a group
-  groupwanted     GROUP EXPR       get or set groupwanted expression
-  indirect                         switch repository to indirect mode
-  init            DESC             initialize git-annex
-  initremote      NAME K=V ...     creates a special (non-git) remote
-  numcopies       NUMBER           configure desired number of copies
-  p2p                              configure peer-2-peer links between repositories
-  required        REMOTE EXPR      get or set required content expression
-  schedule        REMOTE EXPR      get or set scheduled jobs
-  semitrust       REMOTE ...       return repository to default trust level
-  trust           REMOTE ...       trust a repository
-  ungroup         REMOTE DESC      remove a repository from a group
-  untrust         REMOTE ...       do not trust a repository
-  vicfg                            edit configuration in git-annex branch
-  wanted          REMOTE EXPR      get or set preferred content expression
-  
-  Repository maintenance commands:
-  
-  addunused       NUM|RANGE ...    add back unused files
-  dropunused      NUM|RANGE ...    drop unused file content
-  expire          REMOTE:TIME ...  expire inactive repositories
-  fix             PATH ...         fix up links to annexed content
-  forget                           prune git-annex branch history
-  fsck            PATH ...         find and fix problems
-  merge                            automatically merge changes from remotes
-  remotedaemon                     persistent communication with remotes
-  repair                           recover broken git repository
-  unused                           look for unused file content
-  upgrade                          upgrade repository layout
-  
-  Query commands:
-  
-  find            PATH ...         lists available files
-  info            ITEM ...         shows  information about the specified item or the repository as a whole
-  inprogress      PATH ...         access files while they're being downloaded
-  list            PATH ...         show which remotes contain files
-  log             PATH ...         shows location log
-  map                              generate map of repositories
-  version                          show version info
-  whereis         PATH ...         lists repositories that have file content
-  
-  Metadata commands:
-  
-  metadata        PATH ...         sets or gets metadata of a file
-  vadd            FIELD=GLOB ...   add subdirs to current view
-  vcycle                           switch view to next layout
-  vfilter         FIELD=VALUE ...  filter current view
-  view            FIELD=VALUE ...  enter a view branch
-  vpop            NUMBER           switch back to previous view
-  
-  Utility commands:
-  
-  migrate         PATH ...         switch data to different backend
-  reinit          UUID|DESC        initialize repository, reusing old UUID
-  reinject        SRC DEST ...     inject content of file back into annex
-  unannex         PATH ...         undo accidental add command
-  uninit          PATH ...         de-initialize git-annex and clean out repository
-  
-  Plumbing commands:
-  
-  calckey         FILE ...         calculates the key that would be used to refer to a file
-  checkpresentkey KEY REMOTE       check if key is present in remote
-  contentlocation KEY ...          looks up content for a key
-  diffdriver      -- cmd --        external git diff driver shim
-  dropkey         KEY ...          drops annexed content for specified keys
-  examinekey      KEY ...          prints information from a key
-  findref         REF              lists files in a git ref
-  fromkey         KEY PATH ...     adds a file using a specific key
-  lookupkey       FILE ...         looks up key used for file
-  matchexpression EXPR             checks if a preferred content expression matches
-  post-receive                     run by git post-receive hook
-  pre-commit      PATH ...         run by git pre-commit hook
-  proxy           -- git command   safely bypass direct mode guard
-  readpresentkey  KEY UUID         read records of where key is present
-  registerurl     KEY URL          registers an url for a key
-  rekey           PATH KEY ...     change keys used for files
-  resolvemerge                     resolve merge conflicts
-  setkey          KEY PATH         sets annexed content for a key
-  setpresentkey   KEY UUID [1|0]   change records of where key is present
-  smudge          FILE             git smudge filter
-  transferkey     KEY              transfers a key from or to a remote
-  transferkeys                     transfers keys
-  
-  Testing commands:
-  
-  fuzztest                         generates fuzz test files
-  test                             run built-in test suite
-  testremote      REMOTE           test transfers to/from a remote
+	new file:   dir_remote/AirPollutionInGrenoble.pdf
+	new file:   dir_remote/Essay.pdf
+	new file:   dir_remote/writing/drafts/_Project Pain.pdf
+	new file:   dir_remote/writing/drafts/the quest for mortality.pdf
+	new file:   dir_remote/writing/essays/OumaimaHajji_5G.pdf
+	new file:   dir_remote/writing/notes/Internship_Notes.pdf
+	new file:   dir_remote/writing/notes/notes.pdf
+
+Changes not staged for commit:
+..." to update what will be committed)
+..." to discard changes in working directory)
+
+	deleted:    AirPollutionInGrenoble.pdf
+	deleted:    dir_remote/AirPollutionInGrenoble.pdf
+	deleted:    dir_remote/Essay.pdf
+	deleted:    dir_remote/writing/drafts/_Project Pain.pdf
+	deleted:    dir_remote/writing/drafts/the quest for mortality.pdf
+	deleted:    dir_remote/writing/essays/OumaimaHajji_5G.pdf
+	deleted:    dir_remote/writing/notes/Internship_Notes.pdf
+	deleted:    dir_remote/writing/notes/notes.pdf
+
+Untracked files:
+..." to include in what will be committed)
+
+	AirPollutionGrenoble.pdf
+(base) nubudi@ubunto:~/tests_export_import/dir_test$ [master 9887489] small changes to the file
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+AirPollutionGrenoble.pdf (100%)
+rename myremote AirPollutionInGrenoble.pdf -> .git-annex-tmp-content-SHA1--0295c5f5fdea625e2191b79eccf8e9b7020302dd 
+  rename failed; deleting instead
+ok
+export myremote AirPollutionGrenoble.pdf 
+31.98 KiB         3 MiB/s                         ok
+(recording state in git...)
 #+end_example
+
+Now, let's make changes in the remote. We can do this simply by adding
+a new file or by changing the name of an existing file.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf /home/nubudi/tests_export_import/dir_remote
+#+END_SRC
+
+#+RESULTS:
 
 
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-
+cd ~/tests_export_import
+mkdir dir_import
+cd dir_import
+git init
+git annex init
 #+END_SRC
+
+#+RESULTS:
+: 
+: mkdir: cannot create directory ‘dir_import’: File exists
+: (base) nubudi@ubunto:~/tests_export_import/dir_import$ Initialized empty Git repository in /home/nubudi/tests_export_import/dir_import/.git/
+: init  ok
+: (recording state in git...)
+
+
+Here, we try to import from a directory and not from a special
+directory remote. By doing executing this command, git annex import
+moves files from somewhere outside the git working copy, and adds them
+to the annex. In contrast to importing from a special directory
+remote, imported files are deleted from the given path.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex import /home/nubudi/tests_export_import/dir_remote
+#+END_SRC
+
+#+RESULTS:
+: import dir_remote/Essay.pdf ok
+: import dir_remote/AirPollutionGrenoble.pdf ok
+: (recording state in git...)
+
+
+
+
+** Importing/Exproting to/from a special remote.
+'You can combine using git annex import to fetch changes from a
+special remote with git annex export to send your local changes to the
+special remote. You can only import from special remotes that were
+configured with importtree=yes when set up with
+git-annex-initremote(1). Only some kinds of special remotes will let
+you configure them this way.'
+Another way to import from special remotes is using the git annex sync
+--content command (and the git-annex assistant). It can also be used to
+import from a special remote. To do this, you need to configure
+"remote..annex-tracking-branch" to tell it what branch to track.
+
+#+start_example
+git config remote.myremote.annex-tracking-branch master
+git annex sync --content
+#+end_example
+
+We can choose whether or not we want to import the content of the
+files or just the metadata (--content or --no-content). Even if we
+don't download the content, the keys are generated from information
+provided by the special remote. 
