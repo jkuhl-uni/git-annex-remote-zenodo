@@ -4261,3 +4261,290 @@ remote.<name>.annex-security-allow-unverified-downloads
 
 
 * Thursday 17/06.
+** Testing the changes of git-annex-remote-zenodo.
+*** Preparation.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+pwd
+cd ~/Desktop
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/Desktop/Internship
+
+First, we need to export the path to where the git-annex-remote-zenodo
+function so as to be able to locate it when executing.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+export PATH=$PATH:/home/nubudi/Desktop/test_remote
+#+END_SRC
+
+#+RESULTS:
+
+Let's check if the path has been successfully exported:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/test_remote
+
+We also need to make the program executable. To do this, we can simply
+change the permissions in the properties of the program (by checking
+the box) or we can do it using the shell command line with ths
+command (go to the path where the program is to execute it):
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+chmod +x git-annex-remote-zenodo
+#+END_SRC
+You'll need the sheebang line #!/usr/bin/env python3 to execute this
+command which we added to the program.
+
+Now, we can simply work with git annex like we would usually do. If we
+are working in a new repository, we will have to initialize git and
+git annex before the next steps. In this case, I'm working in an
+already initialized repository. We also need to initialize a special
+remote using the command with added options (ex: url to specify if we
+want to use the sandbox or newversion if we want to initialize the
+remote as a new version of an already published remote)
+
+#+begin_example
+git annex initremote test-zenodo type=external externaltype=zenodo key=ACCESS_TOKEN  encryption=
+#+end_example
+
+In this case, I'm reusing a remote that I've already initialized. To
+use an already initialized remote in another directory, we can use the
+command enableremote. We can also specify other options when doing so
+if needed.
+
+#+begin_example
+git annex enableremote test-zenodo
+#+end_example
+
+*** Uploading a file to the remote.
+As we can see below, the file test/notes.org is annexed and stored in
+two places, here and in a remote called 'extra'. It still hasn't been
+uploaded to the zenodo remote. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |extra
+: ||web
+: |||bittorrent
+: ||||test-zenodo
+: |||||
+: XX___ test/notes.org
+
+Now we can finally upload a file into the zenodo remote. This git-annex
+command uses some of the functions we have implemente in the remote
+(checkpresent to see if the exact same file is already uploaded and
+transferstore which uploads the file).
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy test/notes.org --to test-zenodo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+copy test/notes.org finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+[]
+(to test-zenodo...) 
+finished the put operation. Here is the returned message 
+
+200
+finished exporting the file... 
+
+ok
+#+end_example
+
+We can see at the end of the return message that git has recorded the
+state and so we now we can check where the file is to make sure that
+it's been uploaded to the remote. As we can see below, there is now an
+added X to mark the presence of the file in the remote as well.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |extra
+: ||web
+: |||bittorrent
+: ||||test-zenodo
+: |||||
+: XX__X test/notes.org
+
+We can also take a look at the remote and the list of the files that
+have been uploaded to the deposit to see if the uploaded file has been
+exported using the key as a filename. we can check this manually by
+going to the depositions url and looking at the filename in the
+deposit.
+Or, we can check this by also getting the name of the file in the
+remote and comparing it to the key used by git-annex to refer to the
+file.
+
++ Getting the filename from the remote:
+#+begin_src python :results output :exports both
+import requests
+import json
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/866268/files', params={'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG' })
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    {
+        "checksum": "a31ab3d02693c566fbffccda5955b384",
+        "filename": "SHA256E-s33173--0aeb5832762f16a00438b5718137c9c61db03628c2ac02f163afb41ac46b5470.org",
+        "filesize": 33173,
+        "id": "3ba257d9-5749-4366-8ad3-e9dc4b576555",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/c213200e-691a-4b60-8288-6ea69aaca0e7/SHA256E-s33173--0aeb5832762f16a00438b5718137c9c61db03628c2ac02f163afb41ac46b5470.org",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/866268/files/3ba257d9-5749-4366-8ad3-e9dc4b576555"
+        }
+    }
+]
+#+end_example
+
++ Getting the key of the file using the info command:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info test/notes.org
+#+END_SRC
+
+#+RESULTS:
+: file: test/notes.org
+: size: 33.17 kilobytes
+: key: SHA256E-s33173--0aeb5832762f16a00438b5718137c9c61db03628c2ac02f163afb41ac46b5470.org
+: present: true
+
+
+As we can see, it's the same key.
+
+*** Getting the file from the remote .
+Now, can try to get the file from the zenodo remote. Before doing
+this, we will drop it from where it's being stored locally so as to be
+able to retrieve it from the remote.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop test/notes.org
+#+END_SRC
+
+#+RESULTS:
+: drop test/notes.org ok
+: (recording state in git...)
+
+We can check to see where the file is kept now. As we can see, it's
+being stored in the 'extra' remote and in the zenodo remote where we
+have just uploaded it.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |extra
+: ||web
+: |||bittorrent
+: ||||test-zenodo
+: |||||
+: _X__X test/notes.org
+
+It's no longer available locally, but we can get it from the remote
+using the get command. We can see in the results that the file has
+been successfully retrieved.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get test/notes.org --from test-zenodo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+get test/notes.org (from test-zenodo...) 
+finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+(checksum...) ok
+(recording state in git...)
+#+end_example
+
+Let's check the where abouts of the file again to see if it's here
+locally.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis test/notes.org
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+whereis test/notes.org finished the get operation. Here is the returned message 
+
+200
+(3 copies) 
+  	20111730-b84c-46f1-8019-4e8c53e2880b -- remote zenodo [here]
+   	4728ae64-ffad-4f66-8e95-0e8bf4293bba -- [test-zenodo]
+   	b6b0cd5b-0259-43c0-a1c1-6531dd07b707 -- a directory where extra stuff is kept [extra]
+ok
+here
+|extra
+||web
+|||bittorrent
+||||test-zenodo
+|||||
+XX__X test/notes.org
+#+end_example
+
+*** Dropping the file from the remote.
+We can now try to remove the file from the zenodo remote where it's
+being stored. Since we already have two copies of the file, this can
+be done without the fear of losing it.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop test/notes.org --from test-zenodo
+#+END_SRC
+
+#+RESULTS:
+: drop test-zenodo test/notes.org finished the get operation. Here is the returned message 
+: 
+: 200
+: finished the get operation. Here is the returned message 
+: 
+: 200
+: ok
+
+The file has been successfully dropped from the remote and we can
+check that using these commands:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis test/notes.org
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+whereis test/notes.org (2 copies) 
+  	20111730-b84c-46f1-8019-4e8c53e2880b -- remote zenodo [here]
+   	b6b0cd5b-0259-43c0-a1c1-6531dd07b707 -- a directory where extra stuff is kept [extra]
+ok
+here
+|extra
+||web
+|||bittorrent
+||||test-zenodo
+|||||
+XX___ test/notes.org
+#+end_example
