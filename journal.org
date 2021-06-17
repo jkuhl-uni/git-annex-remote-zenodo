@@ -5032,3 +5032,37 @@ git annex info writing/the_deceitful_truth.odt
 : key: SHA256E-s48875--97ac6f560a81ef7509b0278407dc39348e42f29b20d12a4bc2f443f5eea95ed9.odt
 : present: true
 
+*** Notes taken during the meeting.
++ disableremote: publish + transforms the remote into aweb remote +
+  disable the remote locally (git rm ) + need to take care of
+  uploading an archive of the files to zendo before publishing the
+  other deposit and keeps track of the files that have been copied
+  (not annexed just in a simple zenodo deposit).
+
++ possible steps for the script:
+  download the tar
+  untar
+  git init
+  git annex init
+  git annex add url (for each of the files to get their positions).
+  !!! look into this!
+  (also maybe does the same for all the remote web url files and find where they all are) 
+
++ Look into: test: addurl - registerurl (with the key)
+
++ encryption:
+  - test encryting: with another remote (ex: directory/ amazon / google drive).
+ 
++ publish: git-annex-disableremote (with options)
+  - look before to see if the user has already submitted some metadata
+    to zenodo.
+  - create a json file as a template (add options in comments to specify
+    their use in case they are needed) -> (opt --json)
+    else get the info from zenodo and then ask the user if the info is
+    ok or change it accordingly.
+
++ initremote: when we create a new version of a record with enableremote (after
+  disbaing it) we have to inform git-annex that the files that have
+  been uploaded to the old deposit are now available on the new
+  deposit (need to keep a link between the objects in git-annex and
+  the files)
