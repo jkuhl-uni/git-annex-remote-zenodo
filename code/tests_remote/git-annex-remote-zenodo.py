@@ -125,7 +125,6 @@ class ZenodoRemote(ExportRemote):
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
             raise RemoteError('could not send a get query to the API')
 
-
         self.deposit_id = self.annex.getconfig('deposit_id')
         
 
@@ -133,7 +132,7 @@ class ZenodoRemote(ExportRemote):
     def transfer_store(self, key, filename):
         try:
             # fetching the url of the bucket
-            URL_BUCKET = self.deposit_bucket
+            URL_BUCKET = self.annex.getconfig('deposit_bucket')
 
             # and then we upload it
             # extracting the filename and the path from filename
@@ -148,7 +147,7 @@ class ZenodoRemote(ExportRemote):
             # The target URL is a combination of the bucket link with the desired filename
             # seperated by a slash.
             with open(path, "rb") as fp:
-                r = self.query('put', "%s/%s" % (self.url, filename), key, data=fp)
+                r = self.query('put', "%s/%s" % (URL_BUCKET, file), data=fp)
             
             if r.status_code < 400:
                 print("finished exporting the file... \n")
@@ -193,8 +192,9 @@ class ZenodoRemote(ExportRemote):
 
     def checkpresent(self, key):
         try:
-            url = self.url + str(self.deposit_id) + '/files'
+            url = self.url + '/' + str(self.deposit_id) + '/files'
             r = self.query('get', url)
+            print(r.json())
             # going through the list of the files in this deposit
             for i in range(len(r.json())):
                 if r.json()[i]['filename'] == key:
@@ -235,6 +235,7 @@ class ZenodoRemote(ExportRemote):
 
     ## Export methods
     def transferexport_store(self, key, local_file, remote_file):
+        print("exp store")
         return self.transfer_store(key, local_file)
 
 
@@ -243,6 +244,7 @@ class ZenodoRemote(ExportRemote):
 
 
     def checkpresentexport(self, key, remote_file):
+        print("check expo ")
         return self.checkpresent(key)
 
 
