@@ -1,4 +1,4 @@
-v#+TITLE:       lab book
+#+TITLE:       lab book
 #+AUTHOR:      Oumaima Hajji
 #+STARTUP: overview indent inlineimages logdrawer
 #+TAGS: R(R) Python(p) OrgMode(O) 
@@ -4647,3 +4647,6 @@ git annex list
 
 As we can see, it's no longer available locally but it's accessible in
 the remote.
+
+** Testing the uploads with different types of encryptions.
+
