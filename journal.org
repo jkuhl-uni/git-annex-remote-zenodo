@@ -4649,4 +4649,189 @@ As we can see, it's no longer available locally but it's accessible in
 the remote.
 
 ** Testing the uploads with different types of encryptions.
+*** intro.
+I've added some files to be annexed so as to use them if needed in the
+following tests.
 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/Desktop
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+here
+|web
+||bittorrent
+|||test-zenodo
+||||
+___X test/notes.org
+X___ writing/Outline.odt
+X___ writing/Outline.pdf
+X___ writing/aminux.txt
+X___ writing/the_deceitful_truth.odt
+X___ writing/the_quest_for_mortality.odt
+#+end_example
+
+First, we need to export the path to where the git-annex-remote-zenodo
+function so as to be able to locate it when executing.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+export PATH=$PATH:/home/nubudi/Desktop/test_remote
+#+END_SRC
+
+#+RESULTS:
+
+Let's check if the path has been successfully exported:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/test_remote
+
+*** hybrid encryption.
+We first need to create a gpg key to be able to use this type of
+encryption. After doing so, we can enable an existing remote or create
+a new one with initremote. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex enableremote test-zenodo encryption=hybrid keyid=69E2FB9A11D14CB3CB3A12BCCD7D01BA0347F528
+#+END_SRC
+
+#+RESULTS:
+: enableremote test-zenodo (encryption setup) (to gpg keys: CD7D01BA0347F528) finished the post operation. Here is the returned message 
+: 
+: 201
+: ok
+: (recording state in git...)
+
+We can see by executing this command that the type of encryption in
+the configuration is stated as hybrid.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info test-zenodo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+remote: test-zenodo
+description: [test-zenodo]
+uuid: 4728ae64-ffad-4f66-8e95-0e8bf4293bba
+trust: semitrusted
+cost: 250.0
+type: external
+externaltype: zenodo
+encryption: hybrid (to gpg keys: CD7D01BA0347F528)
+chunking: none
+remote annex keys: 1
+remote annex size: 33.17 kilobytes
+#+end_example
+
+Now, we can copy an annexed file into the remote. Because we are now
+using the hybrid encryption, we will need to give our password when we
+want to communicate with the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy writing/the_deceitful_truth.odt --to test-zenodo 
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+copy writing/the_deceitful_truth.odt finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+[]
+(to test-zenodo...) 
+finished the put operation. Here is the returned message 
+
+200
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+!! When uploaded, the file's name became: GPGHMAC<key>
+
+Displaying information about this file:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info writing/the_deceitful_truth.odt 
+#+END_SRC
+
+#+RESULTS:
+: file: writing/the_deceitful_truth.odt
+: size: 48.88 kilobytes
+: key: SHA256E-s48875--97ac6f560a81ef7509b0278407dc39348e42f29b20d12a4bc2f443f5eea95ed9.odt
+: present: true
+
+Now, let's drop it locally and then try to get it back.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop writing/the_deceitful_truth.odt 
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+drop writing/the_deceitful_truth.odt finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+[{u'id': u'98f0edea-33b3-4c4f-8aa7-35fd1259d6c2', u'checksum': u'5fa5147e4c15b41ce590548972fb4c54', u'filesize': 47652, u'links': {u'download': u'https://sandbox.zenodo.org/api/files/407c82d1-124d-4053-8843-c9b7195270a8/GPGHMACSHA1--f281097ad56fe6bd30e6445d178efec6799745cb', u'self': u'https://sandbox.zenodo.org/api/deposit/depositions/866481/files/98f0edea-33b3-4c4f-8aa7-35fd1259d6c2'}, u'filename': u'GPGHMACSHA1--f281097ad56fe6bd30e6445d178efec6799745cb'}]
+Yes, this file exists in the remote: GPGHMACSHA1--f281097ad56fe6bd30e6445d178efec6799745cb
+ok
+(recording state in git...)
+#+end_example
+
+It's no longer here as we can see.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-zenodo
+||||
+___X test/notes.org
+X___ writing/Outline.odt
+X___ writing/Outline.pdf
+X___ writing/aminux.txt
+___X writing/the_deceitful_truth.odt
+X___ writing/the_quest_for_mortality.odt
+#+end_example
+
+Now, let's get it back from the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get writing/the_deceitful_truth.odt --from test-zenodo 
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+get writing/the_deceitful_truth.odt (from test-zenodo...) 
+finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+(checksum...) ok
+(recording state in git...)
+#+end_example
+
+Displaying information about this file:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info writing/the_deceitful_truth.odt 
+#+END_SRC
+
+#+RESULTS:
+: file: writing/the_deceitful_truth.odt
+: size: 48.88 kilobytes
+: key: SHA256E-s48875--97ac6f560a81ef7509b0278407dc39348e42f29b20d12a4bc2f443f5eea95ed9.odt
+: present: true
