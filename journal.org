@@ -4835,3 +4835,5 @@ git annex info writing/the_deceitful_truth.odt
 : size: 48.88 kilobytes
 : key: SHA256E-s48875--97ac6f560a81ef7509b0278407dc39348e42f29b20d12a4bc2f443f5eea95ed9.odt
 : present: true
+
+*** shared encryption.
