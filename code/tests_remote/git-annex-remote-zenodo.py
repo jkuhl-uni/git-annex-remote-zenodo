@@ -32,7 +32,7 @@ class ZenodoRemote(ExportRemote):
         elif query_method == 'put':
             request = requests.put(url, params=params, json={}, data=data)
         else:
-            request = requests.delete(url, params)
+            request = requests.delete(url, params= params, json={})
             
         # informing the user of the currint state of the operation        
         print("finished the " + query_method + " operation. Here is the returned message \n")
@@ -160,9 +160,9 @@ class ZenodoRemote(ExportRemote):
 
     def transfer_retrieve(self, key, filename):
         import json
-        
+
         # getting the information on the files that are in the deposit
-        url = self.url + str(self.deposit_id) + '/files'
+        url = self.url + '/' +  str(self.deposit_id) + '/files'
         r = self.query('get', url)
 
         # going through the list of the files in this deposit
@@ -174,8 +174,7 @@ class ZenodoRemote(ExportRemote):
                 file_id =  r.json()[i]['id']
                 # getting the download link of the file
                 url = r.json()[i]['links']['download']
-                r = self('get', url, stream = True)        
-                r.raise_for_status()
+                r = self.query('get', url, stream = True)  
                 # storing the file in the path given in filename
                 # this is done by reading the content of the file and writing it in the new file
                 # if the files are very large, we can make the chunk size bigger 
@@ -207,7 +206,7 @@ class ZenodoRemote(ExportRemote):
 
     def remove(self, key):
         # checking if the key exists in the remote deposit
-        url = self.url + str(self.deposit_id) + '/files'
+        url = self.url + '/' + str(self.deposit_id) + '/files'
         r = self.query('get', url)
         # going through the list of the files in this deposit
         file_id = None
@@ -226,6 +225,7 @@ class ZenodoRemote(ExportRemote):
         url = url + '/' + str(file_id)
         # we then make the query to delete the file
         r = self.query('delete', url)
+        print(r.json())
 
         # raising RemoteError if there is a problem with the removal of the file
         if r.status_code > 204:
@@ -235,7 +235,6 @@ class ZenodoRemote(ExportRemote):
 
     ## Export methods
     def transferexport_store(self, key, local_file, remote_file):
-        print("exp store")
         return self.transfer_store(key, local_file)
 
 
@@ -253,7 +252,7 @@ class ZenodoRemote(ExportRemote):
 
 
     def removeexportdirectory(self, remote_directory):
-        url = self.url + str(self.deposit_id) + '/files'
+        url = self.url + '/' + str(self.deposit_id) + '/files'
         r = self.query('get', url)
         # going through the list of the files in this deposit
         file_id = None
