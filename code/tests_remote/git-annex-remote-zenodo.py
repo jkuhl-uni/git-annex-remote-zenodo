@@ -32,7 +32,7 @@ class ZenodoRemote(ExportRemote):
         elif query_method == 'put':
             request = requests.put(url, params=params, json={}, data=data)
         else:
-            request = requests.delete(url, params= params, json={})
+            request = requests.delete(url, params= params)
             
         # informing the user of the currint state of the operation        
         print("finished the " + query_method + " operation. Here is the returned message \n")
@@ -78,8 +78,6 @@ class ZenodoRemote(ExportRemote):
         else:
             self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
         
-        #self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
-
         # the key is passed as an argument when using the commant initremote (ex: key='')
         # if it's not been added as an argument, we raise an 
         if not self.annex.getconfig('key'):
@@ -118,7 +116,14 @@ class ZenodoRemote(ExportRemote):
     def prepare(self):
         import json
         self.key = self.annex.getconfig('key')
-        self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+        #self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+
+        url = self.annex.getconfig('url')
+        if url is None:
+            self.url = 'https://zenodo.org/api/deposit/depositions'
+        else:
+            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+        
 
         r = self.query('get', self.url)
         if r.status_code != 200:
@@ -293,12 +298,7 @@ class ZenodoRemote(ExportRemote):
         """
         pass
         
-    def _info(self, message):
-        try:
-            self.annex.info(message)
-        except ProtocolError:
-            print(message)
-            
+
 def main():
 
     # Redirect output to stderr to avoid messing up the protocol

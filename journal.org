@@ -4548,3 +4548,102 @@ here
 |||||
 XX___ test/notes.org
 #+end_example
+
+*** Moving a file from / to the remote.
+When we move a file from a remote to another or locally it's as if we
+made two operations: copying it to X and dropping it from Y. So it's
+useful to do this when we already keep track of where all the copies
+of a file is and we just want to move it around without having to drop
+it everytime.
+
+Here, we can see that it's in the zenodo remote a well as here locally.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis test/notes.org
+#+END_SRC
+
+#+RESULTS:
+: whereis test/notes.org finished the get operation. Here is the returned message 
+: 
+: 200
+: (3 copies) 
+:   	20111730-b84c-46f1-8019-4e8c53e2880b -- remote zenodo [here]
+:    	4728ae64-ffad-4f66-8e95-0e8bf4293bba -- [test-zenodo]
+:    	b6b0cd5b-0259-43c0-a1c1-6531dd07b707 -- a directory where extra stuff is kept [extra]
+: ok
+
+
+let's drop it in the remote and then move the copu we have here to the
+remote to see what will change.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop test/notes.org --from test-zenodo
+#+END_SRC
+
+#+RESULTS:
+: drop test-zenodo test/notes.org finished the get operation. Here is the returned message 
+: 
+: 200
+: finished the get operation. Here is the returned message 
+: 
+: 200
+: ok
+: (recording state in git...)
+
+Checking again the whereabouts of the file:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list 
+#+END_SRC
+
+#+RESULTS:
+: here
+: |extra
+: ||web
+: |||bittorrent
+: ||||test-zenodo
+: |||||
+: XX___ test/notes.org
+
+Now, let's move it from here locally to the zenodo remote.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex move test/notes.org --to test-zenodo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+move test/notes.org finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+[]
+(to test-zenodo...) 
+finished the put operation. Here is the returned message 
+
+200
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+
+Let's check the whereabouts of the file again:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list 
+#+END_SRC
+
+#+RESULTS:
+: here
+: |extra
+: ||web
+: |||bittorrent
+: ||||test-zenodo
+: |||||
+: _X__X test/notes.org
+
+As we can see, it's no longer available locally but it's accessible in
+the remote.
