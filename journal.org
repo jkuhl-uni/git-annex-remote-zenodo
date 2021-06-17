@@ -4752,7 +4752,30 @@ finished exporting the file...
 (recording state in git...)
 #+end_example
 
-!! When uploaded, the file's name became: GPGHMAC<key>
+!! When uploaded, the file's name became: GPGHMAC<key> as can be seen
+   below:
+#+begin_src python :results output :exports both
+import requests
+import json
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/866481/files', params={'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG' })
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    {
+        "checksum": "5fa5147e4c15b41ce590548972fb4c54",
+        "filename": "GPGHMACSHA1--f281097ad56fe6bd30e6445d178efec6799745cb",
+        "filesize": 47652,
+        "id": "98f0edea-33b3-4c4f-8aa7-35fd1259d6c2",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/407c82d1-124d-4053-8843-c9b7195270a8/GPGHMACSHA1--f281097ad56fe6bd30e6445d178efec6799745cb",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/866481/files/98f0edea-33b3-4c4f-8aa7-35fd1259d6c2"
+        }
+    }
+]
+#+end_example
 
 Displaying information about this file:
 #+BEGIN_SRC shell :session *shell* :results output :exports both
@@ -4837,3 +4860,167 @@ git annex info writing/the_deceitful_truth.odt
 : present: true
 
 *** shared encryption.
+We can create a new remote with initremote and specify in the options
+that the type of encryption we want is shared encryption. This uses a
+shared cipher which is stored, unencrypted, in the git repository. So,
+every clone of this repository can access is.
+This is not secure unless you trust every clone of the git
+repository. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex initremote new-test-zenodo encryption=shared type=external externaltype=zenodo exporttree=yes importtree=yes
+#+END_SRC
+
+#+RESULTS:
+: initremote new-test-zenodo git-annex: cannot enable both encryption and exporttree
+
+Retrying without enabling exporttree and importtree:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex initremote new-test-zenodo encryption=shared type=external externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+#+END_SRC
+
+#+RESULTS:
+: initremote new-test-zenodo (encryption setup) (encryption key stored in git repository) finished the post operation. Here is the returned message 
+: 
+: 201
+: ok
+: (recording state in git...)
+
+We can see by executing this command that the type of encryption in
+the configuration is stated as shared.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info new-test-zenodo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+remote: new-test-zenodo
+description: [new-test-zenodo]
+uuid: a3fb3036-b5b8-4bed-b684-983942dc602e
+trust: semitrusted
+cost: 250.0
+type: external
+externaltype: zenodo
+encryption: shared (encryption key stored in git repository)
+chunking: none
+remote annex keys: 0
+remote annex size: 0 bytes
+#+end_example
+
+Now, we can copy an annexed file into the remote. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy writing/the_deceitful_truth.odt --to new-test-zenodo 
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+copy writing/the_deceitful_truth.odt finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+[]
+(to new-test-zenodo...) 
+finished the put operation. Here is the returned message 
+
+200
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+Displaying information about this file:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info writing/the_deceitful_truth.odt 
+#+END_SRC
+
+#+RESULTS:
+: file: writing/the_deceitful_truth.odt
+: size: 48.88 kilobytes
+: key: SHA256E-s48875--97ac6f560a81ef7509b0278407dc39348e42f29b20d12a4bc2f443f5eea95ed9.odt
+: present: true
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis writing/the_deceitful_truth.odt 
+#+END_SRC
+
+#+RESULTS:
+: whereis writing/the_deceitful_truth.odt (3 copies) 
+:   	20111730-b84c-46f1-8019-4e8c53e2880b -- remote zenodo [here]
+:    	4728ae64-ffad-4f66-8e95-0e8bf4293bba -- [test-zenodo]
+:    	a3fb3036-b5b8-4bed-b684-983942dc602e -- [new-test-zenodo]
+: ok
+
+Now, let's drop it locally and then try to get it back.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop writing/the_deceitful_truth.odt 
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+drop writing/the_deceitful_truth.odt finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+[{u'id': u'a3e4d856-7500-4e23-b5e7-2c5b89532059', u'checksum': u'7bf33ffde758357bbc502a00217b2285', u'filesize': 47652, u'links': {u'download': u'https://sandbox.zenodo.org/api/files/406520ff-2af3-4989-a50b-bee63a4fa2bd/GPGHMACSHA1--220f327281256e704e7987589cf1625abb15f4db', u'self': u'https://sandbox.zenodo.org/api/deposit/depositions/866525/files/a3e4d856-7500-4e23-b5e7-2c5b89532059'}, u'filename': u'GPGHMACSHA1--220f327281256e704e7987589cf1625abb15f4db'}]
+Yes, this file exists in the remote: GPGHMACSHA1--220f327281256e704e7987589cf1625abb15f4db
+ok
+(recording state in git...)
+#+end_example
+
+It's no longer here as we can see.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||new-test-zenodo
+||||test-zenodo
+|||||
+____X test/notes.org
+X____ writing/Outline.odt
+X____ writing/Outline.pdf
+X____ writing/aminux.txt
+___XX writing/the_deceitful_truth.odt
+X____ writing/the_quest_for_mortality.odt
+#+end_example
+
+Now, let's get it back from the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get writing/the_deceitful_truth.odt --from new-test-zenodo 
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+get writing/the_deceitful_truth.odt (from new-test-zenodo...) 
+finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+finished the get operation. Here is the returned message 
+
+200
+(checksum...) ok
+(recording state in git...)
+#+end_example
+
+Displaying information about this file:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info writing/the_deceitful_truth.odt 
+#+END_SRC
+
+#+RESULTS:
+: file: writing/the_deceitful_truth.odt
+: size: 48.88 kilobytes
+: key: SHA256E-s48875--97ac6f560a81ef7509b0278407dc39348e42f29b20d12a4bc2f443f5eea95ed9.odt
+: present: true
+
