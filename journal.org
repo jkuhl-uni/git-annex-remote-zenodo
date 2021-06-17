@@ -4777,6 +4777,14 @@ print(json.dumps(r.json(), indent=4))
 ]
 #+end_example
 
++ MAC algo: The default MAC algorithm to be applied on the filenames is
+HMACSHA1. A stronger one, for instance HMACSHA512, can be chosen upon
+creation of the special remote with the option mac=HMACSHA512. The
+available MAC algorithms are HMACSHA1, HMACSHA224, HMACSHA256,
+HMACSHA384, and HMACSHA512. Note that it is not possible to change
+algorithm for a non-empty remote.
+
+
 Displaying information about this file:
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex info writing/the_deceitful_truth.odt 
