@@ -5153,8 +5153,206 @@ https://git-annex.branchable.com/design/encryption/
 https://git-annex.branchable.com/encryption/
 
 ** testing the different types of encryption in a remote.
-*** hybrid.
-a
+first, let's make the directory where we will be doing our tests.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~
+mkdir tests_enc
+cd tests_enc
+mkdir hybrid_enc
+cd hybrid_enc
+mkdir test_enc_hybrid
+cd test_enc_hybrid
+#+END_SRC
+
+#+RESULTS:
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+pwd
+#+END_SRC
+#+RESULTS:
+: /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+
+initiating the git and the git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid/.git/
+: init  ok
+: (recording state in git...)
+
+adding a bunch of files to do the test
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp -R ~/Downloads/writing /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+#+END_SRC
+
+#+RESULTS:
+
+Committing the changes after adding the files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc
+mkdir hybdir
+#+END_SRC
+
+#+RESULTS:
+
+
+Initializing the remote
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+git annex initremote hybdir type=directory directory=/home/nubudi/tests_enc/hybrid_enc/hybdir encryption=hybrid keyid=69E2FB9A11D14CB3CB3A12BCCD7D01BA0347F528
+#+END_SRC
+
+#+RESULTS:
+: 
+: initremote hybdir (encryption setup) (to gpg keys: CD7D01BA0347F528) ok
+: (recording state in git...)
+
+
+
+adding files to the repository by copying them into it first and then
+adding them into the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/nami.JPG /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add nami.JPG
+#+END_SRC
+
+#+RESULTS:
+: add nami.JPG ok
+: (recording state in git...)
+
+copyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+cp ~/Downloads/flows.json /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add Essay.pdf ok
+: add flows.json ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |hybdir
+: ||web
+: |||bittorrent
+: ||||
+: X___ Essay.pdf
+: X___ flows.json
+: X___ nami.JPG
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to hybdir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf (to hybdir...)
+: 12 B/s 1h4m59s                                 ok
+: (recording state in git...)
+
+Now, let's check the file in the remote directory where we have
+uploaded it.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to hybdir
+#+END_SRC
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc/hybdir/268/f84
+ls 
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--4c51cd1d6ee2ec103a2570489d7f38b08c2a710c
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc/hybdir/268/f84/GPGHMACSHA1--4c51cd1d6ee2ec103a2570489d7f38b08c2a710c
+file GPGHMACSHA1--4c51cd1d6ee2ec103a2570489d7f38b08c2a710c
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--4c51cd1d6ee2ec103a2570489d7f38b08c2a710c: GPG symmetrically encrypted data (AES256 cipher)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: drop Essay.pdf ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |hybdir
+: ||web
+: |||bittorrent
+: ||||
+: _X__ Essay.pdf
+: X___ flows.json
+: X___ nami.JPG
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (1 copy) 
+:   	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
+: ok
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from hybdir
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (2 copies) 
+:   	572ad22c-6d8a-40d0-afc1-7adc8c78798a -- nubudi@ubunto:~/tests_enc/hybrid_enc/test_enc_hybrid [here]
+:    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
+: ok
+
 ** editing the metadata of a published record.
 Let's try to change some of the metadata of a record that's already
 been published. To do so, we first need to send a post request to the
