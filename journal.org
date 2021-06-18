@@ -1,3 +1,4 @@
+
 #+TITLE:       lab book
 #+AUTHOR:      Oumaima Hajji
 #+STARTUP: overview indent inlineimages logdrawer
@@ -5066,3 +5067,347 @@ git annex info writing/the_deceitful_truth.odt
   been uploaded to the old deposit are now available on the new
   deposit (need to keep a link between the objects in git-annex and
   the files)
+
+
+* Friday 18/06.
+** encryption design.
+*** encryption key management.
+Data is encrypted by GnuPG using a symmetric cipher that is generated
+by GnuPG when the special remote is created. (A symmetric
+cipher is one that uses the same key for encryption and
+decryption. Ciphers or algorithms can be either symmetric or
+asymmetric. Symmetric ones use the same key (called a secret key or
+private key) for transforming the original message, called plaintext,
+into ciphertext and vice versa.) A symmetric cipher is one that uses
+the same key for encryption and decryption. Ciphers or algorithms can
+be either symmetric or asymmetric. Symmetric ones use the same key
+(called a secret key or private key) for transforming the original
+message, called plaintext, into ciphertext and vice versa. This scheme
+allows new OpenPGP private keys to be given access to content that has
+already been stored in the remote. 
+
+Different encrypted remotes need to be able to each use different
+ciphers. Allowing multiple ciphers to be used within a single remote
+would add a lot of complexity, so is not supported. Instead, if you
+want a new cipher, create a new S3 bucket, or whatever. There does not
+seem to be much benefit to using the same cipher for two different
+encrypted remotes.
+
+So, the encrypted cipher is just stored with the rest of a remote's
+configuration in remote.log: The file format is one line per remote,
+starting with the uuid of the remote, followed by a space, and then a
+series of var=value pairs, each separated by whitespace, and finally a
+timestamp. Encrypted special remotes store their encryption key here,
+in the "cipher" value. It is base64 encoded, and unless shared
+encryption is used, is encrypted to one or more gpg keys. The first
+256 bytes of the cipher is used as the HMAC SHA1 encryption key, to
+encrypt filenames stored on the special remote. The remainder of the
+cipher is used as a gpg symmetric encryption key, to encrypt the
+content of files stored on the special remote. 
+
+When git annex intiremote makes a remote, it generates a random
+symmetric cipher, and encrypt it with the specified gpg key. To allow
+another gpg public key access, update the encrypted cipher to be
+encrypted to both gpg keys.
+
+Note that there's a shared encryption mode where the cipher is not
+encrypted. When this mode is used, any clone of the git repository can
+decrypt files stored in its special remote.
+
+*** filename enumeration.
+The files stored in the remote should be encrypted. But, it needs to
+be a repeatable encryption, so they cannot just be gpg encrypted, that
+would yeild a new name each time. Instead, HMAC is used. Any hash
+could be used with HMAC. SHA-1 is the default, but other hashes can be
+chosen for new remotes.
+
+For instance, the command fsck should be able to, for each file in the
+repository, contact the encrypted remote to check if it has the
+file. This can be done without enumeration, although it will mean
+running gpg once per file fscked, to get the encrypted filename. 
+
+*** other use of symmetric cipher.
+The symmetric cipher can be used to encrypt other content than the
+content sent to the remote. In particular, it may make sense to
+encrypt whatever access keys are used by the special remote with the
+cipher, and store that in remote.log. This way anyone whose gpg key
+has been given access to the cipher can get access to whatever other
+credentials are needed to use the special remote.
+*** risks.
+A risk of this scheme is that, once the symmetric cipher has been
+obtained, it allows full access to all the encrypted content. Indeed
+anyone owning a key that used to be granted access could already have
+decrypted the cipher and stored a copy. While it is in possible to
+remove a key with keyid-=, it is designed for a completely different
+purpose and does not actually revoke access.
+
+If git-annex stores the decrypted symmetric cipher in memory, then
+there is a risk that it could be intercepted from there by an
+attacker. Gpg ameliorates these type of risks by using locked
+memory. For git-annex, note that an attacker with local machine access
+can tell at least all the filenames and metadata of files stored in
+the encrypted remote anyway, and can access whatever content is stored
+locally. 
+*** links.
+https://git-annex.branchable.com/design/encryption/
+https://git-annex.branchable.com/encryption/
+
+** testing the different types of encryption in a remote.
+*** hybrid.
+a
+** editing the metadata of a published record.
+Let's try to change some of the metadata of a record that's already
+been published. To do so, we first need to send a post request to the
+API with the edit action so as to unlock it. Then, we can send a put
+request containing the new data that we want to change to. When this
+is over, we need to either discard the changes or publish the
+record. If we don't do either of these actions, the deposit will stay
+in a drafting state.
+#+begin_src python :results output :exports both
+import requests
+import json
+ACCESS_TOKEN= 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+# r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/discard', params={'access_token': ACCESS_TOKEN})
+
+r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/edit', params={'access_token': ACCESS_TOKEN})
+print(json.dumps(r.json(), indent=4))
+
+# now making modifications
+
+data = {
+    "metadata": {
+        "title": "A report about air pollution in Grenoble",
+        "upload_type": "poster",
+        "description": "report written by two students",
+        "creators": [
+            {"name": "H, O", "affiliation": "St"},
+            {"name": "C, M", "affiliation": "St"}
+        ]
+    }
+}
+
+headers = {"Content-Type": "application/json"}
+
+url = 'https://sandbox.zenodo.org/api/deposit/depositions/846331'
+r = requests.put(url, data=json.dumps(data), headers=headers, params= {'access_token': ACCESS_TOKEN})
+print(json.dumps(r.json(), indent=4))
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+{
+    "conceptdoi": "10.5072/zenodo.846330",
+    "conceptrecid": "846330",
+    "created": "2021-06-02T13:12:08.831740+00:00",
+    "doi": "10.5072/zenodo.846331",
+    "doi_url": "https://doi.org/10.5072/zenodo.846331",
+    "files": [
+        {
+            "checksum": "96379d6f2dfdbdd68ee0fa48a31ee07c",
+            "filename": "AirPollutionInGrenoble.pdf",
+            "filesize": 1107977,
+            "id": "8b14ada3-07a2-4da4-a0af-6c18ce58ced4",
+            "links": {
+                "download": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca/AirPollutionInGrenoble.pdf",
+                "self": "https://sandbox.zenodo.org/api/deposit/depositions/846331/files/8b14ada3-07a2-4da4-a0af-6c18ce58ced4"
+            }
+        }
+    ],
+    "id": 846331,
+    "links": {
+        "badge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846331.svg",
+        "bucket": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca",
+        "conceptbadge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846330.svg",
+        "conceptdoi": "https://doi.org/10.5072/zenodo.846330",
+        "doi": "https://doi.org/10.5072/zenodo.846331",
+        "latest": "https://sandbox.zenodo.org/api/records/846331",
+        "latest_html": "https://sandbox.zenodo.org/record/846331",
+        "record": "https://sandbox.zenodo.org/api/records/846331",
+        "record_html": "https://sandbox.zenodo.org/record/846331"
+    },
+    "metadata": {
+        "access_right": "open",
+        "communities": [
+            {
+                "identifier": "zenodo"
+            }
+        ],
+        "creators": [
+            {
+                "affiliation": "Student",
+                "name": "H, O"
+            },
+            {
+                "affiliation": "Student",
+                "name": "M, C"
+            }
+        ],
+        "description": "<p>first upload: a report written by students</p>",
+        "doi": "10.5072/zenodo.846331",
+        "license": "CC-BY-4.0",
+        "prereserve_doi": {
+            "doi": "10.5072/zenodo.846331",
+            "recid": 846331
+        },
+        "publication_date": "2021-06-02",
+        "title": "Air pollution in Grenoble - A report",
+        "upload_type": "poster"
+    },
+    "modified": "2021-06-18T09:47:32.907609+00:00",
+    "owner": 75563,
+    "record_id": 846331,
+    "state": "inprogress",
+    "submitted": true,
+    "title": "Air pollution in Grenoble - A report"
+}
+{
+    "conceptdoi": "10.5072/zenodo.846330",
+    "conceptrecid": "846330",
+    "created": "2021-06-02T13:12:08.831740+00:00",
+    "doi": "10.5072/zenodo.846331",
+    "doi_url": "https://doi.org/10.5072/zenodo.846331",
+    "files": [
+        {
+            "checksum": "96379d6f2dfdbdd68ee0fa48a31ee07c",
+            "filename": "AirPollutionInGrenoble.pdf",
+            "filesize": 1107977,
+            "id": "8b14ada3-07a2-4da4-a0af-6c18ce58ced4",
+            "links": {
+                "download": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca/AirPollutionInGrenoble.pdf",
+                "self": "https://sandbox.zenodo.org/api/deposit/depositions/846331/files/8b14ada3-07a2-4da4-a0af-6c18ce58ced4"
+            }
+        }
+    ],
+    "id": 846331,
+    "links": {
+        "badge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846331.svg",
+        "bucket": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca",
+        "conceptbadge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846330.svg",
+        "conceptdoi": "https://doi.org/10.5072/zenodo.846330",
+        "discard": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/discard",
+        "doi": "https://doi.org/10.5072/zenodo.846331",
+        "edit": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/edit",
+        "files": "https://sandbox.zenodo.org/api/deposit/depositions/846331/files",
+        "html": "https://sandbox.zenodo.org/deposit/846331",
+        "latest": "https://sandbox.zenodo.org/api/records/846331",
+        "latest_html": "https://sandbox.zenodo.org/record/846331",
+        "newversion": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/newversion",
+        "publish": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/publish",
+        "record": "https://sandbox.zenodo.org/api/records/846331",
+        "record_html": "https://sandbox.zenodo.org/record/846331",
+        "registerconceptdoi": "https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/registerconceptdoi",
+        "self": "https://sandbox.zenodo.org/api/deposit/depositions/846331"
+    },
+    "metadata": {
+        "access_right": "open",
+        "creators": [
+            {
+                "affiliation": "St",
+                "name": "H, O"
+            },
+            {
+                "affiliation": "St",
+                "name": "C, M"
+            }
+        ],
+        "description": "report written by two students",
+        "doi": "10.5072/zenodo.846331",
+        "license": "CC-BY-4.0",
+        "prereserve_doi": {
+            "doi": "10.5072/zenodo.846331",
+            "recid": 846331
+        },
+        "publication_date": "2021-06-18",
+        "title": "A report about air pollution in Grenoble",
+        "upload_type": "poster"
+    },
+    "modified": "2021-06-18T09:47:33.122768+00:00",
+    "owner": 75563,
+    "record_id": 846331,
+    "state": "inprogress",
+    "submitted": true,
+    "title": "A report about air pollution in Grenoble"
+}
+#+end_example
+
+Now either discard the changes or publish the deposit. Let's publish
+it
+
+#+begin_src python :results output :exports both
+import requests
+import json
+ACCESS_TOKEN= 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+
+r = requests.post('https://sandbox.zenodo.org/api/deposit/depositions/846331/actions/publish', params={'access_token': ACCESS_TOKEN})
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+{
+    "conceptdoi": "10.5072/zenodo.846330",
+    "conceptrecid": "846330",
+    "created": "2021-06-02T13:12:08.831740+00:00",
+    "doi": "10.5072/zenodo.846331",
+    "doi_url": "https://doi.org/10.5072/zenodo.846331",
+    "files": [
+        {
+            "checksum": "96379d6f2dfdbdd68ee0fa48a31ee07c",
+            "filename": "AirPollutionInGrenoble.pdf",
+            "filesize": 1107977,
+            "id": "8b14ada3-07a2-4da4-a0af-6c18ce58ced4",
+            "links": {
+                "download": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca/AirPollutionInGrenoble.pdf",
+                "self": "https://sandbox.zenodo.org/api/deposit/depositions/846331/files/8b14ada3-07a2-4da4-a0af-6c18ce58ced4"
+            }
+        }
+    ],
+    "id": 846331,
+    "links": {
+        "badge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846331.svg",
+        "bucket": "https://sandbox.zenodo.org/api/files/7a78a251-8631-47e4-be50-4207854145ca",
+        "conceptbadge": "https://sandbox.zenodo.org/badge/doi/10.5072/zenodo.846330.svg",
+        "conceptdoi": "https://doi.org/10.5072/zenodo.846330",
+        "doi": "https://doi.org/10.5072/zenodo.846331",
+        "latest": "https://sandbox.zenodo.org/api/records/846331",
+        "latest_html": "https://sandbox.zenodo.org/record/846331",
+        "record": "https://sandbox.zenodo.org/api/records/846331",
+        "record_html": "https://sandbox.zenodo.org/record/846331"
+    },
+    "metadata": {
+        "access_right": "open",
+        "communities": [
+            {
+                "identifier": "zenodo"
+            }
+        ],
+        "creators": [
+            {
+                "affiliation": "St",
+                "name": "H, O"
+            },
+            {
+                "affiliation": "St",
+                "name": "C, M"
+            }
+        ],
+        "description": "report written by two students",
+        "doi": "10.5072/zenodo.846331",
+        "license": "CC-BY-4.0",
+        "prereserve_doi": {
+            "doi": "10.5072/zenodo.846331",
+            "recid": 846331
+        },
+        "publication_date": "2021-06-18",
+        "title": "A report about air pollution in Grenoble",
+        "upload_type": "poster"
+    },
+    "modified": "2021-06-18T09:51:07.650592+00:00",
+    "owner": 75563,
+    "record_id": 846331,
+    "state": "done",
+    "submitted": true,
+    "title": "A report about air pollution in Grenoble"
+}
+#+end_example
