@@ -9,6 +9,10 @@
 
 import sys, getopt
 
+LICENCE = ''
+EMBARGO_DATE = ''
+ACCESS_CONDITIONS= ''
+
 # function to call whenever we can to choose an upload type:
 def setting_uploadtype():
     # the possible types of the uploads
@@ -121,6 +125,7 @@ def setting_accessright ():
         # need to specify embargo_date
         print('Specify the Embargo date. The format is: YYYY-MM-DD. \n')
         embargo_date = input()
+        EMBARGO_DATE = embargo_date
 
     if access_right == 'embargoed' or access_right == 'open':
         # need to specify the license
@@ -128,20 +133,23 @@ def setting_accessright ():
         print("0 - Creative Commons Attribution 4.0 International \n")
         print("1 - Creative Commons Attribution 1.0 Generic \n")
         print("2 - Creative Commons Attribution 2.0 Generic \n")
-        print("3 - Creative Commons Attribution 3.0 Unported \n")               
+        print("3 - Creative Commons Attribution 3.0 Unported \n")
         n = int(input('Enter the correspoding number: ')) 
         license = licenses[n]
+        LICENCE = license
 
     if access_right == 'restricted':
         # need to specify access_conditions
         print('Specify the conditions under which you grant users access to the files in your upload. \n')
         access_conditions = input()
+        ACCESS_CONDITIONS = access_conditions
 
-
+    return access_right
 
 # this is the function that will be used to publish the deposit
 def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     import json
+    import requests
     # initializing the required metadata if the file is not given
     if not pub_file:
         # setting the type of the upload using the choosetype function
@@ -164,7 +172,8 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
                 'access_right': access_right
             }
         }      
-        data = json.dumps(data)  
+        data = json.dumps(data) 
+
     # if the file is already written by the user, we can simply use it    
     else:
         with open(pub_file, "rb") as fp:
@@ -180,14 +189,15 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
         url = 'https://zenodo.org/api/deposit/depositions/%s' % deposit_id
     else:
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % deposit_id
-    r = requests.put(url, params=params, json={}, data=data)
-
+    r = requests.put(url, params=params, json={}, data=data, headers=headers)
+    print(r.json())
     # publishing
     if not sandbox_url:
         url = 'https://zenodo.org/api/deposit/depositions/%s/actions/publish' % deposit_id    
     else:
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' % deposit_id
     r = requests.post(url,params=params, json={}, headers=headers)    
+    print(r.json())
 
     
 # this is the main function
@@ -212,9 +222,8 @@ def main(argv):
             file_path = arg
         elif opt in ("-u", "--url"):
             url= arg
-    
+
     publish(deposit_id, key, file_path, url)
 
-
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])
