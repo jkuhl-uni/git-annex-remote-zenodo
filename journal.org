@@ -5153,6 +5153,7 @@ https://git-annex.branchable.com/design/encryption/
 https://git-annex.branchable.com/encryption/
 
 ** testing the different types of encryption in a remote.
+*** hybrid.
 first, let's make the directory where we will be doing our tests.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 cd ~
@@ -5352,6 +5353,8 @@ git annex whereis Essay.pdf
 :   	572ad22c-6d8a-40d0-afc1-7adc8c78798a -- nubudi@ubunto:~/tests_enc/hybrid_enc/test_enc_hybrid [here]
 :    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
 : ok
+
+*** shared.
 
 ** editing the metadata of a published record.
 Let's try to change some of the metadata of a record that's already
@@ -5609,3 +5612,6 @@ print(json.dumps(r.json(), indent=4))
     "title": "A report about air pollution in Grenoble"
 }
 #+end_example
+
+
+* Monday 21/06.
