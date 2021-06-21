@@ -5354,8 +5354,6 @@ git annex whereis Essay.pdf
 :    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
 : ok
 
-*** shared.
-
 ** editing the metadata of a published record.
 Let's try to change some of the metadata of a record that's already
 been published. To do so, we first need to send a post request to the
@@ -5615,3 +5613,807 @@ print(json.dumps(r.json(), indent=4))
 
 
 * Monday 21/06.
+** shared.
+first, let's make the directory where we will be doing our tests.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc
+mkdir shared_enc
+cd shared_enc
+mkdir test_enc_shared
+cd test_enc_shared
+#+END_SRC
+
+#+RESULTS:
+: !!: command not found
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+pwd
+#+END_SRC
+#+RESULTS:
+: /home/nubudi/tests_enc/shared_enc/test_enc_shared
+
+initiating the git and the git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/tests_enc/shared_enc/test_enc_shared/.git/
+: init  ok
+: (recording state in git...)
+
+adding a bunch of files to do the test
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp -R ~/Downloads/writing /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRC
+
+#+RESULTS:
+
+Committing the changes after adding the files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/shared_enc
+mkdir shareddir
+#+END_SRC
+
+#+RESULTS:
+
+
+Initializing the remote
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/shared_enc/test_enc_shared
+git annex initremote shareddir type=directory directory=/home/nubudi/tests_enc/shared_enc/shareddir encryption=shared 
+#+END_SRC
+
+#+RESULTS:
+: 
+: initremote shareddir (encryption setup) (encryption key stored in git repository) ok
+: (recording state in git...)
+
+
+
+adding files to the repository by copying them into it first and then
+adding them into the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/nami.JPG /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add nami.JPG
+#+END_SRC
+
+#+RESULTS:
+: add nami.JPG ok
+: (recording state in git...)
+
+copyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf /home/nubudi/tests_enc/shared_enc/test_enc_shared
+cp ~/Downloads/flows.json /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add Essay.pdf ok
+: add flows.json ok
+: add writing/drafts/_Project Pain.pdf ok
+: add writing/drafts/the quest for mortality.pdf ok
+: add writing/essays/OumaimaHajji_5G.pdf ok
+: add writing/notes/Internship_Notes.pdf ok
+: add writing/notes/notes.pdf ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|shareddir
+||web
+|||bittorrent
+||||
+X___ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to shareddir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf (to shareddir...)
+: 10 B/s 1h17m58s                                  ok
+: (recording state in git...)
+
+Now, let's check the file in the remote directory where we have
+uploaded it.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to shareddir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf ok
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/shared_enc/shareddir/d76/dc0
+ls 
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/shared_enc/shareddir/d76/dc0/GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
+file GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333: GPG symmetrically encrypted data (AES256 cipher)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRCd76/dc0
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|shareddir
+||web
+|||bittorrent
+||||
+_X__ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (1 copy) 
+:   	8be9097b-d87b-4df9-a532-f465272088da -- [shareddir]
+: ok
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from shareddir
+#+END_SRC
+
+#+RESULTS:
+: get Essay.pdf (from shareddir...)
+: 93 KiB/s 0s100%             63 MiB/s 0s                            (checksum...) ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (2 copies) 
+:   	8be9097b-d87b-4df9-a532-f465272088da -- [shareddir]
+:    	97b463f9-c944-492e-b29f-85d01293dc86 -- nubudi@ubunto:~/tests_enc/shared_enc/test_enc_shared [here]
+: ok
+
+** pubkey.
+first, let's make the directory where we will be doing our tests.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc
+mkdir pubkey_enc
+cd pubkey_enc
+mkdir test_enc_pubkey
+cd test_enc_pubkey
+#+END_SRC
+
+#+RESULTS:
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+pwd
+#+END_SRC
+#+RESULTS:
+: /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey
+
+initiating the git and the git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey/.git/
+: init  ok
+: (recording state in git...)
+
+adding a bunch of files to do the test
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp -R ~/Downloads/writing /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey
+#+END_SRC
+
+#+RESULTS:
+
+Committing the changes after adding the files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/pubkey_enc
+mkdir pubdir
+#+END_SRC
+
+#+RESULTS:
+
+
+Initializing the remote
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey
+git annex initremote pubdir type=directory directory=/home/nubudi/tests_enc/pubkey_enc/pubdir encryption=pubkey keyid=69E2FB9A11D14CB3CB3A12BCCD7D01BA0347F528
+#+END_SRC
+
+#+RESULTS:
+: 
+: initremote pubdir (encryption setup) (to gpg keys: CD7D01BA0347F528) ok
+: (recording state in git...)
+
+
+
+adding files to the repository by copying them into it first and then
+adding them into the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/nami.JPG /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add nami.JPG
+#+END_SRC
+
+#+RESULTS:
+: add nami.JPG ok
+: (recording state in git...)
+
+copyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey
+cp ~/Downloads/flows.json /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add Essay.pdf ok
+: add flows.json ok
+: add writing/drafts/_Project Pain.pdf ok
+: add writing/drafts/the quest for mortality.pdf ok
+: add writing/essays/OumaimaHajji_5G.pdf ok
+: add writing/notes/Internship_Notes.pdf ok
+: add writing/notes/notes.pdf ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|pubdir
+||web
+|||bittorrent
+||||
+X___ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to pubdir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf (to pubdir...)
+: 114 KiB/s 0s                            ok
+: (recording state in git...)
+
+Now, let's check the file in the remote directory where we have
+uploaded it.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to pubdir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf ok
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/pubkey_enc/pubdir/17d/66d
+ls 
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--857cfa94d9f6e81e38d5e824133b164b5f17c895
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/pubkey_enc/pubdir/17d/66d/GPGHMACSHA1--857cfa94d9f6e81e38d5e824133b164b5f17c895
+file GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333: cannot open `GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333' (No such file or directory)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/pubkey_enc/test_enc_pubkey
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: drop Essay.pdf ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|pubdir
+||web
+|||bittorrent
+||||
+_X__ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (1 copy) 
+:   	2cdd715b-6fda-4b2d-8d63-73e944025c4e -- [pubdir]
+: ok
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from pubdir
+#+END_SRC
+
+#+RESULTS:
+: get Essay.pdf (from pubdir...)
+: 65 KiB/s 0s100%             29 MiB/s 0s                            (checksum...) ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (2 copies) 
+:   	2cdd715b-6fda-4b2d-8d63-73e944025c4e -- [pubdir]
+:    	7a7d5f29-0354-4fd2-b359-49018e23e925 -- nubudi@ubunto:~/tests_enc/pubkey_enc/test_enc_pubkey [here]
+: ok
+
+** sharedpubkey.
+first, let's make the directory where we will be doing our tests.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc
+mkdir sharedpubkey_enc
+cd sharedpubkey_enc
+mkdir test_enc_sharedpubkey
+cd test_enc_sharedpubkey
+#+END_SRC
+
+#+RESULTS:
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+pwd
+#+END_SRC
+#+RESULTS:
+: /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey
+
+initiating the git and the git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey/.git/
+: init  ok
+: (recording state in git...)
+
+adding a bunch of files to do the test
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp -R ~/Downloads/writing /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey
+#+END_SRC
+
+#+RESULTS:
+
+Committing the changes after adding the files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/sharedpubkey_enc
+mkdir sharedpubdir
+#+END_SRC
+
+#+RESULTS:
+
+
+Initializing the remote
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey
+git annex initremote sharedpubdir type=directory directory=/home/nubudi/tests_enc/sharedpubkey_enc/sharedpubdir encryption=sharedpubkey keyid=69E2FB9A11D14CB3CB3A12BCCD7D01BA0347F528
+#+END_SRC
+
+#+RESULTS:
+: 
+: initremote sharedpubdir (encryption setup) (to gpg keys: CD7D01BA0347F528) ok
+: (recording state in git...)
+
+
+
+adding files to the repository by copying them into it first and then
+adding them into the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/nami.JPG /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add nami.JPG
+#+END_SRC
+
+#+RESULTS:
+: add nami.JPG ok
+: (recording state in git...)
+
+copyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey
+cp ~/Downloads/flows.json /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add Essay.pdf ok
+: add flows.json ok
+: add writing/drafts/_Project Pain.pdf ok
+: add writing/drafts/the quest for mortality.pdf ok
+: add writing/essays/OumaimaHajji_5G.pdf ok
+: add writing/notes/Internship_Notes.pdf ok
+: add writing/notes/notes.pdf ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|sharedpubdir
+||web
+|||bittorrent
+||||
+X___ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to sharedpubdir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf (to sharedpubdir...)
+: 112 KiB/s 0s                            ok
+: (recording state in git...)
+
+Now, let's check the file in the remote directory where we have
+uploaded it.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to sharedpubdir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf ok
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/sharedpubkey_enc/sharedpubdir/8c7/613
+ls 
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--88a323dab9604f245953a14826ca76101017ca2d
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/sharedpubkey_enc/sharedpubdir/8c7/613/GPGHMACSHA1--88a323dab9604f245953a14826ca76101017ca2d
+file GPGHMACSHA1--88a323dab9604f245953a14826ca76101017ca2d
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--88a323dab9604f245953a14826ca76101017ca2d: PGP RSA encrypted session key - keyid: 58EDAFD4 8F968863 RSA (Encrypt or Sign) 3072b .
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: drop Essay.pdf ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|sharedpubdir
+||web
+|||bittorrent
+||||
+_X__ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (1 copy) 
+:   	0dd2f589-bf95-48b0-9897-4cc80bd4bca7 -- [sharedpubdir]
+: ok
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from sharedpubdir
+#+END_SRC
+
+#+RESULTS:
+: get Essay.pdf (from sharedpubdir...)
+: 67 KiB/s 0s100%              2 MiB/s 0s                            (checksum...) ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (2 copies) 
+:   	0dd2f589-bf95-48b0-9897-4cc80bd4bca7 -- [sharedpubdir]
+:    	62b28b33-fc2c-486e-a933-36832fcc1fca -- nubudi@ubunto:~/tests_enc/sharedpubkey_enc/test_enc_sharedpubkey [here]
+: ok
+
+** adding a second key (hybrid enc).
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc
+#+END_SRC
+
+#+RESULTS:
+
+Now, we can create a new gpg key simply by using the command 'gpg --generate-key'
+
+Enabling the remote that we have already created in this new repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+git annex enableremote hybdir directory=/home/nubudi/tests_enc/hybrid_enc/hybdir keyid+=E2F3567F5286A7E0F19381A30E6AA8479A33E1E4
+#+END_SRC
+
+#+RESULTS:
+: 
+: enableremote hybdir (encryption update) (to gpg keys: 0E6AA8479A33E1E4 CD7D01BA0347F528) ok
+: (recording state in git...)
+
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |hybdir
+: ||web
+: |||bittorrent
+: ||||
+: _X__ Essay.pdf
+: X___ flows.json
+: X___ nami.JPG
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy nami.JPG --to hybdir
+#+END_SRC
+
+#+RESULTS:
+: copy nami.JPG (to hybdir...)
+: 61 B/s 46m17s                                ok
+: (recording state in git...)
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc/hybdir/da8/c95
+ls 
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc/hybdir/da8/c95/GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e
+file GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e: GPG symmetrically encrypted data (AES256 cipher)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: drop Essay.pdf ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |hybdir
+: ||web
+: |||bittorrent
+: ||||
+: _X__ Essay.pdf
+: X___ flows.json
+: XX__ nami.JPG
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (1 copy) 
+:   	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
+: ok
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from hybdir
+#+END_SRC
+
+#+RESULTS:
+: get Essay.pdf (from hybdir...)
+: 96 KiB/s 0s100%             52 MiB/s 0s                            (checksum...) ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (2 copies) 
+:   	572ad22c-6d8a-40d0-afc1-7adc8c78798a -- nubudi@ubunto:~/tests_enc/hybrid_enc/test_enc_hybrid [here]
+:    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
+: ok
