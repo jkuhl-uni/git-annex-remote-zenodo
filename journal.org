@@ -6652,7 +6652,6 @@ git annex list
 : |||test-zenodo
 : ||||
 
-
 *** adding a file to the new version.
 copyign different types of files.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
@@ -6767,137 +6766,209 @@ X__X_ Essay.pdf
 X____ flows.json
 #+end_example
 
+
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex copy Essay.pdf --from test-zenodo --to test-zenodo2
+git annex copy Essay.pdf --from test-zenodo
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-Invalid option `--to'
 
-Usage: git-annex COMMAND
-  git-annex - manage files with git, without checking their contents in
-  
-  Commonly used commands:
-  
-  add             PATH ...         add files to annex
-  addurl          URL ...          add urls to annex
-  assistant                        automatically sync changes
-  copy            PATH ...         copy content of files to/from another repository
-  drop            PATH ...         remove content of files from repository
-  edit            PATH ...         same as unlock
-  export          TREEISH          export content to a remote
-  get             PATH ...         make content of annexed files available
-  help            COMMAND          display help
-  import          PATH ...         move and add files from outside git working copy
-  importfeed      URL ...          import files from podcast feeds
-  lock            PATH ...         undo unlock command
-  mirror          PATH ...         mirror content of files to/from another repository
-  move            PATH ...         move content of files to/from another repository
-  multicast                        multicast file distribution
-  rmurl           FILE URL ...     record file is not available at url
-  status          PATH ...         show the working tree status
-  sync            REMOTE ...       synchronize local repository with remotes
-  undo            PATH ...         undo last change to a file or directory
-  unlock          PATH ...         unlock files for modification
-  watch                            watch for changes and autocommit
-  webapp                           launch webapp
-  
-  Repository setup commands:
-  
-  adjust                           enter adjusted branch
-  config                           configuration stored in git-annex branch
-  dead            REMOTE ...       hide a lost repository or key
-  describe        REMOTE DESC      change description of a repository
-  direct                           switch repository to direct mode
-  enable-tor      uid              enable tor hidden service
-  enableremote    NAME K=V ...     enables git-annex to use a remote
-  group           REMOTE DESC      add a repository to a group
-  groupwanted     GROUP EXPR       get or set groupwanted expression
-  indirect                         switch repository to indirect mode
-  init            DESC             initialize git-annex
-  initremote      NAME K=V ...     creates a special (non-git) remote
-  numcopies       NUMBER           configure desired number of copies
-  p2p                              configure peer-2-peer links between repositories
-  required        REMOTE EXPR      get or set required content expression
-  schedule        REMOTE EXPR      get or set scheduled jobs
-  semitrust       REMOTE ...       return repository to default trust level
-  trust           REMOTE ...       trust a repository
-  ungroup         REMOTE DESC      remove a repository from a group
-  untrust         REMOTE ...       do not trust a repository
-  vicfg                            edit configuration in git-annex branch
-  wanted          REMOTE EXPR      get or set preferred content expression
-  
-  Repository maintenance commands:
-  
-  addunused       NUM|RANGE ...    add back unused files
-  dropunused      NUM|RANGE ...    drop unused file content
-  expire          REMOTE:TIME ...  expire inactive repositories
-  fix             PATH ...         fix up links to annexed content
-  forget                           prune git-annex branch history
-  fsck            PATH ...         find and fix problems
-  merge                            automatically merge changes from remotes
-  remotedaemon                     persistent communication with remotes
-  repair                           recover broken git repository
-  unused                           look for unused file content
-  upgrade                          upgrade repository layout
-  
-  Query commands:
-  
-  find            PATH ...         lists available files
-  info            ITEM ...         shows  information about the specified item or the repository as a whole
-  inprogress      PATH ...         access files while they're being downloaded
-  list            PATH ...         show which remotes contain files
-  log             PATH ...         shows location log
-  map                              generate map of repositories
-  version                          show version info
-  whereis         PATH ...         lists repositories that have file content
-  
-  Metadata commands:
-  
-  metadata        PATH ...         sets or gets metadata of a file
-  vadd            FIELD=GLOB ...   add subdirs to current view
-  vcycle                           switch view to next layout
-  vfilter         FIELD=VALUE ...  filter current view
-  view            FIELD=VALUE ...  enter a view branch
-  vpop            NUMBER           switch back to previous view
-  
-  Utility commands:
-  
-  migrate         PATH ...         switch data to different backend
-  reinit          UUID|DESC        initialize repository, reusing old UUID
-  reinject        SRC DEST ...     inject content of file back into annex
-  unannex         PATH ...         undo accidental add command
-  uninit          PATH ...         de-initialize git-annex and clean out repository
-  
-  Plumbing commands:
-  
-  calckey         FILE ...         calculates the key that would be used to refer to a file
-  checkpresentkey KEY REMOTE       check if key is present in remote
-  contentlocation KEY ...          looks up content for a key
-  diffdriver      -- cmd --        external git diff driver shim
-  dropkey         KEY ...          drops annexed content for specified keys
-  examinekey      KEY ...          prints information from a key
-  findref         REF              lists files in a git ref
-  fromkey         KEY PATH ...     adds a file using a specific key
-  lookupkey       FILE ...         looks up key used for file
-  matchexpression EXPR             checks if a preferred content expression matches
-  post-receive                     run by git post-receive hook
-  pre-commit      PATH ...         run by git pre-commit hook
-  proxy           -- git command   safely bypass direct mode guard
-  readpresentkey  KEY UUID         read records of where key is present
-  registerurl     KEY URL          registers an url for a key
-  rekey           PATH KEY ...     change keys used for files
-  resolvemerge                     resolve merge conflicts
-  setkey          KEY PATH         sets annexed content for a key
-  setpresentkey   KEY UUID [1|0]   change records of where key is present
-  smudge          FILE             git smudge filter
-  transferkey     KEY              transfers a key from or to a remote
-  transferkeys                     transfers keys
-  
-  Testing commands:
-  
-  fuzztest                         generates fuzz test files
-  test                             run built-in test suite
-  testremote      REMOTE           test transfers to/from a remote
+When we try to upload the file to the remote, we get a message that it
+already exists there (since the key that it was named by is the same
+as the one given by git-annex and also the one in the old version). 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to test-zenodo2
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: Yes, this file exists in the remote: SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+: ok
+: (recording state in git...)
+
+Now, we can finally see that the file is considered come existent in
+the newversion remote test-zenodo2.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: X__XX Essay.pdf
+: X____ flows.json
+
+*** test: getting info on a deposit.
+**** This is done before adding the metadata on the website.
+#+begin_src python :results output :exports both
+import json
+import requests
+
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/866525', params={'access_token': ACCESS_TOKEN})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+200
+{
+    "conceptrecid": "866524",
+    "created": "2021-06-17T12:53:20.532100+00:00",
+    "files": [
+        {
+            "checksum": "7bf33ffde758357bbc502a00217b2285",
+            "filename": "GPGHMACSHA1--220f327281256e704e7987589cf1625abb15f4db",
+            "filesize": 47652,
+            "id": "a3e4d856-7500-4e23-b5e7-2c5b89532059",
+            "links": {
+                "download": "https://sandbox.zenodo.org/api/files/406520ff-2af3-4989-a50b-bee63a4fa2bd/GPGHMACSHA1--220f327281256e704e7987589cf1625abb15f4db",
+                "self": "https://sandbox.zenodo.org/api/deposit/depositions/866525/files/a3e4d856-7500-4e23-b5e7-2c5b89532059"
+            }
+        }
+    ],
+    "id": 866525,
+    "links": {
+        "bucket": "https://sandbox.zenodo.org/api/files/406520ff-2af3-4989-a50b-bee63a4fa2bd",
+        "discard": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/discard",
+        "edit": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/edit",
+        "files": "https://sandbox.zenodo.org/api/deposit/depositions/866525/files",
+        "html": "https://sandbox.zenodo.org/deposit/866525",
+        "latest_draft": "https://sandbox.zenodo.org/api/deposit/depositions/866525",
+        "latest_draft_html": "https://sandbox.zenodo.org/deposit/866525",
+        "newversion": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/newversion",
+        "publish": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/publish",
+        "registerconceptdoi": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/registerconceptdoi",
+        "self": "https://sandbox.zenodo.org/api/deposit/depositions/866525"
+    },
+    "metadata": {
+        "prereserve_doi": {
+            "doi": "10.5072/zenodo.866525",
+            "recid": 866525
+        }
+    },
+    "modified": "2021-06-17T12:53:20.532121+00:00",
+    "owner": 75563,
+    "record_id": 866525,
+    "state": "unsubmitted",
+    "submitted": false,
+    "title": ""
+}
 #+end_example
+
+**** This is after.
+#+begin_src python :results output :exports both
+import json
+import requests
+
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/866525', params={'access_token': ACCESS_TOKEN})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+200
+{
+    "conceptrecid": "866524",
+    "created": "2021-06-17T12:53:20.532100+00:00",
+    "doi": "",
+    "doi_url": "https://doi.org/",
+    "files": [
+        {
+            "checksum": "7bf33ffde758357bbc502a00217b2285",
+            "filename": "GPGHMACSHA1--220f327281256e704e7987589cf1625abb15f4db",
+            "filesize": 47652,
+            "id": "a3e4d856-7500-4e23-b5e7-2c5b89532059",
+            "links": {
+                "download": "https://sandbox.zenodo.org/api/files/406520ff-2af3-4989-a50b-bee63a4fa2bd/GPGHMACSHA1--220f327281256e704e7987589cf1625abb15f4db",
+                "self": "https://sandbox.zenodo.org/api/deposit/depositions/866525/files/a3e4d856-7500-4e23-b5e7-2c5b89532059"
+            }
+        }
+    ],
+    "id": 866525,
+    "links": {
+        "bucket": "https://sandbox.zenodo.org/api/files/406520ff-2af3-4989-a50b-bee63a4fa2bd",
+        "discard": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/discard",
+        "edit": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/edit",
+        "files": "https://sandbox.zenodo.org/api/deposit/depositions/866525/files",
+        "html": "https://sandbox.zenodo.org/deposit/866525",
+        "latest_draft": "https://sandbox.zenodo.org/api/deposit/depositions/866525",
+        "latest_draft_html": "https://sandbox.zenodo.org/deposit/866525",
+        "newversion": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/newversion",
+        "publish": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/publish",
+        "registerconceptdoi": "https://sandbox.zenodo.org/api/deposit/depositions/866525/actions/registerconceptdoi",
+        "self": "https://sandbox.zenodo.org/api/deposit/depositions/866525"
+    },
+    "metadata": {
+        "access_right": "open",
+        "creators": [
+            {
+                "name": "O, H"
+            }
+        ],
+        "description": "<p>Test with an enc file.</p>",
+        "doi": "",
+        "license": "CC-BY-4.0",
+        "prereserve_doi": {
+            "doi": "10.5072/zenodo.866525",
+            "recid": 866525
+        },
+        "publication_date": "2021-06-22",
+        "publication_type": "article",
+        "title": "Test containing an encrypted file",
+        "upload_type": "publication"
+    },
+    "modified": "2021-06-22T13:38:28.948109+00:00",
+    "owner": 75563,
+    "record_id": 866525,
+    "state": "unsubmitted",
+    "submitted": false,
+    "title": "Test containing an encrypted file"
+}
+#+end_example
+
+**** function to look up the metadata of the deposit.
+This function is to be used to look up all the metadata that has been
+set in the deposit and see if the user has added some info after the
+creation of the deposit (ex: title, author, ..). So it needs to have
+access to the list of the keys and values in metadata.
+
+
+
+#+begin_src python :results output :exports both
+import json
+import requests
+
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/851823', params={'access_token': ACCESS_TOKEN}) 
+print(r.status_code)
+print(json.dumps(r.json()['metadata'], indent=4))
+#metadata = json.dumps(r.json()['metadata'], indent=4)
+metadata= r.json()['metadata']
+if 'title' in metadata.keys():
+    print("exists")
+if 'prereserve_doi' in metadata.keys():
+    print("exists")
+print(type(metadata))
+#+end_src
+
+#+RESULTS:
+: 200
+: {
+:     "prereserve_doi": {
+:         "doi": "10.5072/zenodo.851823",
+:         "recid": 851823
+:     }
+: }
+: exists
+: <class 'dict'>

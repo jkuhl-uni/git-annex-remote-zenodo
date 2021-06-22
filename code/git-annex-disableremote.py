@@ -146,12 +146,23 @@ def setting_accessright ():
 
     return access_right
 
+# method to look up the metadata on the remote before publishing.
+# returns true if all the needed metadata is given or false if it's not
+def lookup_metadata():
+
+    return
+
+
 # this is the function that will be used to publish the deposit
 def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     import json
     import requests
     # initializing the required metadata if the file is not given
     if not pub_file:
+        # look to see if the user has already set the metadata in the remote manually.
+        # if it's the case, either ask the user if the info is ok and publish directly
+        # or make them fill in the information manually on the command line.
+        lookup_metadata() 
         # setting the type of the upload using the choosetype function
         upload_type = setting_uploadtype() 
         # setting the title of the upload
