@@ -5034,7 +5034,7 @@ git annex info writing/the_deceitful_truth.odt
 : present: true
 
 ** Notes taken during the meeting.
-+ disableremote: publish + transforms the remote into aweb remote +
++ disableremote: publish + transforms the remote into a web remote +
   disable the remote locally (git rm ) + need to take care of
   uploading an archive of the files to zendo before publishing the
   other deposit and keeps track of the files that have been copied
@@ -6560,4 +6560,220 @@ git annex whereis Essay.pdf
 : whereis Essay.pdf (2 copies) 
 :   	572ad22c-6d8a-40d0-afc1-7adc8c78798a -- nubudi@ubunto:~/tests_enc/hybrid_enc/test_enc_hybrid [here]
 :    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
+: ok
+
+** test: keeping a link between the files in a published record and in the new version.
+*** Preparation.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/Desktop
+mkdir test-remote-newver
+#+END_SRC
+
+#+RESULTS:
+: !!: command not found
+
+First, we need to export the path to where the git-annex-remote-zenodo
+function so as to be able to locate it when executing.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+export PATH=$PATH:/home/nubudi/Desktop/Internship/code
+#+END_SRC
+
+#+RESULTS:
+
+Let's check if the path has been successfully exported:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/Internship/code
+
+We also need to make the program executable. To do this, we can simply
+change the permissions in the properties of the program (by checking
+the box) or we can do it using the shell command line with ths
+command (go to the path where the program is to execute it):
+
+#+BEGIN_EXAMPLE shell :session *shell* :results output :exports both
+chmod +x git-annex-remote-zenodo
+#+END_EXAMPLE
+
+You'll need the sheebang line #!/usr/bin/env python3 to execute this
+command which we added to the program.
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/Desktop/test-remote-newver
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git init
+git annex init
+#+ENDcopyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf /home/nubudi/tests_enc/shared_enc/test_enc_shared
+cp ~/Downloads/flows.json /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add Essay.pdf ok
+: add flows.json ok
+: add writing/drafts/_Project Pain.pdf ok
+: add writing/drafts/the quest for mortality.pdf ok
+: add writing/essays/OumaimaHajji_5G.pdf ok
+: add writing/notes/Internship_Notes.pdf ok
+: add writing/notes/notes.pdf ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|shareddir
+||web
+|||bittorrent
+||||
+X___ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to shareddir
+#+END_SRC
+_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/Desktop/test-remote-newver/.git/
+: init  ok
+: (recording state in git...)
+
+
+Now, we can simply work with git annex like we would usually do. If we
+are working in a new repository, we will have to initialize git and
+git annex before the next steps. In this case, I'm working in an
+already initialized repository. We also need to initialize a special
+remote using the command with added options (ex: url to specify if we
+want to use the sandbox or newversion if we want to initialize the
+remote as a new version of an already published remote)
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex initremote test-zenodo type=external externaltype=zenodo encryption=none url=sandbox newversion=848907 key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+#+END_SRC
+
+#+RESULTS:
+: initremote test-zenodo finished the get operation. Here is the returned message :200
+: 
+: finished the post operation. Here is the returned message :201
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: ok
+: (recording state in git...)
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+*** adding a file to the new version.
+copyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf ~/Desktop/test-remote-newver
+cp ~/Downloads/flows.json ~/Desktop/test-remote-newver
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add Essay.pdf ok
+: add flows.json ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||
+: X___ Essay.pdf
+: X___ flows.json
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to test-zenodo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+copy Essay.pdf finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-zenodo...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf finished the get operation. Here is the returned message :200
+: 
+: (2 copies) 
+:   	3d398bfb-f0a3-4635-92f5-02f31c0c054e -- nubudi@ubunto:~/Desktop/test-remote-newver [here]
+:    	ae1c6500-551f-48dd-90ae-1e92a4f238fc -- [test-zenodo]
 : ok

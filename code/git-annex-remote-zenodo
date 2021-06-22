@@ -37,15 +37,15 @@ class ZenodoRemote(ExportRemote):
             request = requests.put(url, params=params, json={}, data=data)
         else:
             request = requests.delete(url, params= params)
-            
+
         # informing the user of the currint state of the operation        
-        print("finished the " + query_method + " operation. Here is the returned message :" + request.status_code + "\n")
+        print("finished the " + query_method + " operation. Here is the returned message :" + str(request.status_code) + "\n")
         #returning the resulting request for later uses
         return request
 
     def create_newversion(self, oldrecord_id):
         # making sure that the given id for the old record is correct
-        url = self.url + '/' + str(oldrecord_id) 
+        url = self.url + '/' + oldrecord_id 
         r = self.query('get', url)
 
         # raise error if there is a problem (the success code is 200)
@@ -53,7 +53,7 @@ class ZenodoRemote(ExportRemote):
             raise RemoteError('error while retrieving the old deposit')
         
         # making the post request to create the new version
-        url = self.url + '/' +  str(oldrecord_id) + '/actions/newversion'
+        url = self.url + '/' +  oldrecord_id + '/actions/newversion'
         r = self.query('post', url)
         
         # raise error if there is a problem (the success code is 201)
@@ -77,7 +77,7 @@ class ZenodoRemote(ExportRemote):
         # getting the url of the remote (Zenodo or Sandbox)
         # the user would need the key for both of them and it's created on the website of the one they chose
         url = self.annex.getconfig('url') 
-        if  url is None:
+        if url is None:
             self.url = 'https://zenodo.org/api/deposit/depositions'
         else:
             self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
@@ -92,14 +92,15 @@ class ZenodoRemote(ExportRemote):
 
         # now, we need to create an empty upload that we will be using from now on
         # it's either a new version of a deposit or a brand new one
-        newversion= self.annex.getconfig('newversion')
-        if not newversion:
+        newversion= str(self.annex.getconfig('newversion'))
+        if newversion is None:
             r = self.query('post', self.url)
         else:   
-            r = self.create_newversion(self.annex.getconfig('newversion'))
+            r = self.create_newversion(newversion)
+           
  
         # making sure that we got the correct success response for creating a new deposit
-        if r.status_code != 201:
+        if r.status_code > 201:
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
             raise RemoteError('could not send a post query to the API')
 
