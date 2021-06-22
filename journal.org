@@ -7185,6 +7185,65 @@ git annex whereis Essay.pdf
 :    	cd38fd0c-ba02-4046-932f-b4b2e110abd9 -- [test-zenodo2]
 : ok
 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: drop Essay.pdf finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: Yes, this file exists in the remote: SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+: ok
+: (recording state in git...)
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: ___XX Essay.pdf
+: X____ flows.json
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+#+END_SRC
+
+#+RESULTS:
+: finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+: [                    ]       0  --.-KB/s               /home/nubudi/Deskto 100%[===================>]  45,69K  --.-KB/s    in 0,03s
+: "/home/nubudi/Desktop/test-remote-newver/.git/annex/tmp/URL-s46788--https&c%%sandbox.zenodo.org%api%-bac5af018f71b35e67e900a9c1cde69c" [1]
+: (to sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG) ok
+: (recording state in git...)
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: ___XX Essay.pdf
+: X____ flows.json
+: XX___ sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+
 *** idk.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 cd ~/Desktop
@@ -7215,6 +7274,4 @@ for i in range(len(r.json())):
 : https://sandbox.zenodo.org/api/deposit/depositions/851823/files/b5f9d7d6-45d6-4763-9363-0d0a33de7a28
 : https://sandbox.zenodo.org/api/deposit/depositions/851823/files/71851844-7020-4b59-a046-97901e9a69e0
 
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex addurl
-#+END_SRC
+

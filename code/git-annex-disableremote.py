@@ -257,7 +257,10 @@ def main(argv):
         elif opt in ("-u", "--url"):
             url= arg
 
+    # first step: publishing the deposit
     publish(deposit_id, key, file_path, url)
+    # second step: 
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
