@@ -7185,6 +7185,7 @@ git annex whereis Essay.pdf
 :    	cd38fd0c-ba02-4046-932f-b4b2e110abd9 -- [test-zenodo2]
 : ok
 
+Let's drop essay.pdf locally.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex drop Essay.pdf
 #+END_SRC
@@ -7198,7 +7199,7 @@ git annex drop Essay.pdf
 : ok
 : (recording state in git...)
 
-
+It's no longer here.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex list
 #+END_SRC
@@ -7213,6 +7214,16 @@ git annex list
 : ___XX Essay.pdf
 : X____ flows.json
 
+Now, let's add the url. Notice that, this time, only the url of the
+file has been given as an argument in the command and not the file
+which is concerned. This could be done when we have a fine that's for
+instance only annexed locally and in the web remote and so we by doing
+this there won't be any problem with confusing the name of the file
+here and the name of the file in other remotes. However, if we have
+one file that we aim to store in multiple remotes, it's better to give
+the name of the file when adding the url (--file=f) so as to be able
+to have homoginy and have easier access to all the remotes that store
+this file.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
 #+END_SRC
@@ -7243,6 +7254,50 @@ git annex list
 : ___XX Essay.pdf
 : X____ flows.json
 : XX___ sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+
+Now, we add the url to the file by giving the name of the concerned file.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG --file=Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+: (recording state in git...)
+
+We can now see that the file Essay.pdf is available in the web
+remote. And seeing that we have dropped it locally, it doesn't appear
+as available here.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: _X_XX Essay.pdf
+: X____ flows.json
+: XX___ sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+#+END_SRC
+
+#+RESULTS:
+: whereis sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG (2 copies) 
+:   	00000000-0000-0000-0000-000000000001 -- web
+:    	3d398bfb-f0a3-4635-92f5-02f31c0c054e -- nubudi@ubunto:~/Desktop/test-remote-newver [here]
+: 
+:   web: https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+:   web: https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+: ok
 
 *** idk.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
