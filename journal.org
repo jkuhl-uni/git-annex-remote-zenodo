@@ -6417,3 +6417,6 @@ git annex whereis Essay.pdf
 :   	572ad22c-6d8a-40d0-afc1-7adc8c78798a -- nubudi@ubunto:~/tests_enc/hybrid_enc/test_enc_hybrid [here]
 :    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
 : ok
+
+
+* Tuesday 22/06.
