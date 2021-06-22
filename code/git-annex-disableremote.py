@@ -148,9 +148,19 @@ def setting_accessright ():
 
 # method to look up the metadata on the remote before publishing.
 # returns true if all the needed metadata is given or false if it's not
-def lookup_metadata():
-
-    return
+# returns the dictionary containing the metadata as well to show the user
+# so that they decide whether to change or not.
+def lookup_metadata(deposit_id, key):
+    import requests
+    url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % str(deposit_id)
+    r = requests.get(url, params = {'access_token': key})
+    metadata = r.json()['metadata']
+    # In Zenodo, we can't change only one of these and save the file since we have to 
+    # give all of them (they are required) to be able to save it
+    # so, by knowing that one of them is absent, we can know that they all are.
+    if 'title' or 'upload_type' or 'description' or 'creators' or 'access_right' not in metadata.keys():
+        return False, {}
+    return True, metadata
 
 
 # this is the function that will be used to publish the deposit
@@ -159,31 +169,44 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     import requests
     # initializing the required metadata if the file is not given
     if not pub_file:
+        
         # look to see if the user has already set the metadata in the remote manually.
         # if it's the case, either ask the user if the info is ok and publish directly
         # or make them fill in the information manually on the command line.
-        lookup_metadata() 
-        # setting the type of the upload using the choosetype function
-        upload_type = setting_uploadtype() 
-        # setting the title of the upload
-        title = input('Enter the title of the upload: ')
-        # setting the description of the upload
-        description = input('Enter a basic description of the upload')
-        # setting the access right of the upload
-        access_right = setting_accessright()
-        # getting information about the creators of the publication
-        creators = setting_creators()
-        # setting up the data
-        data = {
-            'metadata': {
-                'title': title,
-                'upload_type': upload_type,
-                'description': description,
-                'creators': creators,
-                'access_right': access_right
-            }
-        }      
-        data = json.dumps(data) 
+        bool, dict = lookup_metadata(deposit_id, key) 
+        # showing the user the metadata they have submitted so as to see if they want 
+        # to keep them or update them
+        if bool:
+            print("Here is the metadata of the deposit. Do you want to change it (y/n)? \n")
+            print(json.dumps(dict, indent=4))
+            response = input()
+
+        # if they don't want to change it, we can use the metadata as the data given when publishing
+        if response == False:
+            data = dict
+        # or else, they want to update the existing metadata or want to submit it from the start
+        elif response == True or bool == False: 
+            # setting the type of the upload using the choosetype function
+            upload_type = setting_uploadtype() 
+            # setting the title of the upload
+            title = input('Enter the title of the upload: ')
+            # setting the description of the upload
+            description = input('Enter a basic description of the upload')
+            # setting the access right of the upload
+            access_right = setting_accessright()
+            # getting information about the creators of the publication
+            creators = setting_creators()
+            # setting up the data
+            data = {
+                'metadata': {
+                    'title': title,
+                    'upload_type': upload_type,
+                    'description': description,
+                    'creators': creators,
+                    'access_right': access_right
+                }
+            }      
+            data = json.dumps(data) 
 
     # if the file is already written by the user, we can simply use it    
     else:

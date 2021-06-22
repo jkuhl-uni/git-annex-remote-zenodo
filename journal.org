@@ -6955,7 +6955,7 @@ print(r.status_code)
 print(json.dumps(r.json()['metadata'], indent=4))
 #metadata = json.dumps(r.json()['metadata'], indent=4)
 metadata= r.json()['metadata']
-if 'title' in metadata.keys():
+if 'title' or 'id' not in metadata.keys():
     print("exists")
 if 'prereserve_doi' in metadata.keys():
     print("exists")
@@ -6963,12 +6963,15 @@ print(type(metadata))
 #+end_src
 
 #+RESULTS:
-: 200
-: {
-:     "prereserve_doi": {
-:         "doi": "10.5072/zenodo.851823",
-:         "recid": 851823
-:     }
-: }
-: exists
-: <class 'dict'>
+#+begin_example
+200
+{
+    "prereserve_doi": {
+        "doi": "10.5072/zenodo.851823",
+        "recid": 851823
+    }
+}
+exists
+exists
+<class 'dict'>
+#+end_example
