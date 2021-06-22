@@ -3386,7 +3386,7 @@ git annex find --metadata tag=test_metadata
 : S8/ARI/TP/Collection_tokens/CACM-1748.flt
 : S8/ARI/TP2/Collection_tokens/CACM-1748.flt
 
-** The succession of commands in this case.
+** The succession of commands in this case / subprocess.
 - When we add the file to the annexed files, we can easily retrieve
   the information about this file using the find command (here we have
   to have already set tags to differentiate the topics of the files
@@ -6805,8 +6805,8 @@ git annex list
 : X__XX Essay.pdf
 : X____ flows.json
 
-*** test: getting info on a deposit.
-**** This is done before adding the metadata on the website.
+** test: getting info on a deposit.
+*** This is done before adding the metadata on the website.
 #+begin_src python :results output :exports both
 import json
 import requests
@@ -6864,7 +6864,7 @@ print(json.dumps(r.json(), indent=4))
 }
 #+end_example
 
-**** This is after.
+*** This is after.
 #+begin_src python :results output :exports both
 import json
 import requests
@@ -6937,7 +6937,7 @@ print(json.dumps(r.json(), indent=4))
 }
 #+end_example
 
-**** function to look up the metadata of the deposit.
+*** function to look up the metadata of the deposit.
 This function is to be used to look up all the metadata that has been
 set in the deposit and see if the user has added some info after the
 creation of the deposit (ex: title, author, ..). So it needs to have
@@ -6981,3 +6981,240 @@ exists
 exists
 <class 'dict'>
 #+end_example
+
+** addurl / registerurl.
+*** test addurl.
+Let's go to the directory where we have already initialized a remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/Desktop/test-remote-newver
+#+END_SRC
+
+#+RESULTS:
+Making sure that the path is set.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/Internship/code
+
+Now, let's check the whereabouts of a file we have annexed and
+exported to a few remotes.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: X__XX Essay.pdf
+: X____ flows.json
+
+As we can see, it's not available in the web remote. To make it so, we
+need to add it. We can use the command addurl that allows us to add
+urls to the annex. We need the url of the files as well as the name of
+the file we want to add to this url.
+
+Here, we try to add the url without giving anymore info and as we can
+see there is a probelm since the url is not available. This is due to
+the fact that we need the access token whenever we make a request to
+get a file from zenodo.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+#+END_SRC
+
+#+RESULTS:
+: finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf 
+: https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf:
+: 2021-06-22 17:04:18 ERROR 404: NOT FOUND.
+: failed
+: git-annex: addurl: 1 failed
+
+This is a second try but this time we also give the access token as
+well as the name of the file. We can see that the requests have been
+well executed and that there is no error. We can also see that the
+urlhas been added.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG --file=Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: addurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+: (recording state in git...)
+
+Now, what's left is to see if the file figures in the web remote as
+well.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: XX_XX Essay.pdf
+: X____ flows.json
+
+As can be seen above, the file is now in the web remote. Let's try
+dorpping it locally and fetching it from the web remote.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: drop Essay.pdf (checking https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG...) ok
+: (recording state in git...)
+
+It's no longer here.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: _X_XX Essay.pdf
+: X____ flows.json
+
+Now, let's get it from the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from web
+#+END_SRC
+
+#+RESULTS:
+: get Essay.pdf (from web...)
+: [                    ]       0  --.-KB/s               /home/nubudi/Deskto 100%[===================>]  45,69K  --.-KB/s    in 0,008s
+: "/home/nubudi/Desktop/test-remote-newver/.git/annex/tmp/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf" [1]
+: (checksum...) ok
+: (recording state in git...)
+
+This was done successfully!
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: XX_XX Essay.pdf
+: X____ flows.json
+
+*** test registerurl.
+First, we will remove the url for the file before testing the command
+registerurl. To do this, we an use this command:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex rmurl Essay.pdf https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+#+END_SRC
+
+#+RESULTS:
+: rmurl Essay.pdf finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: ok
+: (recording state in git...)
+
+It's no longer available on the web remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: X__XX Essay.pdf
+: X____ flows.json
+
+Now, let's register this url. To do this, we can give the url of the
+file as well as the key used to annex the file.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex registerurl SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+#+END_SRC
+
+#+RESULTS:
+: registerurl https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: ok
+
+Now, let's take a look at the list of the annexed files in this
+repository.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: (3 copies) 
+:   	3d398bfb-f0a3-4635-92f5-02f31c0c054e -- nubudi@ubunto:~/Desktop/test-remote-newver [here]
+:    	ae1c6500-551f-48dd-90ae-1e92a4f238fc -- [test-zenodo]
+:    	cd38fd0c-ba02-4046-932f-b4b2e110abd9 -- [test-zenodo2]
+: ok
+
+*** idk.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/Desktop
+#+END_SRC
+
+#+RESULTS:
+
+
+#+begin_src python :results output :exports both
+import json
+import requests
+import subprocess
+
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/851823/files', params={'access_token': ACCESS_TOKEN}) 
+print(r.status_code)
+#print(json.dumps(r.json(), indent=4))
+for i in range(len(r.json())):
+    file_url = r.json()[i]['links']['self']
+    print(file_url)
+    subprocess.run(["/usr/bin/git", "annex", "addurl", file_url])
+    
+#+end_src
+
+#+RESULTS:
+: 200
+: https://sandbox.zenodo.org/api/deposit/depositions/851823/files/451b7ec7-32b8-4b80-bb06-beebe2bb043e
+: https://sandbox.zenodo.org/api/deposit/depositions/851823/files/b5f9d7d6-45d6-4763-9363-0d0a33de7a28
+: https://sandbox.zenodo.org/api/deposit/depositions/851823/files/71851844-7020-4b59-a046-97901e9a69e0
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex addurl
+#+END_SRC
