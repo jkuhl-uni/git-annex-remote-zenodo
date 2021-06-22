@@ -6285,7 +6285,11 @@ git annex whereis Essay.pdf
 : ok
 
 ** adding a second key (hybrid enc).
-
+"You can repeat this process to add any number of gpg keys, including
+your own gpg keys and any public keys of others who you want to give
+access. Anyone with a corresponding secret key will be able to decrypt
+all content that is stored in the remote."
+Let's now add a new key to the remote.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 cd ~/tests_enc/hybrid_enc
 #+END_SRC
@@ -6386,7 +6390,7 @@ git annex list
 : ||web
 : |||bittorrent
 : ||||
-: _X__ Essay.pdf
+: XX__ Essay.pdf
 : X___ flows.json
 : XX__ nami.JPG
 
@@ -6420,3 +6424,140 @@ git annex whereis Essay.pdf
 
 
 * Tuesday 22/06.
+** removing a key (hybrid enc).
+"While a key can later be removed from the list, note that it will not
+prevent the owner of the key from accessing data on the remote (which
+is by design impossible to prevent, short of deleting the remote)."
+
+Let's try removing a key that's been used to encrypt the data in this
+remote. Since we have added two keys, we can choose one of them and
+remote it when enabling the remote.  
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc
+#+END_SRC
+
+#+RESULTS:
+
+Now, we can create a new gpg key simply by using the command 'gpg --generate-key'
+
+Enabling the remote that we have already created in this new repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+git annex enableremote hybdir directory=/home/nubudi/tests_enc/hybrid_enc/hybdir keyid-=E2F3567F5286A7E0F19381A30E6AA8479A33E1E4
+#+END_SRC
+
+#+RESULTS:
+: 
+: enableremote hybdir (encryption update) (to gpg keys: CD7D01BA0347F528) ok
+: (recording state in git...)
+
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: drop Essay.pdf ok
+: (recording state in git...)
+
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |hybdir
+: ||web
+: |||bittorrent
+: ||||
+: _X__ Essay.pdf
+: X___ flows.json
+: XX__ nami.JPG
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy nami.JPG --to hybdir
+#+END_SRC
+
+#+RESULTS:
+: copy nami.JPG ok
+
+We can see that we can access the 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc/hybdir/da8/c95
+ls 
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/hybrid_enc/hybdir/da8/c95/GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e
+file GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--025b1dfb198bdd8cb09792a1b47c5c7e7a12d58e: GPG symmetrically encrypted data (AES256 cipher)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |hybdir
+: ||web
+: |||bittorrent
+: ||||
+: _X__ Essay.pdf
+: X___ flows.json
+: XX__ nami.JPG
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (1 copy) 
+:   	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
+: ok
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from hybdir
+#+END_SRC
+
+#+RESULTS:
+: get Essay.pdf (from hybdir...)
+: 86 KiB/s 0s100%            858 KiB/s 0s                            (checksum...) ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (2 copies) 
+:   	572ad22c-6d8a-40d0-afc1-7adc8c78798a -- nubudi@ubunto:~/tests_enc/hybrid_enc/test_enc_hybrid [here]
+:    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
+: ok
