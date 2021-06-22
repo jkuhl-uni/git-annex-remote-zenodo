@@ -5033,7 +5033,7 @@ git annex info writing/the_deceitful_truth.odt
 : key: SHA256E-s48875--97ac6f560a81ef7509b0278407dc39348e42f29b20d12a4bc2f443f5eea95ed9.odt
 : present: true
 
-*** Notes taken during the meeting.
+** Notes taken during the meeting.
 + disableremote: publish + transforms the remote into aweb remote +
   disable the remote locally (git rm ) + need to take care of
   uploading an archive of the files to zendo before publishing the
