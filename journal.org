@@ -6942,7 +6942,13 @@ This function is to be used to look up all the metadata that has been
 set in the deposit and see if the user has added some info after the
 creation of the deposit (ex: title, author, ..). So it needs to have
 access to the list of the keys and values in metadata.
-
+In zenodo, we can't add metadata for only the title for instance and
+save the draft since all the requiered fields need to be changed as
+well. This is useful in this case since we only need to look if one of
+the required fields is filled to know if the user has filled in the
+Metadata. If it's the case, we can simply use this metadata for
+publishing or change it if the user so chooses. If not, we can just
+ask the user to fill in the required fields that are all missing. 
 
 
 #+begin_src python :results output :exports both
