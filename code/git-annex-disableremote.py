@@ -234,6 +234,22 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     print(r.json())
 
     
+# method that transforms the files into web remotes
+def transformtoweb():
+    # we can simply use the git annex addurl --file and do this for each file as has been previously tested
+    # the option --file will attach the url to the existing file instead of creating a new one.
+    # this way, a trace has been kept of where this file exists (the remotes in this case being Zenodo and the web remote)
+    # to do this, we can use a shell command with a library to facilitate the interaction between the two interfaces.
+    return
+
+# method to disable the remote locally with git rm 
+def disableremote():
+    # use a shell command to remove the remote locally with git rm
+    # this could be done with the library that has been previously tested
+    # this is the last step to be done after having already published the deposit on Zenodo.    
+    return
+
+    
 # this is the main function
 def main(argv):
     url = None
@@ -259,8 +275,10 @@ def main(argv):
 
     # first step: publishing the deposit
     publish(deposit_id, key, file_path, url)
-    # second step: 
-
+    # second step: we need to transform each of the files into a web remote
+    transformtoweb()
+    # third step: we need to disable the remote locally
+    disableremote()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
