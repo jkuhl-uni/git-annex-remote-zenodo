@@ -7571,7 +7571,6 @@ nothing added to commit but untracked files present (use "git add" to track)
 #+end_example
 
 
-
 ** subprocess git-annex test.
 in our case, this module will be used for two things:
   - first, we need to use it to transform each of the annexed files that
@@ -8158,9 +8157,51 @@ for each of the files in the API response:
 #+end_example
 
 **** test implem.
+We can now try to test the algorithm by creating a method that does
+all the steps that will done later on by transformtoweb. 
+
 #+begin_src python :results output :exports both
+import json
+import requests
 import os
 
-os.chdir("/home/nubudi/tes")
-os.system("pwd")
+# first step
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+os.system("git-annex list")
 #+end_src
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-addurl
+||||
+X__X Essay.pdf
+X__X flows.json
+X__X nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+The result is correct however, it's hard to fetch the name of the file
+using the list command so instead we will be using the find command
+which also lists the annexed files.
+
+#+begin_src python :results output :exports both
+import json
+import requests
+import os
+
+# first step
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+os.system("git-annex find").readlines()
+
+#+end_src
+
+#+RESULTS:
