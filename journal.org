@@ -1,4 +1,4 @@
-
+tarted in
 #+TITLE:       lab book
 #+AUTHOR:      Oumaima Hajji
 #+STARTUP: overview indent inlineimages logdrawer
@@ -7570,7 +7570,6 @@ nothing added to commit but untracked files present (use "git add" to track)
  create mode 120000 .#journal.org
 #+end_example
 
-
 ** subprocess git-annex test.
 in our case, this module will be used for two things:
   - first, we need to use it to transform each of the annexed files that
@@ -8191,7 +8190,6 @@ X___ writing/notes/notes.pdf
 The result is correct however, it's hard to fetch the name of the file
 using the list command so instead we will be using the find command
 which also lists the annexed files.
-
 #+begin_src python :results output :exports both
 import json
 import requests
@@ -8200,8 +8198,138 @@ import os
 # first step
 #going to the directory where git annex has been initialized
 os.chdir("/home/nubudi/test_addurl")
-os.system("git-annex find").readlines()
+os.system("git-annex find")
+#+end_src
+
+#+RESULTS:
+: Essay.pdf
+: flows.json
+: nami.JPG
+: writing/drafts/_Project Pain.pdf
+: writing/drafts/the quest for mortality.pdf
+: writing/essays/OumaimaHajji_5G.pdf
+: writing/notes/Internship_Notes.pdf
+: writing/notes/notes.pdf
+
+Now trying to get the list of the elements which are the files that
+are available from the output. This method does generate an output
+with all the files but there are ways to simplify it as can be seen below.
+#+begin_src python :results output :exports both
+import json
+import requests
+import os
+import sys
+import subprocess
+from subprocess import PIPE
+
+# first step
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+# p = os.system("git-annex find")
+#r = subprocess.run(['git-annex', 'find'], stdout=subprocess.PIPE)
+#r.stdout
+#subprocess.check_output('git-annex status', shell=True)
+
+output = subprocess.Popen(['git-annex', 'find'], stdout=PIPE)
+r = output.communicate()
+print(r)
+#+end_src
+
+#+RESULTS:
+: (b'Essay.pdf\nflows.json\nnami.JPG\nwriting/drafts/_Project Pain.pdf\nwriting/drafts/the quest for mortality.pdf\nwriting/essays/OumaimaHajji_5G.pdf\nwriting/notes/Internship_Notes.pdf\nwriting/notes/notes.pdf\n', None)
+
+
+- new version of the same function trying a different method:
+#+begin_src python :results output :exports both
+import json
+import requests
+import os
+import sys
+import subprocess
+
+# first step
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+
+output = subprocess.Popen(['git-annex', 'find'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+r = iter(output.stdout.readline, b'')
+print(r)
+"""
+rcode = None
+while(rcode is None):
+        rcode = output.poll() #returns None while the subprocess is still running
+        line = output.stdout.readline() # reading the lines
+        print (line.strip())
+"""
+#r = output.communicate()
+#print(r)
 
 #+end_src
 
 #+RESULTS:
+: <callable_iterator object at 0x7fb3243d17f0>
+
+
+Finally, this is the function that allows us to get the list of the
+files in a simpler way.
+#+begin_src python :results output :exports both
+import subprocess
+import shlex
+import os
+# first step
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+# getting the output from trom the command
+output = subprocess.getoutput("git-annex find")
+# parsing the output and separating the lines in a list where each element is a file
+s = shlex.split(output)
+print(s)
+#+end_src
+
+#+RESULTS:
+: ['Essay.pdf', 'flows.json', 'nami.JPG', 'writing/drafts/_Project', 'Pain.pdf', 'writing/drafts/the', 'quest', 'for', 'mortality.pdf', 'writing/essays/OumaimaHajji_5G.pdf', 'writing/notes/Internship_Notes.pdf', 'writing/notes/notes.pdf']
+
+Now, we can move to the other steps of the algorithm.
+
+#+begin_src python :results output :exports both
+import subprocess
+import shlex
+import os
+
+
+# first step
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+# getting the output from trom the command
+output = subprocess.getoutput("git-annex find")
+# parsing the output and separating the lines in a list where each element is a file
+s = shlex.split(output)
+print(s)
+# init the dico
+dico = {}
+# fetching the keys of these files
+for file in s:
+   output = subprocess.getoutput("git-annex info %s" % file)
+   l = shlex.split(output)
+   print(l)
+#+end_src
+
+As can be seen in the results, there is a problem with the files that
+have a space in the name. This causes the splitter to consider them as
+multiple elements instead of just one. 
+#+RESULTS:
+#+begin_example
+['Essay.pdf', 'flows.json', 'nami.JPG', 'writing/drafts/_Project', 'Pain.pdf', 'writing/drafts/the', 'quest', 'for', 'mortality.pdf', 'writing/essays/OumaimaHajji_5G.pdf', 'writing/notes/Internship_Notes.pdf', 'writing/notes/notes.pdf']
+['file:', 'Essay.pdf', 'size:', '46.79', 'kilobytes', 'key:', 'SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf', 'present:', 'true']
+['file:', 'flows.json', 'size:', '10.4', 'kilobytes', 'key:', 'SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json', 'present:', 'true']
+['file:', 'nami.JPG', 'size:', '169.4', 'kilobytes', 'key:', 'SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG', 'present:', 'true']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'writing/drafts/_Project', 'info', 'writing/drafts/_Project', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'Pain.pdf', 'info', 'Pain.pdf', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'writing/drafts/the', 'info', 'writing/drafts/the', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'quest', 'info', 'quest', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'for', 'info', 'for', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'mortality.pdf', 'info', 'mortality.pdf', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['file:', 'writing/essays/OumaimaHajji_5G.pdf', 'size:', '57.04', 'kilobytes', 'key:', 'SHA256E-s57036--f248de0dfc04f1e0436b11bd814a813b51ebd9b7c418242f45dac00eb7c62093.pdf', 'present:', 'true']
+['file:', 'writing/notes/Internship_Notes.pdf', 'size:', '180.06', 'kilobytes', 'key:', 'SHA256E-s180064--0cdc423ebaf679dd85645bd24f6f986abc14fef5112d936cec75ce8db0bfac49.pdf', 'present:', 'true']
+['file:', 'writing/notes/notes.pdf', 'size:', '180.06', 'kilobytes', 'key:', 'SHA256E-s180064--0cdc423ebaf679dd85645bd24f6f986abc14fef5112d936cec75ce8db0bfac49.pdf', 'present:', 'true']
+#+end_example
