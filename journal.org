@@ -8303,8 +8303,8 @@ os.chdir("/home/nubudi/test_addurl")
 # getting the output from trom the command
 output = subprocess.getoutput("git-annex find")
 # parsing the output and separating the lines in a list where each element is a file
-s = shlex.split(output)
-print(s)
+s = shlex.split(output, comments=True, posix=False)
+
 # init the dico
 dico = {}
 # fetching the keys of these files
@@ -8312,7 +8312,24 @@ for file in s:
    output = subprocess.getoutput("git-annex info %s" % file)
    l = shlex.split(output)
    print(l)
+
 #+end_src
+
+#+RESULTS:
+#+begin_example
+['file:', 'Essay.pdf', 'size:', '46.79', 'kilobytes', 'key:', 'SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf', 'present:', 'true']
+['file:', 'flows.json', 'size:', '10.4', 'kilobytes', 'key:', 'SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json', 'present:', 'true']
+['file:', 'nami.JPG', 'size:', '169.4', 'kilobytes', 'key:', 'SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG', 'present:', 'true']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'writing/drafts/_Project', 'info', 'writing/drafts/_Project', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'Pain.pdf', 'info', 'Pain.pdf', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'writing/drafts/the', 'info', 'writing/drafts/the', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'quest', 'info', 'quest', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'for', 'info', 'for', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['fatal:', 'Not', 'a', 'valid', 'object', 'name', 'mortality.pdf', 'info', 'mortality.pdf', '(not', 'a', 'directory', 'or', 'an', 'annexed', 'file', 'or', 'a', 'treeish', 'or', 'a', 'remote', 'or', 'a', 'uuid)', 'failed']
+['file:', 'writing/essays/OumaimaHajji_5G.pdf', 'size:', '57.04', 'kilobytes', 'key:', 'SHA256E-s57036--f248de0dfc04f1e0436b11bd814a813b51ebd9b7c418242f45dac00eb7c62093.pdf', 'present:', 'true']
+['file:', 'writing/notes/Internship_Notes.pdf', 'size:', '180.06', 'kilobytes', 'key:', 'SHA256E-s180064--0cdc423ebaf679dd85645bd24f6f986abc14fef5112d936cec75ce8db0bfac49.pdf', 'present:', 'true']
+['file:', 'writing/notes/notes.pdf', 'size:', '180.06', 'kilobytes', 'key:', 'SHA256E-s180064--0cdc423ebaf679dd85645bd24f6f986abc14fef5112d936cec75ce8db0bfac49.pdf', 'present:', 'true']
+#+end_example
 
 As can be seen in the results, there is a problem with the files that
 have a space in the name. This causes the splitter to consider them as
@@ -8333,3 +8350,101 @@ multiple elements instead of just one.
 ['file:', 'writing/notes/Internship_Notes.pdf', 'size:', '180.06', 'kilobytes', 'key:', 'SHA256E-s180064--0cdc423ebaf679dd85645bd24f6f986abc14fef5112d936cec75ce8db0bfac49.pdf', 'present:', 'true']
 ['file:', 'writing/notes/notes.pdf', 'size:', '180.06', 'kilobytes', 'key:', 'SHA256E-s180064--0cdc423ebaf679dd85645bd24f6f986abc14fef5112d936cec75ce8db0bfac49.pdf', 'present:', 'true']
 #+end_example
+
+--Note: using shlex.shlex doesn't work as well. I've tested this
+  program to try to have the filenames not divided by the blank spaces
+  but to no avail.
+#+begin_example
+s = shlex.shlex(output, posix=True)
+s.whitespace_split=False
+list(s)
+#+end_example
+To remedy this, perhaps just have a simple program that joins the
+  parts of the title together (we know that the filename is not
+  finished until we get the extension so we can start concatinating
+  the elements of the list from the first one that doesn't have an
+  extension to the one that has it).
+
+
+  Moving on, we can just take care of the files where there is no
+  problem before going back to correct the problem with the spaces.
+  We can see from the pronted list of the info about the files that the
+  key value is always in the seventh position (element 6 in the list)
+  for all the files that are accessible (not the ones where there is a
+  fatal error), so we can just fetch the key values and store them in
+  the dico. 
+#+begin_src python :results output :exports both
+import subprocess
+import shlex
+import os
+import requests, json
+
+# first step
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+# getting the output from trom the command
+output = subprocess.getoutput("git-annex find")
+# parsing the output and separating the lines in a list where each element is a file
+s = shlex.split(output, comments=True, posix=False)
+
+# init the dico
+dico = {}
+# fetching the keys of these files
+for file in s:
+   output = subprocess.getoutput("git-annex info %s" % file)
+   l = shlex.split(output)
+   # we won't take care of the ones with the fatal error now
+   if l[0] == 'file:':
+      dico[l[6]] = file
+# making sure that the correct things have been inserted into the dictionary
+print(dico)
+
+# second step
+id = '875408' # this is the id of the deposit that we have created previously (the last one just above)
+              # we published it manually on zenodo but it could also be simply published through the disableremote function.
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/' + id + '/files', params={'access_token': ACCESS_TOKEN})
+print(r.status_code)
+
+# third step
+# for each of the files
+for i in range(len(r.json())):
+   # fetching the necessary information
+   file_id = r.json()[i]['filename']
+   download_link = r.json()[i]['links']['download']
+   file_name = dico[file_id]
+   # now, we can finally create the web url
+   url = download_link + '?access_token='+ ACCESS_TOKEN
+   #print('git annex addurl '+ download_link + ' --file=' + file_name) 
+   os.system('git annex addurl '+ download_link + ' --file=' + file_name) 
+os.system('git annex list')
+   
+#+end_src
+As can be seen in the results, we have succeeded in turning the files
+into web remotes by starting from the keys we have on the zenodo
+remote to the filename and finally by using addurl.
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-addurl
+||||
+X__X Essay.pdf
+X__X flows.json
+X__X nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+{'SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf': 'Essay.pdf', 'SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json': 'flows.json', 'SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG': 'nami.JPG', 'SHA256E-s57036--f248de0dfc04f1e0436b11bd814a813b51ebd9b7c418242f45dac00eb7c62093.pdf': 'writing/essays/OumaimaHajji_5G.pdf', 'SHA256E-s180064--0cdc423ebaf679dd85645bd24f6f986abc14fef5112d936cec75ce8db0bfac49.pdf': 'writing/notes/notes.pdf'}
+200
+#+end_example
+
+In the disableremote program, the difference will be that the
+publishing of the zenodo remote will be done manually and we will also
+remove the zenodo remote with the git rm command instead of leaving it
+enabled. Other than that, the things will stay the same with slight
+changes. 
