@@ -7905,7 +7905,25 @@ As we can see, they all figure in the remote.
 git annex list
 #+END_SRC
 
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-addurl
+||||
+X__X Essay.pdf
+X__X flows.json
+X__X nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
 *** addurl.
+**** intro. 
 Now, we can simply make use of the files we have uploaded to the
 remote and try to turn them into web remotes with addurl. In the
 program disableremote, this could be done after having already
@@ -7921,8 +7939,6 @@ First, because we have just created a new deposit when we initialized
 the remote, we have to fetch the id of this deposit so as to use it
 when accessing the files.
 This is the id of the deposit in this case: 875408
-
-
 
 
 #+begin_src python :results output :exports both
@@ -7971,13 +7987,6 @@ print(json.dumps(r.json(), indent=4))
     }
 ]
 #+end_example
-
-#+begin_src python :results output :exports both
-import os
-
-os.chdir("/home/nubudi/tes")
-os.system("pwd")
-#+end_src
 
 We can see that there is a problem with names. This is due to the fact
 that when we annex a file on git-annex and copy it to the Zenodo
@@ -8032,3 +8041,126 @@ matching the keys and the files.
 : size: 46.79 kilobytes
 : key: SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
 : present: true
+
+
+- getting the list of files from a published record.
+  (we know that when a deposit is published the id of the record stays
+  the same as the id before publication, so there is no problem with
+  the id).
+#+begin_src python :results output :exports both
+import json
+import requests
+
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/869900/files', params={'access_token': ACCESS_TOKEN})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+200
+[
+    {
+        "checksum": "96379d6f2dfdbdd68ee0fa48a31ee07c",
+        "filename": "AirPollutionInGrenoble.pdf",
+        "filesize": 1107977,
+        "id": "e9b6f5af-c97d-4304-b1d1-18c740c04600",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/66b7b6cc-18d2-4476-b4c5-d8224534212d/AirPollutionInGrenoble.pdf",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/869900/files/e9b6f5af-c97d-4304-b1d1-18c740c04600"
+        }
+    },
+    {
+        "checksum": "fc5b92e373b269a0c4411ce11ea6345d",
+        "filename": "SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf",
+        "filesize": 46788,
+        "id": "0f344ae4-f8d1-4713-bb42-8dfd6df7437f",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/66b7b6cc-18d2-4476-b4c5-d8224534212d/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/869900/files/0f344ae4-f8d1-4713-bb42-8dfd6df7437f"
+        }
+    },
+    {
+        "checksum": "c5ce86ac1f36b7bee1f74c91c16f7125",
+        "filename": "unnamed.jpg",
+        "filesize": 41763,
+        "id": "10ca0132-8524-42db-8f08-ceb85866a36c",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/66b7b6cc-18d2-4476-b4c5-d8224534212d/unnamed.jpg",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/869900/files/10ca0132-8524-42db-8f08-ceb85866a36c"
+        }
+    }
+]
+#+end_example
+
+**** possible solution.
+To be able to add the url to the annexed files we have run into
+problems with matching the filename to the key and so this needs to be
+resolved before moving forward with the implementation of
+transformtoweb.
+This is a possible algorithm to handle this task:
+
+#+begin_example
+git annex list (to get all the annexed files and their positions)
+for each of the files in the list:
+   if the file is annexed in the Zenodo remote:
+      git annex info file_i
+      fetch key_i (save in dico: key_i <-> file_i)
+   else:
+      we could either transform these files to web remotes as well or ignore them.
+      (to look into!!!)
+#+end_example
+
+After this first part of the process, we will have a dictionary
+containing all the files that we have saved in the remote as well as
+the keys that correspond to each of these files.
+Now, we can move on to the next step where we will make requests to
+the Zenodo API (get request to the url: deposit/depositions/id/files,
+with id being the identifier of the now published deposit). The
+message we will get as a response contains the list of all the files
+that are available on the deposit with all the metadata concerning
+them.
+We can now fetch the keys from the response and start the second
+process.
+
+#+begin_example
+# first step: getting the keys of the annexed files
+git annex list (to get all the annexed files and their positions)
+for each of the files in the list:
+   if the file is annexed in the Zenodo remote:
+      git annex info file_i
+      fetch key_i (save in dico: key_i <-> file_i)
+   else:
+      we could either transform these files to web remotes as well or ignore them.
+      (to look into!!!)
+# second step: sending the request to the API
+requests.get('deposit/depositions/id/files')
+# third step: transforming the files into web remotes      
+for each of the files in the API response:
+   fetch the key of the file (file_id)
+   fetch the download link of the file (download_link)
+   fetch the filename corresponding to this key (use the dico) (file_name)
+   git annex addurl download_link?access_token=key --file=file_name 
+#+end_example
+
+With this, we will have finished the transformation of the files into
+web remotes.
+
+This is the complete algorithm:
+
+#+begin_example
+for each of the files in the API response:
+   fetch the key of the file (file_id)
+   fetch the download link of the file (download_link)
+   fetch the filename corresponding to this key (use the dico) (file_name)
+   git annex addurl download_link?access_token=key --file=file_name 
+#+end_example
+
+**** test implem.
+#+begin_src python :results output :exports both
+import os
+
+os.chdir("/home/nubudi/tes")
+os.system("pwd")
+#+end_src
