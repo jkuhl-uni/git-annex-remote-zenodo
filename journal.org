@@ -8447,4 +8447,100 @@ In the disableremote program, the difference will be that the
 publishing of the zenodo remote will be done manually and we will also
 remove the zenodo remote with the git rm command instead of leaving it
 enabled. Other than that, the things will stay the same with slight
-changes. 
+changes.
+
+Now we will just have to incorporate the changes in the transformtoweb
+function. 
+
+** disableremotelocally.
+*** intro.
+In this function we have to execute a simple git rm command so as to
+remove this remote locally. We will do this once we finish with the
+publication of the deposit and the transformation of the files into
+web remotes.
+The possible complexities with this function is that executing the
+command git rm is done on the remote name (which is in our case
+test-addurl seeing that it's the remote we have been working on in the
+last parts of this file). But it's hard to match the name of the
+remote to the id of the deposit seeing that they function
+differently. But we can get there using a succession of commands.
+
+*** the useful commands.
+**** git annex info remote.
+We can first start with the git annex info command to see the
+available information about this remote.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/test_addurl
+git annex info test-addurl
+#+END_SRC
+
+As we can see, not much is given that is useful in our case, however,
+the uuid of this remote is specified. This identifier is what will
+allow us to get the extra information about the remote that we need.
+#+RESULTS:
+#+begin_example
+
+remote: test-addurl
+description: [test-addurl]
+uuid: 4c4a5acd-f4c7-4d3b-bc5e-fde842100d89
+trust: semitrusted
+cost: 200.0
+type: external
+externaltype: zenodo
+encryption: none
+chunking: none
+remote annex keys: 3
+remote annex size: 226.6 kilobytes
+#+end_example
+
+**** git checkout git-annex.
+A file that is imprtant for us is the remote log where git-annex keeps
+all the information regarding the remotes that have been initialized
+in a given directory. But this file is only accessible in the
+git-annex branch and not the master branch. So, we have to checkout
+into the git-annex branch in order to view it.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git checkout git-annex
+#+END_SRC
+
+#+RESULTS:
+: Switched to branch 'git-annex'
+
+Now, let's check the list of the existing files in this directory.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+ls -a
+#+END_SRC
+
+As we can see, there is a huge change in the files in the directory,
+but what's important to us are the logs, especially the remote log.
+#+RESULTS:
+: .   0b7  4df  952  f7c   remote.log
+: ..  1d5  76a  e39  .git  uuid.log
+
+Let's take a look at the content of this file.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cat remote.log
+#+END_SRC
+
+as we can see, the deposit id is accessible and can be fetched easily
+from this file, which let's us create a link between the name of the
+remote & the uuid (also available in this log) and the deposit id.
+If we had multiple remotes in this directory, there will be other
+lines containing all the information concerning these remotes (the
+configs and options for instance).
+#+RESULTS:
+: 
+: deposit_bucket=https://sandbox.zenodo.org/api/files/32821e79-79a8-4112-a100-74911cde6592 deposit_id=875408 encryption=none externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG name=test-addurl type=external url=https://sandbox.zenodo.org/api/deposit/depositions timestamp=1625475035.709126356s
+
+
+Now, let's just check back into the master branch
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git checkout master
+#+END_SRC
+
+#+RESULTS:
+: Switched to branch 'master'
+
+

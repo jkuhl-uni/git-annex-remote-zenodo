@@ -235,18 +235,61 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
 
     
 # method that transforms the files into web remotes
-def transformtoweb():
+def transformtoweb(deposit_id, key, sandbox_url=None):
     # we can simply use the git annex addurl --file and do this for each file as has been previously tested
     # the option --file will attach the url to the existing file instead of creating a new one.
     # this way, a trace has been kept of where this file exists (the remotes in this case being Zenodo and the web remote)
     # to do this, we can use a shell command with a library to facilitate the interaction between the two interfaces.
-    return
+    
+    import subprocess
+    import shlex
+    import os
+    import requests
+
+    # first step
+    # getting the output from trom the command
+    output = subprocess.getoutput("git-annex find")
+    # parsing the output and separating the lines in a list where each element is a file
+    s = shlex.split(output, comments=True, posix=False)
+
+    # init the dico
+    dico = {}
+    # fetching the keys of these files
+    for file in s:
+        output = subprocess.getoutput("git-annex info %s" % file)
+        l = shlex.split(output)
+        # we won't take care of the ones with the fatal error now
+        if l[0] == 'file:':
+            dico[l[6]] = file
+        
+    # second step
+    if not sandbox_url: 
+        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
+    else:
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % deposit_id
+
+    r = requests.get(url, params={'access_token': key})
+
+    # third step
+    # for each of the files
+    for i in range(len(r.json())):
+        # fetching the necessary information
+        file_id = r.json()[i]['filename']
+        download_link = r.json()[i]['links']['download']
+        file_name = dico[file_id]
+        # now, we can finally create the web url
+        url = download_link + '?access_token='+ key
+        #print('git annex addurl '+ download_link + ' --file=' + file_name) 
+        os.system('git annex addurl '+ download_link + ' --file=' + file_name) 
+    # this is just to make sure
+    #os.system('git annex list')
 
 # method to disable the remote locally with git rm 
-def disableremote():
+def disableremotelocally():
     # use a shell command to remove the remote locally with git rm
     # this could be done with the library that has been previously tested
     # this is the last step to be done after having already published the deposit on Zenodo.    
+    
     return
 
     
@@ -276,9 +319,9 @@ def main(argv):
     # first step: publishing the deposit
     publish(deposit_id, key, file_path, url)
     # second step: we need to transform each of the files into a web remote
-    transformtoweb()
+    transformtoweb(deposit_id, key, url)
     # third step: we need to disable the remote locally
-    disableremote()
+    disableremotelocally(deposit_id)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
