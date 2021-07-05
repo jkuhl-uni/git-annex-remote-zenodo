@@ -3289,7 +3289,7 @@ f()
   }
   #+end_example
 
-
+  
 * Monday 14/06.
 Worked with the git-annex-remote-zenodo file and tried to deploy
 the remote, initiate it, and test it while making changes to fix the
@@ -7507,3 +7507,431 @@ git annex list
 
 * Friday 02/07.
 made changes in the program.
+
+
+* Monday 05/07.
+** subprocess intro test.
+- To be able to execute shell commands (mostly git annex commands)
+  from within the python program we can use some libraries that allow
+  the interactions between the two.
+  + the subprocess library (more flexible/secure than os): https://docs.python.org/3/library/subprocess.html#module-subprocess
+  + the os library (basic functionalities): https://docs.python.org/3/library/os.html 
+  + the git-annex-adapter library: https://github.com/alpernebbi/git-annex-adapter
+
+  link explaining some differences:
+  https://stackoverflow.com/questions/89228/how-to-execute-a-program-or-call-a-system-command-from-python
+  
+- Test with subprocess:
+  + looking into the current working directory. It's the directory
+    where the file where are working on is situated.
+    #+begin_src python :results output :exports both
+import subprocess
+subprocess.run(["ls", "-l"])
+subprocess.run("pwd")
+#+end_src
+
+#+RESULTS:
+: total 552
+: drwxr-xr-x 4 nubudi nubudi   4096 juin  22 15:57 code
+: drwxr-xr-x 2 nubudi nubudi   4096 juin  10 09:44 docs
+: -rw-r--r-- 1 nubudi nubudi 268699 juil.  5 09:41 #journal.org#
+: -rw-r--r-- 1 nubudi nubudi 268697 juil.  5 00:51 journal.org
+: -rw-r--r-- 1 nubudi nubudi  13310 juin   7 09:41 README.md
+: /home/nubudi/Desktop/Internship
+
+  + this is a simple test that looks to see if there are any untracked
+  changes in the git repository and then add the untracked files,
+  commits the changes, and pushes into the git remote.
+
+
+#+begin_src python :results output :exports both
+import subprocess
+subprocess.run(["/usr/bin/git", "status"])
+subprocess.run(["/usr/bin/git", "add", "--all"])
+subprocess.run(["/usr/bin/git", "commit", "-m", "update"])
+subprocess.run(["/usr/bin/git", "push"])
+#+end_src
+
+#+RESULTS:
+#+begin_example
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	#journal.org#
+	.#journal.org
+
+nothing added to commit but untracked files present (use "git add" to track)
+[main 4c51fef] update
+ 2 files changed, 7556 insertions(+)
+ create mode 100644 #journal.org#
+ create mode 120000 .#journal.org
+#+end_example
+
+
+
+
+** subprocess git-annex test.
+in our case, this module will be used for two things:
+  - first, we need to use it to transform each of the annexed files that
+  we have on the Zenodo remote into web remotes.
+  - second, we need to use it to do a git rm command so as to delete
+    the remote locally.
+
+So, let's test the utility of the library with simple git-annex
+examples.
+
+#+begin_src python :results output :exports both
+import subprocess
+subprocess.run(["/usr/bin/git", "git", "annex", "status"])
+#+end_src
+
+#+RESULTS:
+
+This won't work in the working directory since we haven't initilized a
+git-annex directory here. So, we first need to position the program in
+a directory where we have what's needed.
+For instance, let's use the same directory where we have tested the
+hybrid type of encryption in a previous day.
+
+#+begin_src python :results output :exports both
+import subprocess
+
+r = subprocess.run(["cd", "/home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid"], shell=True)
+subprocess.run("pwd")
+print(str(r))
+r = subprocess.run(["/usr/bin/git-annex", "git-annex", "status"])
+print(str(r))
+#+end_src
+
+#+RESULTS:
+: /home/nubudi/Desktop/Internship
+: CompletedProcess(args=['cd', '/home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid'], returncode=0)
+: CompletedProcess(args=['/usr/bin/git-annex', 'git-annex', 'status'], returncode=1)
+
+** test with the os library.
+  First, let's change the current working directory to one where we
+  have already initialized git-annex.
+
+#+begin_src python :results output :exports both
+import os
+
+os.chdir("/home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid")
+os.system("pwd")
+#+end_src
+
+#+RESULTS:
+: /home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid
+
+
+Now, let's try executing a git-annex command
+
+#+begin_src python :results output :exports both
+import os
+
+os.chdir("/home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid")
+r = os.system("git-annex status")
+print(str(r))
+#+end_src
+
+#+RESULTS:
+: A Essay.pdf
+: A flows.json
+: A nami.JPG
+: 0
+
+As we can see, the command has successfully been executed and we have
+gotten the expected result containing the info on the annexed files of
+that directory as well as a correct error code.
+
+Since we will also be using simple git commands, we can also test to
+see if they functional with the same library.
+
+#+begin_src python :results output :exports both
+import os
+
+os.chdir("/home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid")
+r = os.system("git status")
+print(str(r))
+#+end_src
+
+#+RESULTS:
+: On branch master
+: Changes to be committed:
+:   (use "git reset HEAD <file>..." to unstage)
+: 
+: 	new file:   Essay.pdf
+: 	new file:   flows.json
+: 	new file:   nami.JPG
+: 
+: 0
+
+** transformtoweb.
+this is the method that will be used to take care of transforming the
+annexed files that are on the Zenodo remote into web remotes. This is
+done by using the addurl command of git-annex by specifying the name
+of the files we want to transform (or the key as well). We need to
+specify the name of the files with --file so as to attach the url to
+the existing files. If we don't do this, the url will be added and
+considered as a new file as we have previously tested.
+
+This method is an example we can use to try this mechanism before
+adding it to the disableremote program.
+
+To this, we will create a directory where we will initialize a
+git-annex repository and add a few file to it.
+(we can also use an existing directory that we have already worked
+on where there is already an initialized git and git-annex repository
+as well as a list of annexed files.)
+
+*** creating a repository to work in.
+**** preparation.
+first, let's make the directory where we will be doing our tests.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~
+mkdir test_addurl
+cd test_addurl
+#+END_SRC
+
+#+RESULTS:
+: !!: command not found
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+pwd
+#+END_SRC
+#+RESULTS:
+: /home/nubudi/test_addurl
+
+initiating the git and the git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/test_addurl/.git/
+: init  ok
+: (recording state in git...)
+
+adding a bunch of files to do the test
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp -R ~/Downloads/writing /home/nubudi/test_addurl
+#+END_SRC
+
+#+RESULTS:
+
+
+**** Initializing the remote.
+we will be using a zenodo remote. This will be useful for when we want
+to transform the files from this remote into the web one.
+
+First, we need to export the path to where the git-annex-remote-zenodo
+function so as to be able to locate it when executing.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+export PATH=$PATH:/home/nubudi/Desktop/Internship/code
+#+END_SRC
+
+#+RESULTS:
+
+Let's check if the path has been successfully exported:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/test_remote
+
+Now, we can simply work with git annex like we would usually do. If we
+are working in a new repository, we will have to initialize git and
+git annex before the next steps. In this case, I'm working in an
+already initialized repository. We also need to initialize a special
+remote using the command with added options (ex: url to specify if we
+want to use the sandbox or newversion if we want to initialize the
+remote as a new version of an already published remote)
+
+
+#+begin_src shell :session *shell* :results output :exports both
+git annex initremote test-addurl type=external externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG url=sandbox  encryption=none
+#+end_src
+
+#+RESULTS:
+: initremote test-addurl git-annex: external special remote protocol error, unexpectedly received "Number of arguments:1arguments." (unable to parse command)
+
+
+**** adding files into the remote.
+adding files to the repository by copying them into it first and then
+adding them into the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/nami.JPG /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add nami.JPG
+#+END_SRC
+
+#+RESULTS:
+: add nami.JPG ok
+: (recording state in git...)
+
+copyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/Essay.pdf /home/nubudi/tests_enc/shared_enc/test_enc_shared
+cp ~/Downloads/flows.json /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add Essay.pdf ok
+: add flows.json ok
+: add writing/drafts/_Project Pain.pdf ok
+: add writing/drafts/the quest for mortality.pdf ok
+: add writing/essays/OumaimaHajji_5G.pdf ok
+: add writing/notes/Internship_Notes.pdf ok
+: add writing/notes/notes.pdf ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|shareddir
+||web
+|||bittorrent
+||||
+X___ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+
+Now let's copy these files into the remote to see how this type of
+encryption changes things. When executing this command, we need to
+give the access password to be able to encrypt the file with the gpg
+key. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to shareddir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf (to shareddir...)
+: 10 B/s 1h17m58s                                  ok
+: (recording state in git...)
+
+Now, let's check the file in the remote directory where we have
+uploaded it.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy Essay.pdf --to shareddir
+#+END_SRC
+
+#+RESULTS:
+: copy Essay.pdf ok
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/shared_enc/shareddir/d76/dc0
+ls 
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/tests_enc/shared_enc/shareddir/d76/dc0/GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
+file GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
+#+END_SRC
+
+#+RESULTS:
+: 
+: GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333: GPG symmetrically encrypted data (AES256 cipher)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd /home/nubudi/tests_enc/shared_enc/test_enc_shared
+#+END_SRCd76/dc0
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|shareddir
+||web
+|||bittorrent
+||||
+_X__ Essay.pdf
+X___ flows.json
+X___ nami.JPG
+X___ writing/drafts/_Project Pain.pdf
+X___ writing/drafts/the quest for mortality.pdf
+X___ writing/essays/OumaimaHajji_5G.pdf
+X___ writing/notes/Internship_Notes.pdf
+X___ writing/notes/notes.pdf
+#+end_example
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (1 copy) 
+:   	8be9097b-d87b-4df9-a532-f465272088da -- [shareddir]
+: ok
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get Essay.pdf --from shareddir
+#+END_SRC
+
+#+RESULTS:
+: get Essay.pdf (from shareddir...)
+: 93 KiB/s 0s100%             63 MiB/s 0s                            (checksum...) ok
+: (recording state in git...)
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis Essay.pdf
+#+END_SRC
+
+#+RESULTS:
+: whereis Essay.pdf (2 copies) 
+:   	8be9097b-d87b-4df9-a532-f465272088da -- [shareddir]
+:    	97b463f9-c944-492e-b29f-85d01293dc86 -- nubudi@ubunto:~/tests_enc/shared_enc/test_enc_shared [here]
+: ok
+
+
+*** addurl.
+#+begin_src python :results output :exports both
+import os
+
+os.chdir("/home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid")
+os.system("pwd")
+#+end_src
+
+
