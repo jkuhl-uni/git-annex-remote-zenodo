@@ -1,4 +1,3 @@
-tarted in
 #+TITLE:       lab book
 #+AUTHOR:      Oumaima Hajji
 #+STARTUP: overview indent inlineimages logdrawer
@@ -8544,3 +8543,24 @@ git checkout master
 : Switched to branch 'master'
 
 
+
+*** algorithm.
+We can do the two commands mentionned above to access the name of the
+remote but they are not both needed. In fact, we can just checkout
+into the git-annex branch and retrieve the name of the file after
+having compared the deposit id in remote.log with the one we have
+passed as argument to the function disableremotelocally.
+Once the name of the remote is fetched, we can execute a git em
+command with that name.
+
+#+begin_example
+git checkout git-annex
+fetch remote_name 
+git rm remote_name
+#+end_example
+
+Note: if the remote log contains more than one line (ie: there are
+multiple remotes in this directory), we have go through the file line
+by line and compare the deposit id that we have to the ones that are
+there. This has to be done only for the remotes of the type zenodo and
+not those of different types.
