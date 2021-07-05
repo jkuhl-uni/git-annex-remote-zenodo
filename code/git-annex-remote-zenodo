@@ -93,7 +93,7 @@ class ZenodoRemote(ExportRemote):
         # now, we need to create an empty upload that we will be using from now on
         # it's either a new version of a deposit or a brand new one
         newversion= str(self.annex.getconfig('newversion'))
-        if newversion is None:
+        if not newversion:
             r = self.query('post', self.url)
         else:   
             r = self.create_newversion(newversion)

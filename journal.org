@@ -7572,7 +7572,6 @@ nothing added to commit but untracked files present (use "git add" to track)
 
 
 
-
 ** subprocess git-annex test.
 in our case, this module will be used for two things:
   - first, we need to use it to transform each of the annexed files that
@@ -7669,6 +7668,7 @@ print(str(r))
 : 0
 
 ** transformtoweb.
+*** intro.
 this is the method that will be used to take care of transforming the
 annexed files that are on the Zenodo remote into web remotes. This is
 done by using the addurl command of git-annex by specifying the name
@@ -7698,7 +7698,6 @@ cd test_addurl
 #+RESULTS:
 : !!: command not found
 
-
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 pwd
 #+END_SRC
@@ -7723,7 +7722,6 @@ cp -R ~/Downloads/writing /home/nubudi/test_addurl
 
 #+RESULTS:
 
-
 **** Initializing the remote.
 we will be using a zenodo remote. This will be useful for when we want
 to transform the files from this remote into the web one.
@@ -7742,7 +7740,7 @@ echo $PATH
 #+END_SRC
 
 #+RESULTS:
-: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/test_remote
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/Internship/code
 
 Now, we can simply work with git annex like we would usually do. If we
 are working in a new repository, we will have to initialize git and
@@ -7758,14 +7756,16 @@ git annex initremote test-addurl type=external externaltype=zenodo key=K1jsyYfSb
 #+end_src
 
 #+RESULTS:
-: initremote test-addurl git-annex: external special remote protocol error, unexpectedly received "Number of arguments:1arguments." (unable to parse command)
-
+: initremote test-addurl finished the post operation. Here is the returned message :201
+: 
+: ok
+: (recording state in git...)
 
 **** adding files into the remote.
 adding files to the repository by copying them into it first and then
 adding them into the annex.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-cp ~/Downloads/nami.JPG /home/nubudi/tests_enc/shared_enc/test_enc_shared
+cp ~/Downloads/nami.JPG /home/nubudi/test_addurl
 #+END_SRC
 
 #+RESULTS:
@@ -7780,8 +7780,8 @@ git annex add nami.JPG
 
 copyign different types of files.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-cp ~/Downloads/Essay.pdf /home/nubudi/tests_enc/shared_enc/test_enc_shared
-cp ~/Downloads/flows.json /home/nubudi/tests_enc/shared_enc/test_enc_shared
+cp ~/Downloads/Essay.pdf /home/nubudi/test_addurl
+cp ~/Downloads/flows.json /home/nubudi/test_addurl
 #+END_SRC
 
 #+RESULTS:
@@ -7807,10 +7807,12 @@ git annex list
 
 #+RESULTS:
 #+begin_example
+finished the get operation. Here is the returned message :200
+
 here
-|shareddir
-||web
-|||bittorrent
+|web
+||bittorrent
+|||test-addurl
 ||||
 X___ Essay.pdf
 X___ flows.json
@@ -7823,59 +7825,28 @@ X___ writing/notes/notes.pdf
 #+end_example
 
 
-Now let's copy these files into the remote to see how this type of
-encryption changes things. When executing this command, we need to
-give the access password to be able to encrypt the file with the gpg
-key. 
+Now let's copy these files into the remote.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex copy Essay.pdf --to shareddir
+git annex copy Essay.pdf --to test-addurl
 #+END_SRC
 
 #+RESULTS:
-: copy Essay.pdf (to shareddir...)
-: 10 B/s 1h17m58s                                  ok
-: (recording state in git...)
+#+begin_example
+copy Essay.pdf finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-addurl...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
 
 Now, let's check the file in the remote directory where we have
 uploaded it.
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex copy Essay.pdf --to shareddir
-#+END_SRC
-
-#+RESULTS:
-: copy Essay.pdf ok
-
-
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-cd ~/tests_enc/shared_enc/shareddir/d76/dc0
-ls 
-#+END_SRC
-
-#+RESULTS:
-: 
-: GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
-
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-cd ~/tests_enc/shared_enc/shareddir/d76/dc0/GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
-file GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333
-#+END_SRC
-
-#+RESULTS:
-: 
-: GPGHMACSHA1--b7f5c509040bf61346bf9567fb355a49d7040333: GPG symmetrically encrypted data (AES256 cipher)
-
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-cd /home/nubudi/tests_enc/shared_enc/test_enc_shared
-#+END_SRCd76/dc0
-
-#+RESULTS:
-
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex drop Essay.pdf
-#+END_SRC
-
-#+RESULTS:
-
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex list
 #+END_SRC
@@ -7883,11 +7854,11 @@ git annex list
 #+RESULTS:
 #+begin_example
 here
-|shareddir
-||web
-|||bittorrent
+|web
+||bittorrent
+|||test-addurl
 ||||
-_X__ Essay.pdf
+X__X Essay.pdf
 X___ flows.json
 X___ nami.JPG
 X___ writing/drafts/_Project Pain.pdf
@@ -7897,41 +7868,167 @@ X___ writing/notes/Internship_Notes.pdf
 X___ writing/notes/notes.pdf
 #+end_example
 
+Let's add other files to the remote.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex whereis Essay.pdf
+git annex copy flows.json --to test-addurl
+git annex copy nami.JPG --to test-addurl
 #+END_SRC
 
 #+RESULTS:
-: whereis Essay.pdf (1 copy) 
-:   	8be9097b-d87b-4df9-a532-f465272088da -- [shareddir]
-: ok
+#+begin_example
+copy flows.json finished the get operation. Here is the returned message :200
 
+finished the get operation. Here is the returned message :200
+
+(to test-addurl...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+copy nami.JPG finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-addurl...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+As we can see, they all figure in the remote.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex get Essay.pdf --from shareddir
+git annex list
 #+END_SRC
-
-#+RESULTS:
-: get Essay.pdf (from shareddir...)
-: 93 KiB/s 0s100%             63 MiB/s 0s                            (checksum...) ok
-: (recording state in git...)
-
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex whereis Essay.pdf
-#+END_SRC
-
-#+RESULTS:
-: whereis Essay.pdf (2 copies) 
-:   	8be9097b-d87b-4df9-a532-f465272088da -- [shareddir]
-:    	97b463f9-c944-492e-b29f-85d01293dc86 -- nubudi@ubunto:~/tests_enc/shared_enc/test_enc_shared [here]
-: ok
-
 
 *** addurl.
+Now, we can simply make use of the files we have uploaded to the
+remote and try to turn them into web remotes with addurl. In the
+program disableremote, this could be done after having already
+published the deposit and gotten the urls for the records. This is
+what we will do here as well.
+So the task could be divided into a few steps:
+- first, publish the deposit.
+- for each of the files, retrieve the url that corresponds to the link
+  where this file could be reached.
+- for each file, use the command addurl to link the file to the url.
+
+First, because we have just created a new deposit when we initialized
+the remote, we have to fetch the id of this deposit so as to use it
+when accessing the files.
+This is the id of the deposit in this case: 875408
+
+
+
+
+#+begin_src python :results output :exports both
+import json
+import requests
+
+ACCESS_TOKEN = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/875408/files', params={'access_token': ACCESS_TOKEN})
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+200
+[
+    {
+        "checksum": "7082e555b36043a3cbe3ae671b6e3245",
+        "filename": "SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json",
+        "filesize": 10405,
+        "id": "c5c1192e-1d68-479e-abcb-80c5a1c64d75",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/32821e79-79a8-4112-a100-74911cde6592/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/875408/files/c5c1192e-1d68-479e-abcb-80c5a1c64d75"
+        }
+    },
+    {
+        "checksum": "2c71214423db952cf3335b448f6efa94",
+        "filename": "SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG",
+        "filesize": 169404,
+        "id": "9ab5625a-42c2-4ce2-8365-bad28e36753c",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/32821e79-79a8-4112-a100-74911cde6592/SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/875408/files/9ab5625a-42c2-4ce2-8365-bad28e36753c"
+        }
+    },
+    {
+        "checksum": "fc5b92e373b269a0c4411ce11ea6345d",
+        "filename": "SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf",
+        "filesize": 46788,
+        "id": "6a6f4b98-b3fc-417d-97eb-7ff1d773ef08",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/32821e79-79a8-4112-a100-74911cde6592/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/875408/files/6a6f4b98-b3fc-417d-97eb-7ff1d773ef08"
+        }
+    }
+]
+#+end_example
+
 #+begin_src python :results output :exports both
 import os
 
-os.chdir("/home/nubudi/tests_enc/hybrid_enc/test_enc_hybrid")
+os.chdir("/home/nubudi/tes")
 os.system("pwd")
 #+end_src
 
+We can see that there is a problem with names. This is due to the fact
+that when we annex a file on git-annex and copy it to the Zenodo
+remote, the filename changes to match the key that was given by
+git-annex when annexing the file. So, when looking for a certain file
+on the remote to add the url, we can't look by name, which means that
+it's hard to match the files to the keys. This is especially hard when
+working with multiple files that share the same format (in our
+example, this wasn't the case since each of the 3 files has its own
+format).
+We need to take care of this problem by finding how to match the files
+to the keys before moving forward.
 
+- First, let's test the whereis command.  
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis --key=SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG
+#+END_SRC
+
+We can see that it doesn't give any information concerning the name of
+the file.
+#+RESULTS:
+: whereis SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG finished the get operation. Here is the returned message :200
+: 
+: (2 copies) 
+:   	4c4a5acd-f4c7-4d3b-bc5e-fde842100d89 -- [test-addurl]
+:    	52c8e6c7-c02c-4970-9c34-6e3e7835ad42 -- nubudi@ubunto:~/test_addurl [here]
+: ok
+
+- The only we could get this information starting from the key is by
+  using this command that looks into the commits to find the
+  match. But this could only be done when we commit at each time we
+  annex a file or change it.
+  #+begin_example
+  git log -1 --stat -S <key>
+  #+end_example
+
+ - Test with git info:
+   we can start from the list of the files that we have annexed and
+   then get information about the key of eahc of the files. Then, we
+   can compare the keys manually one by one to the ones we have on the
+   remote and match the files accordingly.
+
+   For instance:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex info Essay.pdf
+#+END_SRC
+We can see by comparing the keys (this one and the one we got from the
+api response) that they are the same and so this could be a way for
+matching the keys and the files.
+#+RESULTS:
+: file: Essay.pdf
+: size: 46.79 kilobytes
+: key: SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+: present: true
