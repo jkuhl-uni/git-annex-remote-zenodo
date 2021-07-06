@@ -8543,8 +8543,8 @@ git checkout master
 : Switched to branch 'master'
 
 
-
-*** algorithm.
+* Tuesday 06/07.
+** disableremotelocally algorithm.
 We can do the two commands mentionned above to access the name of the
 remote but they are not both needed. In fact, we can just checkout
 into the git-annex branch and retrieve the name of the file after
@@ -8559,8 +8559,141 @@ fetch remote_name
 git rm remote_name
 #+end_example
 
-Note: if the remote log contains more than one line (ie: there are
-multiple remotes in this directory), we have go through the file line
-by line and compare the deposit id that we have to the ones that are
-there. This has to be done only for the remotes of the type zenodo and
-not those of different types.
+Notes:
+   - if the remote log contains more than one line (ie: there are
+     multiple remotes in this directory), we have go through the file line
+     by line and compare the deposit id that we have to the ones that are
+     there. This has to be done only for the remotes of the type zenodo and
+     not those of different types.
+   - to retrieve the id of the deposit from the remote.log file a
+     simple line reader that tokenizes the lines and puts each one
+     into a list. Then we can access the elements of this list and
+     look for the element depositionid=X and then use a function
+     (split?) to catch the value of the id.
+
+
+** implem of the function.
+Going to the directory where we will be working.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/test_addurl
+#+END_SRC
+
+#+RESULTS:
+
+Checking into the git-annex branch.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git checkout git-annex
+#+END_SRC
+
+#+RESULTS:
+: Switched to branch 'git-annex'
+
+Showing the files that are available now. 
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+ls
+#+END_SRC
+
+#+RESULTS:
+: 0b7  1d5  4df  76a  952  e39  f7c  remote.log  uuid.log
+
+
+checking back into the master branch
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git checkout master
+#+END_SRC
+
+#+RESULTS:
+: Switched to branch 'master'
+
+
+Now, this is a first implementation of the function. In this method,
+we will read the elements of the file and fetch the id of the
+deposit. 
+#+begin_src python :results output :exports both
+import subprocess
+import shlex
+import os
+
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+
+# checking into the git-annex branch
+subprocess.getoutput("git checkout git-annex")
+
+# getting the output from trom the command
+output = subprocess.getoutput("cat remote.log")
+
+# parsing the output and separating the lines in a list where each element is a file
+s = shlex.split(output, comments=True, posix=False)
+
+print(s)
+
+for elm in s:
+    # looking through the elemnts for the index of the id
+    if elm.startswith("deposit_id"):
+        # if it's the right id that we are looking for, we fetch the element and
+        if deposit_id = elm.split("=")[-1]:
+            element = elm
+            break;
+            
+        
+
+# checking into the master branch
+subprocess.getoutput("git checkout master")
+        
+#+end_src
+
+#+RESULTS:
+: ['4c4a5acd-f4c7-4d3b-bc5e-fde842100d89', 'deposit=<Response&32;[201]>', 'deposit_bucket=https://sandbox.zenodo.org/api/files/32821e79-79a8-4112-a100-74911cde6592', 'deposit_id=875408', 'encryption=none', 'externaltype=zenodo', 'key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG', 'name=test-addurl', 'type=external', 'url=https://sandbox.zenodo.org/api/deposit/depositions', 'timestamp=1625475035.709126356s']
+: 875408
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#+begin_src python :results output :exports both
+import subprocess
+import shlex
+
+
+def f():
+	# checking into the git-annex branch
+	subprocess.getoutput("git checkout git-annex")
+
+	# getting the output from trom the command
+	output = subprocess.getoutput("cat remote.log")
+
+	# we can have multiple remotes in one log and they are separated by lines.
+	lines = output.splitlines()
+	found = False
+	
+	for line in lines:
+    	# parsing the output and separating the lines in a list where each element is a file
+		s = shlex.split(line, comments=True, posix=False)
+		# now, let's go through the list
+		for elm in s:
+	    	# looking through the elemnts for the index of the id
+			if (elm.startswith("deposit_id")) and (869900 == elm.split("=")[-1]):
+    				found = True
+			if elm.startswith("name") and found == True:
+    				deposit_name = elm.split("=")[-1]
+					break
+
+	
+	# checking into the master branch
+	subprocess.getoutput("git checkout master")
+	return
+    
+f() 
+
+#+end_src
