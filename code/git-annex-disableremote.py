@@ -285,14 +285,47 @@ def transformtoweb(deposit_id, key, sandbox_url=None):
     #os.system('git annex list')
 
 # method to disable the remote locally with git rm 
-def disableremotelocally():
+def disableremotelocally(deposit_id):
     # use a shell command to remove the remote locally with git rm
     # this could be done with the library that has been previously tested
     # this is the last step to be done after having already published the deposit on Zenodo.    
     
-    return
+    import subprocess
+    import shlex
+    import os
 
-    
+    # checking into the git-annex branch
+    subprocess.getoutput("git checkout git-annex")
+
+    # getting the output from trom the command
+    output = subprocess.getoutput("cat remote.log")
+
+    # we can have multiple remotes in one log and they are separated by lines.
+    lines = output.splitlines()
+    deposit_name = ''	
+    # going through the remotes
+    for line in lines:
+        # parsing the output and separating the lines in a list where each element is a file
+        s = shlex.split(line, comments=True, posix=False)
+        # now, let's go through the list
+        for elm in s:
+            # looking through the elemnts for the index of the id
+            if elm.startswith("deposit_id"):
+                id = elm.split("=")[-1]
+            # we have found the name of the remote that we are looking for
+            if (elm.startswith("name")) and (id == deposit_id):
+                deposit_name = elm.split("=")[-1]
+
+    # checking back into the master branch
+    subprocess.getoutput("git checkout master")
+
+    # removing the remote locally
+    if deposit_name == '':
+        print("Error while looking for the name of the remote")
+    else:
+        os.system("git rm %s" % deposit_name)
+
+
 # this is the main function
 def main(argv):
     url = None

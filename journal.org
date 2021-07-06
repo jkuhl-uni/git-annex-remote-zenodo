@@ -8571,7 +8571,6 @@ Notes:
      look for the element depositionid=X and then use a function
      (split?) to catch the value of the id.
 
-
 ** implem of the function.
 Going to the directory where we will be working.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
@@ -8688,3 +8687,6 @@ subprocess.getoutput("git checkout master")
 
 #+RESULTS:
 : test-addurl
+
+Now, we just have to add these elements into the disableremotelocally
+function and execute the command 'git rm' to delete the remote locally.
