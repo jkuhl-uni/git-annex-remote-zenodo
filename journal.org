@@ -6615,7 +6615,6 @@ git annex init
 : init  ok
 : (recording state in git...)
 
-
 Now, we can simply work with git annex like we would usually do. If we
 are working in a new repository, we will have to initialize git and
 git annex before the next steps. In this case, I'm working in an
@@ -8690,3 +8689,405 @@ subprocess.getoutput("git checkout master")
 
 Now, we just have to add these elements into the disableremotelocally
 function and execute the command 'git rm' to delete the remote locally.
+
+
+* Wednesday 07/07.
+** test to see how many files could be added to a single zenodo deposit.
+This is done so as to know if we can put as many files as we want
+(keeping in mind that the max size of a record in zenodo is 50GB), or
+if we have to stop at a given number. This fonction was uspposed to
+upload multiple files in the deposit (the loop goes to 100 times) but
+seeing the message error (we can't possibly upload them all at once or
+in very short intervals) so we can see that only the first file
+(filename1) has been uploaded successfully to Zenodo.
+
+#+begin_src python :results output :exports both
+import requests
+import json
+
+headers = {"Content-Type": "application/json"}
+params = {'access_token': 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'}
+
+r = requests.get('https://sandbox.zenodo.org/api/deposit/depositions/876758', params=params, json={}, headers=headers)
+print(r.status_code)
+print(r.json())
+
+
+bucket_url = r.json()["links"]["bucket"]
+bucket_id = r.json()["id"]
+
+filename = 'AirPollutionInGrenoble.pdf'
+path = '/home/nubudi/Downloads/AirPollutionInGrenoble.pdf'
+
+with open(path, "rb") as fp:
+    for i in range(100):
+        filename = filename + str(i)
+        r = requests.put("%s/%s" % (bucket_url, filename), data=fp, params=params, json={})
+
+        """
+url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ str(bucket_id) + '/files'
+r = requests.get(url, params=params)
+"""
+print(json.dumps(r.json(), indent=4))
+
+#+end_src
+
+#+RESULTS:
+: 200
+: {'conceptrecid': '876757', 'created': '2021-07-07T08:06:30.991888+00:00', 'files': [{'checksum': '96379d6f2dfdbdd68ee0fa48a31ee07c', 'filename': 'AirPollutionInGrenoble.pdf0', 'filesize': 1107977, 'id': '811bcb2a-9524-458c-b92b-bc81eec211b2', 'links': {'download': 'https://sandbox.zenodo.org/api/files/09dbe780-712f-46ef-ac9d-a47f5eb2183d/AirPollutionInGrenoble.pdf0', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/files/811bcb2a-9524-458c-b92b-bc81eec211b2'}}, {'checksum': '449450c39898a57d61da4e878001585b', 'filename': 'cacm.all', 'filesize': 2187734, 'id': 'c40545e8-0919-41ae-a4f9-b60435338a7d', 'links': {'download': 'https://sandbox.zenodo.org/api/files/09dbe780-712f-46ef-ac9d-a47f5eb2183d/cacm.all', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/files/c40545e8-0919-41ae-a4f9-b60435338a7d'}}], 'id': 876758, 'links': {'bucket': 'https://sandbox.zenodo.org/api/files/09dbe780-712f-46ef-ac9d-a47f5eb2183d', 'discard': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/actions/discard', 'edit': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/actions/edit', 'files': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/files', 'html': 'https://sandbox.zenodo.org/deposit/876758', 'latest_draft': 'https://sandbox.zenodo.org/api/deposit/depositions/876758', 'latest_draft_html': 'https://sandbox.zenodo.org/deposit/876758', 'newversion': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/actions/newversion', 'publish': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/actions/publish', 'registerconceptdoi': 'https://sandbox.zenodo.org/api/deposit/depositions/876758/actions/registerconceptdoi', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/876758'}, 'metadata': {'prereserve_doi': {'doi': '10.5072/zenodo.876758', 'recid': 876758}}, 'modified': '2021-07-07T08:06:30.991897+00:00', 'owner': 75563, 'record_id': 876758, 'state': 'unsubmitted', 'submitted': False, 'title': ''}
+: {
+:     "message": "100 per 1 minute",
+:     "status": 429
+: }
+
+
+So, a second try was done to look for the response to this question
+but this time it was done manually by selecting random files of a
+decent size (have tried with a collection of files containing 3200
+files but they couldn't be uploaded due to their size) and uploading
+them on the website (they all differ in size).
+
+For now, 4142 files have been successfully uploaded (can check the
+deposit 876758 where this was done)
+
+** brainstorming.
+When creating a new version of a deposit that we have just published
+when executing the command disableremote, we have to inform git-annex
+that the files that used to belong to the deposit X (initialized when
+we initialized the remote R1) are now in the deposit Y (initialized when
+we initialized the remote R2). This is not done automatically by
+git-annex because even if the keys ofthe fies are the same in both
+remotes, git-annex doesn't keep trace a link between the keys that are
+used to store the files in the remotes and the files that we have
+locally for instance. 
+
+---
+let's do a test.
+*** creating a repository to work in.
+**** preparation.
+first, let's make the directory where we will be doing our tests.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~
+mkdir test_linknewver
+cd test_linknewver
+#+END_SRC
+
+#+RESULTS:
+: 
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+pwd
+#+END_SRC
+#+RESULTS:
+: /home/nubudi/test_linknewver
+
+initiating the git and the git annex repository.
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/test_linknewver/.git/
+: init  ok
+: (recording state in git...)
+
+adding a bunch of files to do the test
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp -R ~/Downloads/NotesMooc.pdf /home/nubudi/test_linknewver
+cp -R ~/Downloads/Oumaima_HAJJI_DM4.pdf /home/nubudi/test_linknewver
+cp -R ~/Downloads/IMG_4886.JPG /home/nubudi/test_linknewver
+cp -R ~/Downloads/IMG_4895.JPG /home/nubudi/test_linknewver
+#+END_SRC
+
+#+RESULTS:
+
+**** Initializing the remote.
+we will be using a zenodo remote. This will be useful for when we want
+to transform the files from this remote into the web one.
+
+First, we need to export the path to where the git-annex-remote-zenodo
+function so as to be able to locate it when executing.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+export PATH=$PATH:/home/nubudi/Desktop/Internship/code
+#+END_SRC
+
+#+RESULTS:
+
+Let's check if the path has been successfully exported:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/Internship/code
+
+Now, we can simply work with git annex like we would usually do. If we
+are working in a new repository, we will have to initialize git and
+git annex before the next steps. In this case, I'm working in an
+already initialized repository. We also need to initialize a special
+remote using the command with added options (ex: url to specify if we
+want to use the sandbox or newversion if we want to initialize the
+remote as a new version of an already published remote)
+
+
+#+begin_src shell :session *shell* :results output :exports both
+git annex initremote test-linknewver type=external externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG url=sandbox  encryption=none
+#+end_src
+
+#+RESULTS:
+: initremote test-linknewver finished the post operation. Here is the returned message :201
+: 
+: ok
+: (recording state in git...)
+
+**** adding files into the remote.
+adding files to the repository by copying them into it first and then
+adding them into the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cp ~/Downloads/nami.JPG /home/nubudi/test_linknewver
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add nami.JPG
+#+END_SRC
+
+#+RESULTS:
+: add nami.JPG ok
+: (recording state in git...)
+
+copyign different types of files.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: add IMG_4886.JPG ok
+: add IMG_4895.JPG ok
+: add NotesMooc.pdf ok
+: add Oumaima_HAJJI_DM4.pdf ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+finished the get operation. Here is the returned message :200
+
+here
+|web
+||bittorrent
+|||test-linknewver
+||||
+X___ IMG_4886.JPG
+X___ IMG_4895.JPG
+X___ NotesMooc.pdf
+X___ Oumaima_HAJJI_DM4.pdf
+X___ nami.JPG
+#+end_example
+
+
+Now let's copy these files into the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy NotesMooc.pdf --to test-linknewver
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+copy NotesMooc.pdf finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-linknewver...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+Now, let's check the file in the remote directory where we have
+uploaded it.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-linknewver
+||||
+X___ IMG_4886.JPG
+X___ IMG_4895.JPG
+X__X NotesMooc.pdf
+X___ Oumaima_HAJJI_DM4.pdf
+X___ nami.JPG
+#+end_example
+
+Let's add other files to the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy IMG_4886.JPG --to test-linknewver
+git annex copy IMG_4895.JPG --to test-linknewver
+git annex copy Oumaima_HAJJI_DM4.pdf --to test-linknewver
+git annex copy nami.JPG --to test-linknewver
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+copy IMG_4886.JPG finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-linknewver...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+copy IMG_4895.JPG finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-linknewver...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+copy Oumaima_HAJJI_DM4.pdf finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-linknewver...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+copy nami.JPG finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-linknewver...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+As we can see, they all figure in the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-linknewver
+||||
+X__X IMG_4886.JPG
+X__X IMG_4895.JPG
+X__X NotesMooc.pdf
+X__X Oumaima_HAJJI_DM4.pdf
+X__X nami.JPG
+#+end_example
+
+**** Disabling the remote.
+Now, moving on to the next step which is disabling the remote. For
+this we can use the program disableremote which takes care of all the
+necessary steps to do this. Or we can also just do it manually by
+publishing the remote first, using the transformtoweb, and finally
+disableremotelocally. However, in this case, since we have already
+implemented a program that does all these steps, we can just simply
+execute it.
+To do so, we will only need the necessary information that will allow
+us to acess the deposit (deposit id and the access token). We will
+also use a file containing all the necessary metadata for publishing
+so as to not have to give the information in the command line.
+
+First, let's just create a simple json file (example: zenodo.json)
+with these metadata:
+
+#+begin_example
+ {
+   'metadata':
+   {
+      'title': "linking old fies to new versions",
+      'upload_type': "poster",
+      'description': "This is deposit that contains some files used to test linking to new versions",
+      'creators':
+      [
+      {
+         'affiliation': "Student at PG",
+         'name': "Hajji, Oumaima"
+      }
+      ],
+      'access_right': "closed"
+   }
+}  
+
+#+end_example
+
+
+Now, let's execute the program giving it the id of the deposit (876772
+in this case), the access key, and the path to the zenodo.json file.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/test_linknewver
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+python3 git-annex-disableremote.py -i 876772 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f /home/nubudi/test_linknewver/zenodo.json -u sandbox 
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+finished the get operation. Here is the returned message :200
+
+addurl https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG 
+  while adding a new url to an already annexed file, failed to verify url exists: https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s169404--c67b144537f69568a78032bd2e8f33609379d9401228894f035d21efb3c37e31.JPG
+failed
+git-annex: addurl: 1 failed
+finished the get operation. Here is the returned message :200
+
+addurl https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s42297--17b1f42d2176e2edde7d8502aa452293b2a610f927e630ef7bd25f38c3b27419.JPG 
+  while adding a new url to an already annexed file, failed to verify url exists: https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s42297--17b1f42d2176e2edde7d8502aa452293b2a610f927e630ef7bd25f38c3b27419.JPG
+failed
+git-annex: addurl: 1 failed
+finished the get operation. Here is the returned message :200
+
+addurl https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s6071--44a0e9b9bef4769db09d3decaaf98a583b4007f081f1fa24c92a9ede6b1de0d0.pdf 
+  while adding a new url to an already annexed file, failed to verify url exists: https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s6071--44a0e9b9bef4769db09d3decaaf98a583b4007f081f1fa24c92a9ede6b1de0d0.pdf
+failed
+git-annex: addurl: 1 failed
+finished the get operation. Here is the returned message :200
+
+addurl https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s781838--8c3468b212d488ce86de7b5a25e8bb89ad9b82ae28898cc7f6b56dd42a74752e.pdf 
+  while adding a new url to an already annexed file, failed to verify url exists: https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s781838--8c3468b212d488ce86de7b5a25e8bb89ad9b82ae28898cc7f6b56dd42a74752e.pdf
+failed
+git-annex: addurl: 1 failed
+finished the get operation. Here is the returned message :200
+
+addurl https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s88443--5a281d276c8e867fd0707578f94c6fe6e38ddab7ca566a03a024839afde1103e.JPG 
+  while adding a new url to an already annexed file, failed to verify url exists: https://sandbox.zenodo.org/api/files/d144f985-2835-40a8-99bf-7e65147d177f/SHA256E-s88443--5a281d276c8e867fd0707578f94c6fe6e38ddab7ca566a03a024839afde1103e.JPG
+failed
+git-annex: addurl: 1 failed
+fatal: pathspec 'test-linknewver' did not match any files
+#+end_example

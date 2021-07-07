@@ -330,8 +330,9 @@ def disableremotelocally(deposit_id):
 def main(argv):
     url = None
     file_path = None
+    deposit_id =''
     try:
-        opts, args = getopt.getopt(argv,"hi:k:o:u:",["id=", "key=", "file=", "url="])
+        opts, args = getopt.getopt(argv,"hi:k:f:u:",["id=", "key=", "file=", "url="])
     except getopt.GetoptError:
         print('Problem with the syntax of the command. Please enter the id of the deposit to publish and/or the path to the file containing information about the publishing or leave it to be done manually. If the deposit is on the sandbox, enter url=sandbox or -u sandbox \n')
         print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used>')
