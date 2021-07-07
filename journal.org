@@ -8989,7 +8989,7 @@ ok
 #+end_example
 
 As we can see, they all figure in the remote.
-#+BEGIN_SRC shell :session *shell* :results output :exports both
+#+BEGIN_SRC shell :session *shell* :results output :exports both :tangle test1.sh
 git annex list
 #+END_SRC
 

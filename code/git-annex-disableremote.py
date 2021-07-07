@@ -158,7 +158,7 @@ def lookup_metadata(deposit_id, key):
     # In Zenodo, we can't change only one of these and save the file since we have to 
     # give all of them (they are required) to be able to save it
     # so, by knowing that one of them is absent, we can know that they all are.
-    if 'title' or 'upload_type' or 'description' or 'creators' or 'access_right' not in metadata.keys():
+    if ('title' not in metadata.keys() ) or ('upload_type' not in metadata.keys()) or ('description' not in metadata.keys()) or ('creators' not in metadata.keys()) or ('access_right' not in metadata.keys()):
         return False, {}
     return True, metadata
 
@@ -211,8 +211,8 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     # if the file is already written by the user, we can simply use it    
     else:
         with open(pub_file, "rb") as fp:
-            data = fp
-
+            #data = fp
+            data = json.load(fp)
 
     # finishing the publication
     headers = {"Content-Type": "application/json"}
@@ -224,14 +224,15 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     else:
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % deposit_id
     r = requests.put(url, params=params, json={}, data=data, headers=headers)
-    print(r.json())
+    #print(r.json())
+    
     # publishing
     if not sandbox_url:
         url = 'https://zenodo.org/api/deposit/depositions/%s/actions/publish' % deposit_id    
     else:
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' % deposit_id
     r = requests.post(url,params=params, json={}, headers=headers)    
-    print(r.json())
+    #print(r.json())
 
     
 # method that transforms the files into web remotes
