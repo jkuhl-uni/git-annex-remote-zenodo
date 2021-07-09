@@ -8763,8 +8763,7 @@ locally for instance.
 
 ---
 let's do a test.
-*** creating a repository to work in.
-**** preparation.
+*** preparation.
 first, let's make the directory where we will be doing our tests.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 cd ~
@@ -8802,7 +8801,7 @@ cp -R ~/Downloads/IMG_4895.JPG /home/nubudi/test_linknewver
 
 #+RESULTS:
 
-**** Initializing the remote.
+*** Initializing the remote.
 we will be using a zenodo remote. This will be useful for when we want
 to transform the files from this remote into the web one.
 
@@ -8841,7 +8840,7 @@ git annex initremote test-linknewver type=external externaltype=zenodo key=K1jsy
 : ok
 : (recording state in git...)
 
-**** adding files into the remote.
+*** adding files into the remote.
 adding files to the repository by copying them into it first and then
 adding them into the annex.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
@@ -9007,7 +9006,7 @@ X__X Oumaima_HAJJI_DM4.pdf
 X__X nami.JPG
 #+end_example
 
-**** Disabling the remote.
+*** Disabling the remote.
 Now, moving on to the next step which is disabling the remote. For
 this we can use the program disableremote which takes care of all the
 necessary steps to do this. Or we can also just do it manually by
@@ -9091,3 +9090,100 @@ failed
 git-annex: addurl: 1 failed
 fatal: pathspec 'test-linknewver' did not match any files
 #+end_example
+
+
+
+* Thursday 08/07.
+- Correcting errors in disableremote.py while doing tests. The problem
+with the transformtoweb method was because of a typo (put the wrong
+url when trying to add the url because of the wrong name of
+variable).
+- Also, when using a json file to give the metadata needed for
+  publishing we need to make sure that they are well put together
+  (with the correct ponctuation obviously) and that all the needed
+  info is given according to the restrictions given in the Zenodo
+  doc.
+  This could be checked here: https://developers.zenodo.org/?python#quickstart-upload
+
+
+* Friday 09/07.
+** making changes in disableremotelocally.
+The reason for making such changes is to be able to access the
+remote.log file without having to checkout into the git-annex branch
+before going back to the master branch. If we use just this mechanism,
+there could be problems later on especially with non commited changes
+in one branch that couldn't be left behind if not handled before. So
+instead, the best way to handle is this is by using the command 'git
+show branch:filepath' which reads the file that is in the filepath and
+avaiable in the given branch.
+
+*** test.
+Let's start first with a simple function that only tries to read the
+remote.log file in the git-annex branch and prints out the content of
+this file.
+
+#+begin_src python :results output :exports both
+import subprocess
+import shlex
+import os
+
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+
+# checking into the git-annex branch
+output = subprocess.getoutput("git show git-annex:./remote.log")
+
+# parsing the output and separating the lines in a list where each element is a file
+s = shlex.split(output, comments=True, posix=False)
+
+print(s)
+    
+#+end_src
+
+#+RESULTS:
+: ['4c4a5acd-f4c7-4d3b-bc5e-fde842100d89', 'deposit=<Response&32;[201]>', 'deposit_bucket=https://sandbox.zenodo.org/api/files/32821e79-79a8-4112-a100-74911cde6592', 'deposit_id=875408', 'encryption=none', 'externaltype=zenodo', 'key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG', 'name=test-addurl', 'type=external', 'url=https://sandbox.zenodo.org/api/deposit/depositions', 'timestamp=1625475035.709126356s']
+
+
+
+Now, let's use the rest of the algorithm to try and read the content
+of the file to see if using this method is functional. 
+#+begin_src python :results output :exports both
+import subprocess
+import shlex
+import os
+
+#going to the directory where git annex has been initialized
+os.chdir("/home/nubudi/test_addurl")
+
+# reading the file from the other branch without checking into it
+output = subprocess.getoutput("git show git-annex:./remote.log")
+
+# parsing the output and separating the lines in a list where each element is a file
+s = shlex.split(output, comments=True, posix=False)
+
+print(s)
+
+# choosing the id of the deposit in this case
+deposit_id = '875408'
+for elm in s:
+    # looking through the elemnts for the index of the id
+    if elm.startswith("deposit_id"):
+        # if it's the right id that we are looking for, we fetch the element and
+        if deposit_id == elm.split("=")[-1]:
+            element = elm
+            print("found the right remote")
+            break;
+           
+#+end_src
+As we can see, it's easier to use this method seeing that it enables
+us to check the content of files without checking into the branches
+where they exist, as well as continue with the rest of our tasks of
+parsing the file content and using it. 
+#+RESULTS:
+: ['4c4a5acd-f4c7-4d3b-bc5e-fde842100d89', 'deposit=<Response&32;[201]>', 'deposit_bucket=https://sandbox.zenodo.org/api/files/32821e79-79a8-4112-a100-74911cde6592', 'deposit_id=875408', 'encryption=none', 'externaltype=zenodo', 'key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG', 'name=test-addurl', 'type=external', 'url=https://sandbox.zenodo.org/api/deposit/depositions', 'timestamp=1625475035.709126356s']
+: found the right remote: 
+
+So, what's left now is to change the disableremotelocally function and
+update it with this new method.
+
+** writing the walkthrough log.

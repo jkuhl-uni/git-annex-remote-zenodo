@@ -1,0 +1,186 @@
+#+TITLE:       walkthrough - tutorial
+#+AUTHOR:      Oumaima Hajji
+#+STARTUP: overview indent inlineimages logdrawer
+#+TAGS: R(R) Python(p) OrgMode(O) 
+
+
+* Introduction.
+In this file, we will be using the programs we have implemented to
+initialize and manipulate a git-annex remote which is this case a
+Zenodo special remote.
+
+This tutorial is devided into a few steps in order to regroup the
+tasks that belong together and execute them in a logical order with
+explanations that go with them. So, in the first step, we will have to
+prepare a directory where all the next tests will be held, before
+starting on the more technical steps concerning the remote. 
+
+* Preparing for the remote.
+1. First, let's make the directory where we will be doing our tests.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~
+mkdir test_remote
+cd test_remote
+#+END_SRC
+
+2. Now, we have to initialize the git and the git annex directory before
+we move on to the next steps. 
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+3. Lastly, and in order to manipulate a git-annex remote, we will need to
+add some files to this directory. This could be done either manually
+by choosing some local files and copying them here, or by creating new
+random files as test subjects. This is what will be done in this
+case.
+First, we will be pulling words from a remote dictionary using the
+requests library. Then, we will use the random.choices method to pick
+random words from that list. We can then use these chosen words (after
+turning the elements of the list into a string with the String
+function join()) to write in new files we create.
+
+Here is the python program that does this:
+
+#+begin_src python :results output :exports both
+import requests
+import random
+
+# fetching the words from the dictionary
+words = "https://www.mit.edu/~ecprice/wordlist.10000"
+response = requests.get(words)
+# putting the words in a list
+wordlist = response.content.splitlines()
+
+# choosing random words from the list and writing into files
+for i in range(5):
+    chosenwords = random.choices(wordlist, k=random.randint(1,50))
+    s = ' '.join(str(i) for i in chosenwords)
+    f= open("test%s.txt" % str(i), "w")
+    f.write(s)
+    f.close()
+
+#+end_src
+
+#+RESULTS:
+
+* Initializing the remote.
+
+1. First, we need to export the path to where the git-annex-remote-zenodo
+function so as to be able to locate it when executing. Since that
+program is in the same path as we are right now, we can just put the
+current path .
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+export PATH=$PATH:.
+#+END_SRC
+
+Let's check if the path has been successfully exported:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+We also need to make the git-annex-remote-zenodo executable so as to
+be able to execute it as a command. To do this, we can simply
+change the permissions in the properties of the program (by checking
+the box) or we can do it using the shell command line with ths
+command (go to the path where the program is to execute it):
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+chmod +x git-annex-remote-zenodo
+#+END_SRC
+
+For this, We will need the sheebang line #!/usr/bin/env python3 to
+execute this command which we added to the program.
+
+2. Now, we can simply work with git annex like we would usually
+   do. Since we have already initialized git and git annex in this
+   repository, we now only need to initialize a Zenodo special remote
+   using the command with added options (ex: url to specify if we want
+   to use the sandbox or newversion if we want to initialize the
+   remote as a new version of an already published remote).
+   In this case, and since this is a test, we will be using the
+   sandbox, and so we need to specify the option url=sandbox. We will
+   be working with a brand new deposit and so we won't be using the
+   newversion option for now. The rest of the options is self
+   explanatory: key is the access token (since we will be using the
+   sandbox, you need an access key created on
+   https://sandbox.zenodo.org/account/settings/applications/)
+
+#+begin_src
+cd ~/test_remote
+git annex initremote test-zenodo type=external externaltype=zenodo key=ACCESS_TOKEN encryption=none url=sandbox
+#+end_src
+
+* Manipulating files in the remote.
+
+1. Now that we have finished with the initial preparations of the
+   depository, we can start working with the remote. As a first step,
+   we can annex the files we have just created.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/test_remote
+git annex add . 
+#+END_SRC
+
+We can find all the files that have been added to the annex.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+2. Now, let's copy these files to the remote. We can either copy them
+   all or choose the ones we are most interested in storing in the
+   deposit. For this example, I've just chosen to copy three of the
+   files we have created and leave the rest available only locally.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy test1.txt --to test-remote
+git annex copy test2.txt --to test-remote
+git annex copy test3.txt --to test-remote
+#+END_SRC
+
+Now, let's check the files we have uploaded to see if they have been
+successfully uploaded to the remote. We can either do this for each
+file using the whereis command, or use the list command to show all
+the annexed files and their positions.
+
+Here is a first step with the whereis command for the file test1.txt:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis test1.txt
+#+END_SRC
+
+And now, let's do the same using the second command and for all the
+files:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+3. Now, let's drop one of the files we have uploaded from the
+   remote. This is done to see if the program we have implemented
+   works and also to test the usefulness of git-annex remotes.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop test1.txt --from test-zenodo
+#+END_SRC
+
+Now, let's list the annexed files to see if the files test1.txt is
+still available in the remote:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+As we can see, it's only available locally now.
+
+4. test move.
+
+
+We can continue playing with files this way, annexing the ones we want
+to store and copying/moving them from/to the remote. We can drop them either
+locally if we no longer want them there, or drop them from the remote
+as well.
+
+5. test get.
+   
+* Disabling the remote.

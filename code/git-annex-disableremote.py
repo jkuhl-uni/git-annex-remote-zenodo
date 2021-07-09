@@ -150,9 +150,8 @@ def setting_accessright ():
 # returns true if all the needed metadata is given or false if it's not
 # returns the dictionary containing the metadata as well to show the user
 # so that they decide whether to change or not.
-def lookup_metadata(deposit_id, key):
+def lookup_metadata(url, key):
     import requests
-    url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % str(deposit_id)
     r = requests.get(url, params = {'access_token': key})
     metadata = r.json()['metadata']
     # In Zenodo, we can't change only one of these and save the file since we have to 
@@ -167,13 +166,19 @@ def lookup_metadata(deposit_id, key):
 def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     import json
     import requests
+   
+    if not sandbox_url:
+        url = 'https://zenodo.org/api/deposit/depositions/%s' % deposit_id
+    else:
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % deposit_id
+
     # initializing the required metadata if the file is not given
     if not pub_file:
         
         # look to see if the user has already set the metadata in the remote manually.
         # if it's the case, either ask the user if the info is ok and publish directly
         # or make them fill in the information manually on the command line.
-        bool, dict = lookup_metadata(deposit_id, key) 
+        bool, dict = lookup_metadata(url, key) 
         # showing the user the metadata they have submitted so as to see if they want 
         # to keep them or update them
         if bool:
@@ -223,7 +228,7 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
         url = 'https://zenodo.org/api/deposit/depositions/%s' % deposit_id
     else:
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % deposit_id
-    r = requests.put(url, params=params, json={}, data=data, headers=headers)
+    r = requests.put(url, params=params, data=json.dumps(data), headers=headers)
     #print(r.json())
     
     # publishing
@@ -295,15 +300,12 @@ def disableremotelocally(deposit_id):
     import shlex
     import os
 
-    # checking into the git-annex branch
-    subprocess.getoutput("git checkout git-annex")
-
-    # getting the output from trom the command
-    output = subprocess.getoutput("cat remote.log")
+    # reading the file from the other branch without checking into it
+    output = subprocess.getoutput("git show git-annex:./remote.log")
 
     # we can have multiple remotes in one log and they are separated by lines.
     lines = output.splitlines()
-    deposit_name = ''	
+    remote_name = ''	
     # going through the remotes
     for line in lines:
         # parsing the output and separating the lines in a list where each element is a file
@@ -315,16 +317,14 @@ def disableremotelocally(deposit_id):
                 id = elm.split("=")[-1]
             # we have found the name of the remote that we are looking for
             if (elm.startswith("name")) and (id == deposit_id):
-                deposit_name = elm.split("=")[-1]
+                remote_name = elm.split("=")[-1]
 
-    # checking back into the master branch
-    subprocess.getoutput("git checkout master")
-
+    # modif!!
     # removing the remote locally
-    if deposit_name == '':
+    if remote_name == '':
         print("Error while looking for the name of the remote")
     else:
-        os.system("git rm %s" % deposit_name)
+        os.system("git rm %s" % remote_name)
 
 
 # this is the main function
