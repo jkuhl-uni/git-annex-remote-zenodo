@@ -191,7 +191,6 @@ class ZenodoRemote(ExportRemote):
                         f.write(chunk)
                 # once we finish writing into the file we can close it
                 f.close()
-
         if r.status_code > 204:
             print("error while fetching the file from the remote " + str(r.status_code))
             raise RemoteError('could not send a get query to the API')
@@ -201,7 +200,6 @@ class ZenodoRemote(ExportRemote):
         # return True if the key is present in the remote
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
-        print("check present")
         try:
             url = self.url + '/' +  str(self.deposit_id) + '/files'
             r = self.query('get', url)
@@ -220,7 +218,6 @@ class ZenodoRemote(ExportRemote):
         # remove the key from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
-        print("remove")
         # checking if the key exists in the remote deposit
         url = self.url + '/' + str(self.deposit_id) + '/files'
         r = self.query('get', url)

@@ -200,19 +200,17 @@ git annex copy test3.txt --to test-zenodo
 #+begin_example
 copy test1.txt finished the get operation. Here is the returned message :200
 
-check present
 finished the get operation. Here is the returned message :200
 
 (to test-zenodo...) 
 finished the put operation. Here is the returned message :200
 
-finished exporting the file... 
+finished exporting the file... 
 
-ok
+ok
 (recording state in git...)
 copy test2.txt finished the get operation. Here is the returned message :200
 
-check present
 finished the get operation. Here is the returned message :200
 
 (to test-zenodo...) 
@@ -224,7 +222,6 @@ finished exporting the file...
 (recording state in git...)
 copy test3.txt finished the get operation. Here is the returned message :200
 
-check present
 finished the get operation. Here is the returned message :200
 
 (to test-zenodo...) 
@@ -289,7 +286,6 @@ git annex drop test1.txt --from test-zenodo
 #+RESULTS:
 : drop test-zenodo test1.txt finished the get operation. Here is the returned message :200
 : 
-: remove
 : finished the get operation. Here is the returned message :200
 : 
 : finished the delete operation. Here is the returned message :204
@@ -318,7 +314,64 @@ X__X test3.txt
 X___ test4.txt
 #+end_example
 
-4. Now, let's try something new, this time having the file only
+
+4. Now, we can try moving a file from a position to another. We can
+   either move it from the remote to here or from the local position
+   to the remote. When we move a file from a remote to another or locally it's as if we
+   made two operations: copying it to X and dropping it from Y. So it's
+   useful to do this when we already keep track of where all the copies
+   of a file is and we just want to move it around without having to drop
+   it everytime.
+
+   It's better to check where a certain file is before we start moving
+   it so as to have full knowledge of all the places it is. As we have
+   tested in the step above, the file test1.txt is only available
+   locally because we have dropped it from the remote.
+   So now, we can try to move the file from here locally to the
+   remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex move test1.txt --to test-zenodo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+move test1.txt finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+(to test-zenodo...) 
+finished the put operation. Here is the returned message :200
+
+finished exporting the file... 
+
+ok
+(recording state in git...)
+#+end_example
+
+Once the operation is finished, we can check the whereabouts of this
+file again:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list 
+#+END_SRC
+
+As we can see, it's no longer available locally but it's accessible in
+the remote.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-zenodo
+||||
+X___ test0.txt
+___X test1.txt
+X__X test2.txt
+X__X test3.txt
+X___ test4.txt
+#+end_example
+
+
+5. Now, let's try something new, this time having the file only
    available on the remote and trying to get it to here.
 
    To do this, we can first list all the files that are annexed and
@@ -355,14 +408,35 @@ git annex drop test2.txt
 #+RESULTS:
 : drop test2.txt finished the get operation. Here is the returned message :200
 : 
-: check present
 : finished the get operation. Here is the returned message :200
 : 
-: Yes, this file exists in the remote: SHA256E-s437--78d7b5b8be5a96a92b84c5b9d78f39180ca9c5bef7228ffffc464698131059fe.txt
+: Yes, this file exists in the remote: SHA256E-s271--a15100b650b26c27f4ba0f13c45084fee13a6ac4ed4b894f23d11cc420fdfa01.txt
 : ok
 : (recording state in git...)
 
-   
+
+We can now check to see if it has been successfully dropped locally
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+Which is the case since the file test2.txt is no longer in here but
+it's still available in the test-zenodo remote.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-zenodo
+||||
+X___ test0.txt
+___X test1.txt
+___X test2.txt
+X__X test3.txt
+X___ test4.txt
+#+end_example
+
+
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex get test2.txt --from test-zenodo
 #+END_SRC
@@ -405,7 +479,6 @@ X___ test4.txt
 to store and copying/moving them from/to the remote. We can drop them either
 locally if we no longer want them there, or drop them from the remote
 as well.
-
 * Disabling the remote.
 Once we finish working with a certain remote, it's time to disable
 it. To do this, we will be using a program that takes care of all the
@@ -505,3 +578,4 @@ os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy
 python3 git-annex-disableremote.py -i 876772 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f /home/nubudi/test_linknewver/zenodo.json -u sandbox 
 #+END_SRC
 
+ 
