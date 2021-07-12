@@ -1,4 +1,4 @@
-#+TITLE:       Walkthrough (complete tutorial)
+#+TITLE:       walkthrough - tutorial
 #+AUTHOR:      Oumaima Hajji
 #+STARTUP: overview indent inlineimages logdrawer
 #+TAGS: R(R) Python(p) OrgMode(O) 
@@ -68,6 +68,7 @@ for i in range(5):
 #+RESULTS:
 
 * Initializing the remote.
+
 1. First, we need to export the path to where the git-annex-remote-zenodo
 function so as to be able to locate it when executing. Since that
 program is in the same path as we are right now, we can just put the
@@ -114,6 +115,7 @@ git annex initremote test-zenodo type=external externaltype=zenodo key=ACCESS_TO
 #+end_src
 
 * Manipulating files in the remote.
+
 1. Now that we have finished with the initial preparations of the
    depository, we can start working with the remote. As a first step,
    we can annex the files we have just created.
@@ -135,9 +137,9 @@ git annex list
    files we have created and leave the rest available only locally.
 
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex copy test1.txt --to test-zenodo
-git annex copy test2.txt --to test-zenodo
-git annex copy test3.txt --to test-zenodo
+git annex copy test1.txt --to test-remote
+git annex copy test2.txt --to test-remote
+git annex copy test3.txt --to test-remote
 #+END_SRC
 
 Now, let's check the files we have uploaded to see if they have been
@@ -171,70 +173,14 @@ git annex list
 #+END_SRC
 As we can see, it's only available locally now.
 
-4. Now, we can try moving a file from a position to another. We can
-   either move it from the remote to here or from the local position
-   to the remote. When we move a file from a remote to another or locally it's as if we
-   made two operations: copying it to X and dropping it from Y. So it's
-   useful to do this when we already keep track of where all the copies
-   of a file is and we just want to move it around without having to drop
-   it everytime.
+4. test move.
 
-   It's better to check where a certain file is before we start moving
-   it so as to have full knowledge of all the places it is. As we have
-   tested in the step above, the file test1.txt is only available
-   locally because we have dropped it from the remote.
-   So now, we can try to move the file from here locally to the
-   remote.
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex move test1.txt --to test-zenodo
-#+END_SRC
-
-Once teh operation is finished, we can check the whereabouts of this
-file again:
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex list 
-#+END_SRC
-
-As we can see, it's no longer available locally but it's accessible in
-the remote.
-
-5. Now, let's try something new, this time having the file only
-   available on the remote and trying to get it to here.
-
-   To do this, we can first list all the files that are annexed and
-   see where the file is kept now.
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex list
-#+END_SRC
-
-   We then can choose either a file that's not here but is on the
-   remote or we can do this manually by dropping a file that is here
-   from its local position and then getting it from the remote. But
-   since file1.txt already answers this criteria, we can just try this
-   operation on it straight-away.
-   
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex get test1.txt --from test-zenodo
-#+END_SRC
 
 We can continue playing with files this way, annexing the ones we want
 to store and copying/moving them from/to the remote. We can drop them either
 locally if we no longer want them there, or drop them from the remote
 as well.
 
+5. test get.
+   
 * Disabling the remote.
-Once we finish working with a certain remote, it's time to disable
-it. To do this, we will be using a program that takes care of all the
-steps that are necessary for a remote to be disabled. In our case,
-this program first publishes the Zenodo deposit that has been created
-when we initialized the remote. Then, it transforms all the annexed
-files that have been published in the deposit into web remotes and
-adds them in git-annex. Lastly, it deletes the remote locally.
-
-To do so, we will only need the necessary information that will allow
-us to acess the deposit (deposit id and the access token). We will
-also use a file containing all the necessary metadata for publishing
-so as to not have to give the information in the command line.
-
-First, let's just create a simple json file (example: zenodo.json)
-with these metadata.
