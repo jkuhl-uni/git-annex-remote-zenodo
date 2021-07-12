@@ -9188,7 +9188,10 @@ update it with this new method.
 
 ** writing the walkthrough log.
 
+
 * Monday 12/07.
+** brainstorming.
+*** problem with transformto url.
 This is a copy of the test I've been working on on the
 walkthrough. The problem I've been facing is that I've been trying to
 excute the command git annex addurl for each of the files but without
@@ -9203,7 +9206,7 @@ The test that was done in the walkthrough is in the next part and so
 now moving on we will be changing things in the transformtoweb
 function so that we won't have this problem anymore. 
 
-** Disabling the remote.
+*** Disabling the remote.
 Once we finish working with a certain remote, it's time to disable
 it. To do this, we will be using a program that takes care of all the
 steps that are necessary for a remote to be disabled
@@ -9314,3 +9317,19 @@ python3 git-annex-disableremote.py -i 876772 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQ
 
 
 
+
+*** possible solution.
+When testing the command git annex addurl on the terminal after it
+didn't work on the walkthrough and having taken the same command and
+copied it into the terminal, we notice that it works and that the
+possibe problem is the size of the file (added the option --relaxed
+for now to see if it's gonna work).
+
+
+*** modification in disableremotelocally.
+This time, the command that was used to disable the remote has been
+the wrong one and so a simple change from 'git rm' to 'git remote
+remove' has been successful in making the function work.
+Now, when executed, this function manages to retrieve the name of the
+remote that the user wants to delete and then uses the command
+indicated above to disable it.

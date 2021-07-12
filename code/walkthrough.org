@@ -488,12 +488,12 @@ import subprocess
 import os
 import shlex
 
-# getting the current directory where the file is 
+# getting the current directory where this file is (and the python script as well)
 cwd = os.getcwd()
 # changing the directory to that of the test
 u = os.path.expanduser('~/test_remote')
 os.chdir(u)
-
+remote_path = os.getcwd()
 # reading the file from the other branch without checking into it
 output = subprocess.getoutput("git show git-annex:./remote.log")
 s = shlex.split(output, comments=True, posix=False)
@@ -506,28 +506,26 @@ for elm in s:
 progpath = cwd + "/git-annex-disableremote.py"
 jsonfilepath = cwd + "/zenodo.json"
 
-os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f " + jsonfilepath + " -u sandbox")
+os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f " + jsonfilepath + " -u sandbox -p "+ remote_path)
 #+end_src
 
   #+RESULTS:
-  #+begin_example
-  here
-  |web
-  ||bittorrent
-  |||test-zenodo
-  ||||
-  X___ test0.txt
-  X___ test1.txt
-  X__X test2.txt
-  X__X test3.txt
-  X___ test4.txt
-  git annex addurl https://sandbox.zenodo.org/api/files/817f212e-b7e2-41d3-8249-ddab8b5050c3/SHA256E-s123--8129d68b5c9ce67b17ff93245a61b15cb05c2d758e1c342909cfd4c5bc532058.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG --file=test3.txt
-  git annex addurl https://sandbox.zenodo.org/api/files/817f212e-b7e2-41d3-8249-ddab8b5050c3/SHA256E-s532--eb178e79022ab3634475206c64a681ecfd0f419d19546e2f2f0ed40795dcb0f5.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG --file=test2.txt
-  #+end_example
+  : 0
   
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-python3 git-annex-disableremote.py -i 876772 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f /home/nubudi/test_linknewver/zenodo.json -u sandbox 
+git annex list
 #+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||
+: X__ test0.txt
+: X__ test1.txt
+: XX_ test2.txt
+: XX_ test3.txt
+: X__ test4.txt
 
  
 

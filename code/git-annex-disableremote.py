@@ -241,7 +241,7 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
 
     
 # method that transforms the files into web remotes
-def transformtoweb(deposit_id, key, sandbox_url=None):
+def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
     # we can simply use the git annex addurl --file and do this for each file as has been previously tested
     # the option --file will attach the url to the existing file instead of creating a new one.
     # this way, a trace has been kept of where this file exists (the remotes in this case being Zenodo and the web remote)
@@ -251,6 +251,7 @@ def transformtoweb(deposit_id, key, sandbox_url=None):
     import shlex
     import os
     import requests
+
 
     # first step
     # getting the output from trom the command
@@ -285,11 +286,25 @@ def transformtoweb(deposit_id, key, sandbox_url=None):
         file_name = dico[file_id]
         # now, we can finally create the web url
         url = download_link + '?access_token='+ key
-        print('git annex addurl '+ url + ' --file=' + file_name) 
-        os.system('git annex addurl '+ url + ' --file=' + file_name) 
+        #print('git annex addurl '+ url + ' --file=' + file_name) 
+        # now, let's turn the files into web remotes
+        u = os.system('git annex addurl '+ url + ' --file=' + file_name + " --relaxed")
+
+        """
+        # let's study the two cases, either the remote is in the local path
+        if remote_path is None:
+            os.system('git annex addurl '+ url + ' --file=' + file_name) 
         
+            # or it's on a different path that is given by the user
+        else:
+            # if this is the case, we need to go to that directory before executing the command
+            u = os.path.expanduser(remote_path)
+            os.chdir(u)
+            os.system('git annex addurl '+ url + ' --file=' + file_name)
+       """ 
     # this is just to make sure
-    os.system('git annex list')
+    #os.system('git annex list')
+    
 
 
 # method to disable the remote locally with git rm 
@@ -320,13 +335,12 @@ def disableremotelocally(deposit_id):
             # we have found the name of the remote that we are looking for
             if (elm.startswith("name")) and (id == deposit_id):
                 remote_name = elm.split("=")[-1]
-
     # removing the remote locally
     if remote_name == '':
         print("Error while looking for the name of the remote")
     else:
-        os.system("git rm %s" % remote_name)
-
+        u = os.system("git remote remove " + remote_name)
+        print(u)
 
 # this is the main function
 def main(argv):
@@ -334,14 +348,14 @@ def main(argv):
     file_path = None
     deposit_id =''
     try:
-        opts, args = getopt.getopt(argv,"hi:k:f:u:",["id=", "key=", "file=", "url="])
+        opts, args = getopt.getopt(argv,"hi:k:f:u:p:",["id=", "key=", "file=", "url=", "path="])
     except getopt.GetoptError:
         print('Problem with the syntax of the command. Please enter the id of the deposit to publish and/or the path to the file containing information about the publishing or leave it to be done manually. If the deposit is on the sandbox, enter url=sandbox or -u sandbox \n')
-        print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used>')
+        print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used> -p <remote_path if different than the local path>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used>')
+            print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used> -p <remote_path if different than the local path>')
             sys.exit()
         elif opt in ("-i", "--id"):
             deposit_id = arg
@@ -351,11 +365,13 @@ def main(argv):
             file_path = arg
         elif opt in ("-u", "--url"):
             url= arg
+        elif opt in ("-p", "--path"):
+            remote_path = arg
 
     # first step: publishing the deposit
     #publish(deposit_id, key, file_path, url)
     # second step: we need to transform each of the files into a web remote
-    transformtoweb(deposit_id, key, url)
+    transformtoweb(deposit_id, key, url, remote_path)
     # third step: we need to disable the remote locally
     disableremotelocally(deposit_id)
 
