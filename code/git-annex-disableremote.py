@@ -348,14 +348,14 @@ def main(argv):
     file_path = None
     deposit_id =''
     try:
-        opts, args = getopt.getopt(argv,"hi:k:f:u:p:",["id=", "key=", "file=", "url=", "path="])
+        opts, args = getopt.getopt(argv,"hi:k:f:u:",["id=", "key=", "file=", "url="])
     except getopt.GetoptError:
         print('Problem with the syntax of the command. Please enter the id of the deposit to publish and/or the path to the file containing information about the publishing or leave it to be done manually. If the deposit is on the sandbox, enter url=sandbox or -u sandbox \n')
-        print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used> -p <remote_path if different than the local path>')
+        print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used> -p <remote_path if different than the local path>')
+            print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used>')
             sys.exit()
         elif opt in ("-i", "--id"):
             deposit_id = arg
@@ -365,13 +365,12 @@ def main(argv):
             file_path = arg
         elif opt in ("-u", "--url"):
             url= arg
-        elif opt in ("-p", "--path"):
-            remote_path = arg
+
 
     # first step: publishing the deposit
-    #publish(deposit_id, key, file_path, url)
+    publish(deposit_id, key, file_path, url)
     # second step: we need to transform each of the files into a web remote
-    transformtoweb(deposit_id, key, url, remote_path)
+    transformtoweb(deposit_id, key, url)
     # third step: we need to disable the remote locally
     disableremotelocally(deposit_id)
 

@@ -9333,3 +9333,7 @@ remove' has been successful in making the function work.
 Now, when executed, this function manages to retrieve the name of the
 remote that the user wants to delete and then uses the command
 indicated above to disable it.
+
+*** new test.
+Having made all these changes to the files, it's time to do a new test
+using the walkthrough. 

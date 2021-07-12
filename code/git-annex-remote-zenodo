@@ -191,6 +191,7 @@ class ZenodoRemote(ExportRemote):
                         f.write(chunk)
                 # once we finish writing into the file we can close it
                 f.close()
+                
         if r.status_code > 204:
             print("error while fetching the file from the remote " + str(r.status_code))
             raise RemoteError('could not send a get query to the API')

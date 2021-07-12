@@ -216,9 +216,9 @@ finished the get operation. Here is the returned message :200
 (to test-zenodo...) 
 finished the put operation. Here is the returned message :200
 
-finished exporting the file... 
+finished exporting the file... 
 
-ok
+ok
 (recording state in git...)
 copy test3.txt finished the get operation. Here is the returned message :200
 
@@ -226,8 +226,8 @@ finished the get operation. Here is the returned message :200
 
 (to test-zenodo...) 
 finished the put operation. Here is the returned message :200
-
-finished exporting the file... 
+
+finished exporting the file... 
 
 ok
 (recording state in git...)
@@ -249,9 +249,10 @@ remote and here locally.
 : whereis test1.txt finished the get operation. Here is the returned message :200
 : 
 : (2 copies) 
-:   	7305dc49-afba-4fcc-92a3-8ab81b6d84fa -- nubudi@ubunto:~/test_remote [here]
-:    	cb398ee5-aef0-424f-ae09-613d73d1b5ba -- [test-zenodo]
+:   	66b28db8-283d-4358-b306-7e966b9864e2 -- nubudi@ubunto:~/test_remote [here]
+:    	e52a5f22-9783-40fb-a1a7-9a0a25e2ef08 -- [test-zenodo]
 : ok
+
 
 And now, let's do the same using the second command and for all the
 files:
@@ -345,15 +346,15 @@ X___ test4.txt
 
 
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex drop test2.txt
+git annex drop test3.txt
 #+END_SRC
 
 #+RESULTS:
-: drop test2.txt finished the get operation. Here is the returned message :200
+: drop test3.txt finished the get operation. Here is the returned message :200
 : 
 : finished the get operation. Here is the returned message :200
 : 
-: Yes, this file exists in the remote: SHA256E-s532--eb178e79022ab3634475206c64a681ecfd0f419d19546e2f2f0ed40795dcb0f5.txt
+: Yes, this file exists in the remote: SHA256E-s384--4e2ab8d53db6354bb9dd3e019eb47e0578ea60f4e898bc2c64d5814ab6f33fda.txt
 : ok
 : (recording state in git...)
 
@@ -362,6 +363,7 @@ We can now check to see if it has been successfully dropped locally
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex list
 #+END_SRC
+
 Which is the case since the file test2.txt is no longer in here but
 it's still available in the test-zenodo remote.
 #+RESULTS:
@@ -373,18 +375,18 @@ here
 ||||
 X___ test0.txt
 X___ test1.txt
-___X test2.txt
-X__X test3.txt
+X__X test2.txt
+___X test3.txt
 X___ test4.txt
 #+end_example
 
 
 #+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex get test2.txt --from test-zenodo
+git annex get test3.txt --from test-zenodo
 #+END_SRC
 
 #+RESULTS:
-: get test2.txt (from test-zenodo...) 
+: get test3.txt (from test-zenodo...) 
 : finished the get operation. Here is the returned message :200
 : 
 : finished the get operation. Here is the returned message :200
@@ -400,7 +402,7 @@ from the remote.
 git annex list
 #+END_SRC
 
-As we can see from the results, the file test2.txt that wasn't
+As we can see from the results, the file test3.txt that wasn't
 available locally just a few moments ago is now here and available for
 our use.
 #+RESULTS:
@@ -506,12 +508,29 @@ for elm in s:
 progpath = cwd + "/git-annex-disableremote.py"
 jsonfilepath = cwd + "/zenodo.json"
 
-os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f " + jsonfilepath + " -u sandbox -p "+ remote_path)
+os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f " + jsonfilepath + " -u sandbox")
 #+end_src
 
   #+RESULTS:
-  : 0
-  
+  : addurl https://sandbox.zenodo.org/api/files/5fba796e-e301-4e23-9b5f-37ca92a3c0d0/SHA256E-s155--d87820702c4e436875270b5ad392d7a54c3fca4a06b15db98f64d7054e6a86e6.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+  : (recording state in git...)
+  : addurl https://sandbox.zenodo.org/api/files/5fba796e-e301-4e23-9b5f-37ca92a3c0d0/SHA256E-s384--4e2ab8d53db6354bb9dd3e019eb47e0578ea60f4e898bc2c64d5814ab6f33fda.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+  : (recording state in git...)
+  : 32768
+
+  Now, we can finally take a look at the results after the operation
+  of disabling the remote. As we can see, there were two major changes
+  in the result of the command list:
+  - Firstly, the two files that were on the Zenodo remote (test2.txt and
+    test3.txt) are not available on the web, which means that they
+    have been successfully turned into web remotes.
+    This step was taken care of by the function transformtoweb.
+  - Secondly, the Zenodo remote (test-zenodo) no longer appears in the list of the
+    remotes where the files are kept. This shows that the remote has
+    been successfully removed.
+    This was done by the command 'git remote remove' in the
+    disableremotelocally method which looks in the file remote.log for
+    the remote that we want to remove and then removes it from git.
 #+BEGIN_SRC shell :session *shell* :results output :exports both
 git annex list
 #+END_SRC
@@ -527,6 +546,15 @@ git annex list
 : XX_ test3.txt
 : X__ test4.txt
 
+ We can also check the list of the remotes that are kept in git and we
+ can see that we get nothing in result, which would have been
+ different if we still have remotes in this directory.
+
+ #+BEGIN_SRC shell :session *shell* :results output :exports both
+git remote
+#+END_SRC
+
+#+RESULTS:
  
 
 
