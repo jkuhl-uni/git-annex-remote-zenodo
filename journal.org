@@ -9187,3 +9187,130 @@ So, what's left now is to change the disableremotelocally function and
 update it with this new method.
 
 ** writing the walkthrough log.
+
+* Monday 12/07.
+This is a copy of the test I've been working on on the
+walkthrough. The problem I've been facing is that I've been trying to
+excute the command git annex addurl for each of the files but without
+actually going to the place where these files are. The directory that
+I've placed the git-annex-disableremote.py is in the Internship/code
+where I've kept all the files that are related to the
+Internship. However, the test is done in a new directory that was
+created at the start of the file walkthrough.org.
+
+
+The test that was done in the walkthrough is in the next part and so
+now moving on we will be changing things in the transformtoweb
+function so that we won't have this problem anymore. 
+
+** Disabling the remote.
+Once we finish working with a certain remote, it's time to disable
+it. To do this, we will be using a program that takes care of all the
+steps that are necessary for a remote to be disabled
+(git-annex-disableremote.py).
+In our case, this program first publishes the Zenodo deposit that has
+been created when we initialized the remote. Then, it transforms all
+the annexed files that have been published in the deposit into web
+remotes and adds them in git-annex. Lastly, it deletes the remote locally.
+
+To do so, we will only need the necessary information that will allow
+us to acess the deposit (deposit id and the access token). We will
+also use a file containing all the necessary metadata for publishing
+so as to not have to give the information in the command line.
+
+First, let's just create a simple json file (example: zenodo.json)
+with example metadata to allow us to publish. For this, we can just
+copy the example that was given in the zenodo tutorial
+(https://developers.zenodo.org/?python#quickstart-upload) or we can
+create our own with information that concerns us.
+
+I've added a file in the directory that contains the code source files
+for the internship and so it could be used to pass this test. You
+could also change things in the file according to the type of content
+you want to publish (this all could be found in the tutorial in the
+same url given earlier).
+
+Let's write the file using a python program which creates a dictionary
+and fills it in with all the metadata that's needed before dumping the
+content of this dictionary in a zenodo.json file.
+#+begin_src python :results output :exports both
+import os
+import json
+
+# filling dico with information
+dico= {}
+metadata = {}
+dico['title'] = "Test upload"
+dico['upload_type'] = "poster"
+dico['description'] = "This is a test to publish a deposit"
+dico['creators'] = [{'name': 'Doe, John', 'affiliation': 'researcher'}]
+dico['access_right'] = "closed"
+# creating the the other dictionary metadata that has dico as a value for the key metadata
+metadata['metadata'] = dico
+
+outputpath = os.getcwd() + "/zenodo.json"
+print(outputpath)
+# opening the file and writing into it.
+f = open(outputpath, "w+")
+json.dump(metadata, f)
+f.close()
+#+end_src
+
+Now, we can execute the program giving it the id of the deposit, the
+access key, and the path to the zenodo.json file.
+- First, we will need the id of the deposit and this could be known
+  easily by checking the uploads on the zenodo website. Depending on
+  whether or nor the sandbox is used, we can get the id on the upload
+  window. But here, we can write a program that automatically looks
+  for the id for us without us having to do it on the browser. So,
+  this is what we will do in the following function.
+  #+begin_src python :results output :exports both
+import subprocess
+import os
+import shlex
+
+# getting the current directory where the file is 
+cwd = os.getcwd()
+# changing the directory to that of the test
+u = os.path.expanduser('~/test_remote')
+os.chdir(u)
+
+# reading the file from the other branch without checking into it
+output = subprocess.getoutput("git show git-annex:./remote.log")
+s = shlex.split(output, comments=True, posix=False)
+for elm in s:
+    # looking through the elemnts for the index of the id
+    if elm.startswith("deposit_id"):
+        id = elm.split("=")[-1]
+
+# now, let's execute the command to disable the remote
+progpath = cwd + "/git-annex-disableremote.py"
+jsonfilepath = cwd + "/zenodo.json"
+
+os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f " + jsonfilepath + " -u sandbox")
+#+end_src
+
+  #+RESULTS:
+  #+begin_example
+  here
+  |web
+  ||bittorrent
+  |||test-zenodo
+  ||||
+  X___ test0.txt
+  X___ test1.txt
+  X__X test2.txt
+  X__X test3.txt
+  X___ test4.txt
+  git annex addurl https://sandbox.zenodo.org/api/files/817f212e-b7e2-41d3-8249-ddab8b5050c3/SHA256E-s123--8129d68b5c9ce67b17ff93245a61b15cb05c2d758e1c342909cfd4c5bc532058.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG --file=test3.txt
+  git annex addurl https://sandbox.zenodo.org/api/files/817f212e-b7e2-41d3-8249-ddab8b5050c3/SHA256E-s532--eb178e79022ab3634475206c64a681ecfd0f419d19546e2f2f0ed40795dcb0f5.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG --file=test2.txt
+  #+end_example
+  
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+python3 git-annex-disableremote.py -i 876772 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f /home/nubudi/test_linknewver/zenodo.json -u sandbox 
+#+END_SRC
+
+ 
+
+
+

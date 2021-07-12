@@ -285,10 +285,12 @@ def transformtoweb(deposit_id, key, sandbox_url=None):
         file_name = dico[file_id]
         # now, we can finally create the web url
         url = download_link + '?access_token='+ key
-        #print('git annex addurl '+ download_link + ' --file=' + file_name) 
+        print('git annex addurl '+ url + ' --file=' + file_name) 
         os.system('git annex addurl '+ url + ' --file=' + file_name) 
+        
     # this is just to make sure
     os.system('git annex list')
+
 
 # method to disable the remote locally with git rm 
 def disableremotelocally(deposit_id):
