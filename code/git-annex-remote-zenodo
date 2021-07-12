@@ -27,7 +27,7 @@ class ZenodoRemote(ExportRemote):
         # depending on the query, some of the arguments might be null
         if query_method == 'get':
             # this is for when we want to retrieve and download the file
-            if stream == True:
+            if stream is True:
                 request = requests.get(url, params = params, stream = True)
             else:
                 request = requests.get(url, params = params)
@@ -117,7 +117,6 @@ class ZenodoRemote(ExportRemote):
     def prepare(self):
         # prepare to be used, eg. open TCP connection, authenticate with the server etc.
         # raise RemoteError if not ready to use
-
         # let's try to connect to the API, if the status code is not 200: there is an error 
         self.key = self.annex.getconfig('key')
         url = self.annex.getconfig('url')
@@ -137,7 +136,6 @@ class ZenodoRemote(ExportRemote):
     def transfer_store(self, key, filename):
         # store the file in `filename` to a unique location derived from `key`
         # raise RemoteError if the file couldn't be stored
-        
         try:
             # fetching the url of the bucket
             URL_BUCKET = self.annex.getconfig('deposit_bucket')
@@ -169,11 +167,9 @@ class ZenodoRemote(ExportRemote):
     def transfer_retrieve(self, key, filename):
         # get the file identified by `key` and store it to `filename`
         # raise RemoteError if the file couldn't be retrieved
-            
         # getting the information on the files that are in the deposit
         url = self.url + '/' + str(self.deposit_id) + '/files'
         r = self.query('get', url)
-
         # going through the list of the files in this deposit
         for i in range(len(r.json())):
             # checking if the file exists by comparing the key/filename
@@ -185,7 +181,7 @@ class ZenodoRemote(ExportRemote):
                 file_id =  r.json()[i]['id']
                 # getting the download link of the file
                 url = r.json()[i]['links']['download']
-                r = self('get', url, stream = True)        
+                r = self.query('get', url, stream = True)  
                 #r.raise_for_status()
                 # storing the file in the path given in filename
                 # this is done by reading the content of the file and writing it in the new file
@@ -205,7 +201,7 @@ class ZenodoRemote(ExportRemote):
         # return True if the key is present in the remote
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
-
+        print("check present")
         try:
             url = self.url + '/' +  str(self.deposit_id) + '/files'
             r = self.query('get', url)
@@ -224,7 +220,7 @@ class ZenodoRemote(ExportRemote):
         # remove the key from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
-
+        print("remove")
         # checking if the key exists in the remote deposit
         url = self.url + '/' + str(self.deposit_id) + '/files'
         r = self.query('get', url)
@@ -255,7 +251,6 @@ class ZenodoRemote(ExportRemote):
     def transferexport_store(self, key, local_file, remote_file):
         # store the file located at `local_file` to `remote_file` on the remote
         # raise RemoteError if the file couldn't be stored
-
         return self.transfer_store(key, local_file)
         # and set the key later on using a put command to be able to retrieve files
         # or: self.transfer_store(remote_file, local_file) which means setting 
@@ -265,7 +260,6 @@ class ZenodoRemote(ExportRemote):
     def transferexport_retrieve(self, key, local_file, remote_file):
         # get the file located at `remote_file` from the remote and store it to `local_file`
         # raise RemoteError if the file couldn't be retrieved
-
         return self.transfer_retrieve(key, local_file)
         # same idea
 
@@ -273,7 +267,6 @@ class ZenodoRemote(ExportRemote):
         # return True if the file `remote_file` is present in the remote
         # return False if not
         # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
-        
         return self.checkpresent(key)
         # same idea
 
