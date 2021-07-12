@@ -257,7 +257,6 @@ def transformtoweb(deposit_id, key, sandbox_url=None):
     output = subprocess.getoutput("git-annex find")
     # parsing the output and separating the lines in a list where each element is a file
     s = shlex.split(output, comments=True, posix=False)
-
     # init the dico
     dico = {}
     # fetching the keys of these files
@@ -266,8 +265,9 @@ def transformtoweb(deposit_id, key, sandbox_url=None):
         l = shlex.split(output)
         # we won't take care of the ones with the fatal error now
         if l[0] == 'file:':
-            dico[l[6]] = file
-        
+            k = l[6]
+            dico[str(k)] = file
+
     # second step
     if not sandbox_url: 
         url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
@@ -286,9 +286,9 @@ def transformtoweb(deposit_id, key, sandbox_url=None):
         # now, we can finally create the web url
         url = download_link + '?access_token='+ key
         #print('git annex addurl '+ download_link + ' --file=' + file_name) 
-        os.system('git annex addurl '+ download_link + ' --file=' + file_name) 
+        os.system('git annex addurl '+ url + ' --file=' + file_name) 
     # this is just to make sure
-    #os.system('git annex list')
+    os.system('git annex list')
 
 # method to disable the remote locally with git rm 
 def disableremotelocally(deposit_id):
@@ -319,7 +319,6 @@ def disableremotelocally(deposit_id):
             if (elm.startswith("name")) and (id == deposit_id):
                 remote_name = elm.split("=")[-1]
 
-    # modif!!
     # removing the remote locally
     if remote_name == '':
         print("Error while looking for the name of the remote")
@@ -352,7 +351,7 @@ def main(argv):
             url= arg
 
     # first step: publishing the deposit
-    publish(deposit_id, key, file_path, url)
+    #publish(deposit_id, key, file_path, url)
     # second step: we need to transform each of the files into a web remote
     transformtoweb(deposit_id, key, url)
     # third step: we need to disable the remote locally

@@ -318,64 +318,7 @@ X__X test3.txt
 X___ test4.txt
 #+end_example
 
-
-4. Now, we can try moving a file from a position to another. We can
-   either move it from the remote to here or from the local position
-   to the remote. When we move a file from a remote to another or locally it's as if we
-   made two operations: copying it to X and dropping it from Y. So it's
-   useful to do this when we already keep track of where all the copies
-   of a file is and we just want to move it around without having to drop
-   it everytime.
-
-   It's better to check where a certain file is before we start moving
-   it so as to have full knowledge of all the places it is. As we have
-   tested in the step above, the file test1.txt is only available
-   locally because we have dropped it from the remote.
-   So now, we can try to move the file from here locally to the
-   remote.
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex move test1.txt --to test-zenodo
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-move test1.txt finished the get operation. Here is the returned message :200
-
-check present
-finished the get operation. Here is the returned message :200
-
-(to test-zenodo...) 
-finished the put operation. Here is the returned message :200
-
-finished exporting the file... 
-
-ok
-(recording state in git...)
-#+end_example
-
-Once the operation is finished, we can check the whereabouts of this
-file again:
-#+BEGIN_SRC shell :session *shell* :results output :exports both
-git annex list 
-#+END_SRC
-
-As we can see, it's no longer available locally but it's accessible in
-the remote.
-#+RESULTS:
-#+begin_example
-here
-|web
-||bittorrent
-|||test-zenodo
-||||
-X___ test0.txt
-___X test1.txt
-X__X test2.txt
-X__X test3.txt
-X___ test4.txt
-#+end_example
-
-5. Now, let's try something new, this time having the file only
+4. Now, let's try something new, this time having the file only
    available on the remote and trying to get it to here.
 
    To do this, we can first list all the files that are annexed and
@@ -466,11 +409,12 @@ as well.
 * Disabling the remote.
 Once we finish working with a certain remote, it's time to disable
 it. To do this, we will be using a program that takes care of all the
-steps that are necessary for a remote to be disabled. In our case,
-this program first publishes the Zenodo deposit that has been created
-when we initialized the remote. Then, it transforms all the annexed
-files that have been published in the deposit into web remotes and
-adds them in git-annex. Lastly, it deletes the remote locally.
+steps that are necessary for a remote to be disabled
+(git-annex-disableremote.py).
+In our case, this program first publishes the Zenodo deposit that has
+been created when we initialized the remote. Then, it transforms all
+the annexed files that have been published in the deposit into web
+remotes and adds them in git-annex. Lastly, it deletes the remote locally.
 
 To do so, we will only need the necessary information that will allow
 us to acess the deposit (deposit id and the access token). We will
@@ -478,4 +422,86 @@ also use a file containing all the necessary metadata for publishing
 so as to not have to give the information in the command line.
 
 First, let's just create a simple json file (example: zenodo.json)
-with these metadata.
+with example metadata to allow us to publish. For this, we can just
+copy the example that was given in the zenodo tutorial
+(https://developers.zenodo.org/?python#quickstart-upload) or we can
+create our own with information that concerns us.
+
+I've added a file in the directory that contains the code source files
+for the internship and so it could be used to pass this test. You
+could also change things in the file according to the type of content
+you want to publish (this all could be found in the tutorial in the
+same url given earlier).
+
+Let's write the file using a python program which creates a dictionary
+and fills it in with all the metadata that's needed before dumping the
+content of this dictionary in a zenodo.json file.
+#+begin_src python :results output :exports both
+import os
+import json
+
+# filling dico with information
+dico= {}
+metadata = {}
+dico['title'] = "Test upload"
+dico['upload_type'] = "poster"
+dico['description'] = "This is a test to publish a deposit"
+dico['creators'] = [{'name': 'Doe, John', 'affiliation': 'researcher'}]
+dico['access_right'] = "closed"
+# creating the the other dictionary metadata that has dico as a value for the key metadata
+metadata['metadata'] = dico
+
+outputpath = os.getcwd() + "/zenodo.json"
+print(outputpath)
+# opening the file and writing into it.
+f = open(outputpath, "w+")
+json.dump(metadata, f)
+f.close()
+#+end_src
+
+Now, we can execute the program giving it the id of the deposit, the
+access key, and the path to the zenodo.json file.
+- First, we will need the id of the deposit and this could be known
+  easily by checking the uploads on the zenodo website. Depending on
+  whether or nor the sandbox is used, we can get the id on the upload
+  window. But here, we can write a program that automatically looks
+  for the id for us without us having to do it on the browser. So,
+  this is what we will do in the following function.
+  #+begin_src python :results output :exports both
+import subprocess
+import os
+import shlex
+
+# getting the current directory where the file is 
+cwd = os.getcwd()
+# changing the directory to that of the test
+u = os.path.expanduser('~/test_remote')
+os.chdir(u)
+
+# reading the file from the other branch without checking into it
+output = subprocess.getoutput("git show git-annex:./remote.log")
+s = shlex.split(output, comments=True, posix=False)
+for elm in s:
+    # looking through the elemnts for the index of the id
+    if elm.startswith("deposit_id"):
+        id = elm.split("=")[-1]
+
+# now, let's execute the command to disable the remote
+progpath = cwd + "/git-annex-disableremote.py"
+jsonfilepath = cwd + "/zenodo.json"
+
+os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f " + jsonfilepath + " -u sandbox")
+#+end_src
+
+  #+RESULTS:
+  : SHA256E-s437--78d7b5b8be5a96a92b84c5b9d78f39180ca9c5bef7228ffffc464698131059fe.txt
+  : SHA256E-s231--011fb59fe56be14b7e56faf92da59c4473054e337e4b7ed933976c9851c93a44.txt
+  : SHA256E-s267--1866c5bdf2a4662617022594b0f7896ca736bca9999ad4d85d22e13b39ec2874.txt
+  : SHA256E-s231--011fb59fe56be14b7e56faf92da59c4473054e337e4b7ed933976c9851c93a44.txt
+  : SHA256E-s232--20b9213055d3edc88b92c687f902bc74d25280a15f61bb7c170584ea6093c951.txt
+  : SHA256E-s231--011fb59fe56be14b7e56faf92da59c4473054e337e4b7ed933976c9851c93a44.txt
+  
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+python3 git-annex-disableremote.py -i 876772 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f /home/nubudi/test_linknewver/zenodo.json -u sandbox 
+#+END_SRC
+
