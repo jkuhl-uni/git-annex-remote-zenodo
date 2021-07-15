@@ -7,8 +7,6 @@ from annexremote import RemoteError, ProtocolError
 
 import sys
 
-import requests
-
 class ZenodoRemote(ExportRemote):
 
     # method to handle all the basic queries
@@ -43,6 +41,19 @@ class ZenodoRemote(ExportRemote):
         #returning the resulting request for later uses
         return request
 
+
+    # linking the files that were in the old deposit and that are now in the new deposit with git-annex
+    def link_files(self, response):
+        newdeposit_id = response.json()['id']
+        url = self.url + '/' + str(newdeposit_id) + '/files'
+        r = self.query('get', url)
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            file_key = r.json()[i]['filename']
+            self.checkpresent(file_key)
+        return
+
+
     def create_newversion(self, oldrecord_id):
         # making sure that the given id for the old record is correct
         url = self.url + '/' + oldrecord_id 
@@ -67,6 +78,16 @@ class ZenodoRemote(ExportRemote):
         # making a new get request to get the information about this reposit and returning the response
         url = self.url + '/' + str(newdeposit_id) 
         r = self.query('get', url)
+        
+        # other settings
+        self.annex.setconfig('deposit', r)
+        self.annex.setconfig('url', self.url)
+        self.annex.setconfig('key', self.key)
+        # setting the id for this deposit
+        self.annex.setconfig('deposit_id', r.json()['id'])
+        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
+            
+        self.link_files(r)
         return r
         
 
@@ -131,7 +152,8 @@ class ZenodoRemote(ExportRemote):
             print("error while preparing the remote: cannot communicate with the remote" + str(r.status_code))
             raise RemoteError('could not send a get query to the API')
 
-        self.deposit_id = self.annex.getconfig('deposit_id')        
+        self.deposit_id = self.annex.getconfig('deposit_id')  
+                 
 
     def transfer_store(self, key, filename):
         # store the file in `filename` to a unique location derived from `key`
@@ -202,7 +224,7 @@ class ZenodoRemote(ExportRemote):
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
         try:
-            url = self.url + '/' +  str(self.deposit_id) + '/files'
+            url = self.url + '/' +  str(self.annex.getconfig('deposit_id')) + '/files'
             r = self.query('get', url)
             # going through the list of the files in this deposit
             for i in range(len(r.json())):
