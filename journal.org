@@ -9473,7 +9473,7 @@ git annex list
 : XX_ test3.txt
 : X__ test4.txt
 
-**** test.
+**** test 1.
 First, let's go to the directory where we will be doing the test.
 #+begin_src shell :session *shell* :results output :exports both
 cd ~/test_remote
@@ -9550,5 +9550,84 @@ X___ test0.txt
 X___ test1.txt
 XX_X test2.txt
 XX_X test3.txt
+X___ test4.txt
+#+end_example
+
+Now, let's disable the remote.
+#+begin_src shell :session *shell* :results output :exports both
+git remote remove test-zenodo-newver
+#+end_src
+
+#+RESULTS:
+
+Showing information about the directory.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||
+: X__ test0.txt
+: X__ test1.txt
+: XX_ test2.txt
+: XX_ test3.txt
+: X__ test4.txt
+
+**** test 2.
+This time, let's try to change a few things in the program (removing
+the positions of where we set the configuration for instance) and
+let's initialize a new remote instead of enabling the one we have
+already used.
+
+Now, initializing the deposit. Obviously, we have already discarded
+the changes in the remote because we haven't made changes in it to be
+able to publish it.
+#+begin_src shell :session *shell* :results output :exports both
+git annex initremote test-zenodo-newver2 type=external newversion=879747 externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
+#+end_src
+
+#+RESULTS:
+#+begin_example
+initremote test-zenodo-newver2 finished the get operation. Here is the returned message :200
+
+finished the post operation. Here is the returned message :201
+
+finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+finished the get operation. Here is the returned message :200
+
+Yes, this file exists in the remote: SHA256E-s155--d87820702c4e436875270b5ad392d7a54c3fca4a06b15db98f64d7054e6a86e6.txt
+finished the get operation. Here is the returned message :200
+
+Yes, this file exists in the remote: SHA256E-s384--4e2ab8d53db6354bb9dd3e019eb47e0578ea60f4e898bc2c64d5814ab6f33fda.txt
+ok
+(recording state in git...)
+#+end_example
+
+
+Now, we can finally test to see if this has worked. As we can see,
+this is the case since the files are seen as if they are in the remote.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+#+RESULTS:
+#+begin_example
+finished the get operation. Here is the returned message :200
+
+here
+|web
+||bittorrent
+|||test-zenodo-newver2
+||||
+X___ test0.txt
+X___ test1.txt
+XX__ test2.txt
+XX__ test3.txt
 X___ test4.txt
 #+end_example
