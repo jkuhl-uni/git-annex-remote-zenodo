@@ -5,7 +5,6 @@
 
 
 * Monday 31/05.
-
 ** first step: get.
   We start off by writing a small function to test the get query on
   the API. To do this, it is imperative to have the token (can
@@ -282,7 +281,6 @@ api()
   ]
   #+end_example
 
-  
 ** second step: post.
    Adding the argument headers to specify the content type because we
    want a json app. We also still need the access token because we
@@ -377,7 +375,6 @@ apipost()
   #+RESULTS:
   : 201
 
-  
 ** step three: merging the two and posting on the API
    now we just write a bigger program where we do the necessary steps
    to communicate with the API in chronological order. First, we send
@@ -715,7 +712,6 @@ remote.transfer_retrieve('notes.pdf')
   [{'checksum': '2d2d364fe89375260446330175bd832f', 'filename': 'notes.pdf', 'filesize': 180064, 'id': 'a05fa9ca-0087-4c3f-9915-4e657e39312e', 'links': {'download': 'https://sandbox.zenodo.org/api/files/4e680567-c908-4a94-88b0-af5ab11551f6/notes.pdf', 'self': 'https://sandbox.zenodo.org/api/deposit/depositions/844144/files/a05fa9ca-0087-4c3f-9915-4e657e39312e'}}]
   #+end_example
 
-  
 ** fct
   #+begin_src python :results output :exports both
 import requests
@@ -925,8 +921,6 @@ print(json.dumps(r.json(), indent=4))
     :     "message": "The server could not verify that you are authorized to access the URL requested. You either supplied the wrong credentials (e.g. a bad password), or your browser doesn't understand how to supply the credentials required.",
     :     "status": 401
     : }
-
-  
 
   
 
@@ -1198,7 +1192,6 @@ print(json.dumps(r.json(), indent=4))
   #+end_example
 
 
-
 ** test: creating a deposit and putting files inside and then deleting
   the deposit and trying to access the files directly with an url
 
@@ -1308,7 +1301,6 @@ trying to access the files with the self link
 As we can see in the response to the get query we sent, the files can
 no longer be accessed via the urls.
 
-
 ** retrying to publish by adding some metadata before senfing the request
 
    #+begin_src python :results output :exports both
@@ -1362,9 +1354,7 @@ print(json.dumps(r.json(), indent=4))
 
    #+end_src
 
-
 * Wednesday 02/06.
-
 ** publishing through the api.
 
     retrying to publish by adding some metadata before senfing the request
@@ -1557,7 +1547,6 @@ print(json.dumps(r.json(), indent=4))
    }
    #+end_example
 
-
 * Thursday 03/06.
   We will be using the Python library that already implements the
   external special remote protocol in order to create the new remote
@@ -1582,7 +1571,6 @@ print(json.dumps(r.json(), indent=4))
         self.key = ''
       #+end_src
 
-   
 ** Step 1: query.
    This is the method that we will be using to handle the basic
    queries to the API.
@@ -1618,7 +1606,6 @@ print(json.dumps(r.json(), indent=4))
         
     #+end_src
 
-    
 ** Step 2: initremote.
    "Gets called when git annex initremote or git annex enableremote are
    run. This is where any one-time setup tasks can be done, for
@@ -1657,7 +1644,6 @@ print(json.dumps(r.json(), indent=4))
         
     #+end_src
 
-    
 ** Step 3: prepare.
     "Tells the remote that it's time to prepare itself to be used. Gets
     called whenever git annex is about to access any of the below
@@ -1681,7 +1667,6 @@ print(json.dumps(r.json(), indent=4))
         
     #+end_src    
 
-    
 ** Step 4: transferstore.
 "Store the file in localfile to a unique location derived from key."
 
@@ -1726,7 +1711,6 @@ put request to the API to send the file.
             raise RemoteError(error)
     #+end_src
 
-    
 ** Step 5: transferretrieve.
 "Get the file identified by key from the remote and store it in
 localfile."
@@ -1758,7 +1742,6 @@ on the file.
 
       #+end_src
 
-      
 ** Step 6: checkpresent.
 "Requests the remote to check if a key is present in it."
 
@@ -1787,8 +1770,6 @@ is a problem with the determining of this, we can raise an exception.
     #+end_src
 
     
-
-
 * Friday 04/06.
 ** fetching and downloading files.
 
@@ -1906,7 +1887,6 @@ the function looks now:
 
 
 
-
 ** deleting a file.
 - First, we have to have the id of a deposit that isn't published to
   be able to delete files. So, we can create a deposit easily with a
@@ -1961,7 +1941,6 @@ We implement this into the remove function so as to delete files from
 the deposit.
 
 
-
 ** Step 7: remove.
 "Requests the remote to remove a key's contents."
 
@@ -2007,7 +1986,6 @@ look into that to make sure that the operation was done successfully.
    
       #+end_src
 
-      
 ** Step 8: transferexportstore.
 "Requests the transfer of a file on local disk to the special
 remote. Note that it's important that, while a file is being stored,
@@ -2031,7 +2009,6 @@ search.
 
        #+end_src
 
-       
 ** Step 9: transferexportretrieve.
 "Requests the transfer of a file from the special remote to the local
 disk. Note that it's important that, while a file is being stored,
@@ -2055,7 +2032,6 @@ remotefile we can use either of them.
       #+end_src
   
 
-
 ** Step 10: checkpresentexport.
 "Requests the remote to check if the file is present in it."
 
@@ -2072,7 +2048,6 @@ one given.
         return self.checkpresent(key)
       #+end_src
 
-      
 ** Step 11: removeexport.
 "Requests the remote to remove content stored by
 transferexportstore()."
@@ -2088,7 +2063,6 @@ and to remove the file whose key corresponds to the one given here.
 
         return self.remove(key)
       #+end_src
-
 
 * Monday 07/06.
 ** Step 12: removeexportdirectory.
@@ -2128,7 +2102,6 @@ and to remove the file whose key corresponds to the one given here.
                     print("error while deleting the " + str(i) + " file from the remote" + str(r.status_code))
                     raise RemoteError('could not send a delete query to the API')
       #+end_src
-
 
 ** Test: renaming unpublished files on Zenodo.
 *** Renaming using the edit action.
@@ -2255,7 +2228,6 @@ rename_file()
 :     "message": "Wrong file on input."
 : }
 
-
 ** Step 13: renameexport.
  "Requests the remote rename a file stored on it from filename to
  newfilename. Remotes that support exports but not renaming do not
@@ -2264,8 +2236,7 @@ rename_file()
       #+begin_src python :results output :exports both
 
       #+end_src
-
-      
+    
 ** Step 14: publishing.
 *** The things that need to be tackled.
 To publish a deposit on Zenodo using the API we can use the publish
@@ -2526,8 +2497,6 @@ list()
 
 
 
-
-
 * Tuesday 08/06.
 - checksum: look into storing it when we  upload a file into zenodo so
   that we can compare it to the checksum and know the versions when we
@@ -2632,7 +2601,6 @@ list()
 - 
 
 
-
 * Wednesday 09/06.
 
 - Looking into possible example of implementation of Zenodo as a
@@ -2728,7 +2696,6 @@ list()
     DOIs and Concept DOIs (note, technically both are just normal DOIs).
 
   
-
 
 * Thursday 10/06.
 ** A new start.
@@ -2863,8 +2830,7 @@ list()
         self.annex.setconfig('url', self.url)
         self.annex.setconfig('key', self.key)
     #+end_src
-
-    
+ 
 * Friday 11/06.
 ** continuing with initremote.
    - Now, let's take care of the case of when the user chooses to
@@ -3288,12 +3254,10 @@ f()
   }
   #+end_example
 
-  
 * Monday 14/06.
 Worked with the git-annex-remote-zenodo file and tried to deploy
 the remote, initiate it, and test it while making changes to fix the
 bugs that arose when trying to init.
-
 
 * Tuesday 15/06.
 ** Commands to get the needed information about a file before uploading it to Zenodo.
@@ -4146,7 +4110,6 @@ https://git-annex.branchable.com/git-annex-export/
 
 - look into the encryption.
 
-
 * Wednesday 16/06.
 ** encryption types.
 git-annex mostly does not use encryption. Anyone with access to a git
@@ -4258,7 +4221,6 @@ expected, too.
 #+begin_example
 remote.<name>.annex-security-allow-unverified-downloads
 #+end_example
-
 
 * Thursday 17/06.
 ** Testing the changes of git-annex-remote-zenodo.
@@ -5067,7 +5029,6 @@ git annex info writing/the_deceitful_truth.odt
   deposit (need to keep a link between the objects in git-annex and
   the files)
 
-
 * Friday 18/06.
 ** encryption design.
 *** encryption key management.
@@ -5609,7 +5570,6 @@ print(json.dumps(r.json(), indent=4))
     "title": "A report about air pollution in Grenoble"
 }
 #+end_example
-
 
 * Monday 21/06.
 ** shared.
@@ -6420,7 +6380,6 @@ git annex whereis Essay.pdf
 :   	572ad22c-6d8a-40d0-afc1-7adc8c78798a -- nubudi@ubunto:~/tests_enc/hybrid_enc/test_enc_hybrid [here]
 :    	9606410d-d941-4d71-9347-608f2f2a3b51 -- [hybdir]
 : ok
-
 
 * Tuesday 22/06.
 ** removing a key (hybrid enc).
@@ -7327,12 +7286,8 @@ for i in range(len(r.json())):
 : https://sandbox.zenodo.org/api/deposit/depositions/851823/files/b5f9d7d6-45d6-4763-9363-0d0a33de7a28
 : https://sandbox.zenodo.org/api/deposit/depositions/851823/files/71851844-7020-4b59-a046-97901e9a69e0
 
-
-
-
 * Wednesday 23/06 - Wednesday 30/06.
 holidays.
-
 
 * Thursday 01/07.
 ** using the web as a special remote.
@@ -7502,10 +7457,8 @@ git annex list
 : XX_XX Essay.pdf
 : X____ flows.json
 
-
 * Friday 02/07.
 made changes in the program.
-
 
 * Monday 05/07.
 ** subprocess intro test.
@@ -8541,7 +8494,6 @@ git checkout master
 #+RESULTS:
 : Switched to branch 'master'
 
-
 * Tuesday 06/07.
 ** disableremotelocally algorithm.
 We can do the two commands mentionned above to access the name of the
@@ -8689,7 +8641,6 @@ subprocess.getoutput("git checkout master")
 
 Now, we just have to add these elements into the disableremotelocally
 function and execute the command 'git rm' to delete the remote locally.
-
 
 * Wednesday 07/07.
 ** test to see how many files could be added to a single zenodo deposit.
@@ -9092,7 +9043,6 @@ fatal: pathspec 'test-linknewver' did not match any files
 #+end_example
 
 
-
 * Thursday 08/07.
 - Correcting errors in disableremote.py while doing tests. The problem
 with the transformtoweb method was because of a typo (put the wrong
@@ -9104,7 +9054,6 @@ variable).
   info is given according to the restrictions given in the Zenodo
   doc.
   This could be checked here: https://developers.zenodo.org/?python#quickstart-upload
-
 
 * Friday 09/07.
 ** making changes in disableremotelocally.
@@ -9187,7 +9136,6 @@ So, what's left now is to change the disableremotelocally function and
 update it with this new method.
 
 ** writing the walkthrough log.
-
 
 * Monday 12/07.
 ** brainstorming.
@@ -9337,3 +9285,200 @@ indicated above to disable it.
 *** new test.
 Having made all these changes to the files, it's time to do a new test
 using the walkthrough. 
+
+* Tuesday 13/07.
+** meeting notes.
+*** things to change in disableremote.
+- add a function in the disableremoteprogram that takes care of
+  looking for the ids of the remotes. For instance, if there is only
+  one zenodo remote that has been initialized in this repository, the
+  program uses that id to disable the remote. If not, we can list the
+  ids to the user for them to choose from.
+- add an option -l to list the ids of the existent remotes to the
+  user.
+- maybe change the name to the program and add in zenodo as well:
+  diablezenodoremote instead?
+- make it executable.
+- instead of reading the entire file to look for the id, maybe use
+  'grep' or another function that gets the id directly. 
+*** things to change in git-annex-remote-zenodo.
+- Need to take better care of error messages:
+  + add letters at the start of each message ([e]: error, [w]:
+    warning, [i]: info, ...)
+  + make messages short.
+  + show the lignes where the error is.
+- add a debug mode to show the messages instead of printing them to
+  the user.
+- pass arguments to the functions so that we can print out in the
+  debug mode where the problem is.
+
+* Wednesday 15/07.
+** test newversion.
+*** first test with no changes in the program.
+In this part, we will test the feature of the program that allows us
+to create a new version of a deposit that we have already
+published. To do this, we can simply initialize a new remote in the
+directory where we want to continue the test by using the option
+newversion=id and giving the id of the deposit that we want to create
+the new version of.
+
+To get the id of the deposit that we want to create a new version of,
+we need to check on the uploads on Zenodo by clicking on the deposit
+and then fetching the id from the url.
+#+begin_src shell :session *shell* :results output :exports both
+git annex initremote test-zenodo-newver type=external newversion=879747 externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
+#+end_src
+
+#+RESULTS:
+: initremote test-zenodo-newver finished the get operation. Here is the returned message :200
+: 
+: finished the post operation. Here is the returned message :201
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: ok
+: (recording state in git...)
+
+Now, we can check to see information about the directory and the
+remotes that have been initialized in.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+As we can see from the results, when we create a new version of a
+remote, the files that were once in the old remote don't look as if
+they are in the new one, although we know they are. This is because
+git-annex didn't keep a link between the files.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-zenodo-newver
+||||
+X___ test0.txt
+X___ test1.txt
+XX__ test2.txt
+XX__ test3.txt
+X___ test4.txt
+#+end_example
+
+Now, let's try to copy a file that is annexed and is in the remote web
+(that was once in the old version of the remote) and upload it to the
+new version of the remote. Since the files have the same key (the key
+given by git-annex when the file was annexed), we can expect that the
+file won't be uploaded to the new version of the deposit since the
+function checkpresent returns true when we check if the file exists in
+the remote.
+#+begin_src shell :session *shell* :results output :exports both
+git annex copy test2.txt --to test-zenodo-newver
+#+end_src
+
+This can be seen in the results in the printed message.
+#+RESULTS:
+: copy test2.txt finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: Yes, this file exists in the remote: SHA256E-s155--d87820702c4e436875270b5ad392d7a54c3fca4a06b15db98f64d7054e6a86e6.txt
+: ok
+: (recording state in git...)
+
+Now, we can actually check to see if the file now appears to be
+uploaded in the new version of the remote, which is the case.
+We can also check the list of files that has been uploaded to the
+deposit (on the site or using the API) and we can see that there is
+onlu one copy of the file text2.txt uploaded there, which means that
+there wasn't any duplication. 
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-zenodo-newver
+||||
+X___ test0.txt
+X___ test1.txt
+XX_X test2.txt
+XX__ test3.txt
+X___ test4.txt
+#+end_example
+
+Now, we can do the same but this time with the file test3.txt. We
+expect to see the same results as the file test2.txt because this file
+as well has been uploaded to the old version of the deposit.
+#+begin_src shell :session *shell* :results output :exports both
+git annex copy test3.txt --to test-zenodo-newver
+#+end_src
+
+#+RESULTS:
+: copy test3.txt finished the get operation. Here is the returned message :200
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: Yes, this file exists in the remote: SHA256E-s384--4e2ab8d53db6354bb9dd3e019eb47e0578ea60f4e898bc2c64d5814ab6f33fda.txt
+: ok
+: (recording state in git...)
+
+Now, both the files are seen as uploaded on the remote.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||test-zenodo-newver
+||||
+X___ test0.txt
+X___ test1.txt
+XX_X test2.txt
+XX_X test3.txt
+X___ test4.txt
+#+end_example
+
+
+
+
+*** second test.
+Now that we have seen the behaviour of the git annex when adding a new
+version of a remote that was published, we can try to make changes in
+the git-annex-remote-zenodo to see if there is a way we can keep a
+link between the two.
+At first, we need to pubish the deposit because there can't be more
+than just one version of a deposit at once. When this done, we can
+move on to making changes in the program and then testing after each
+batch of changes.
+
+1. Using the option of the uploads on the sandbox.zenodo.org site, we
+   can manipulate the deposit manually instead of doing that through
+   the API. And because we can't publish a new version of a deposit if
+   there are no changes in the deposit, we chose to simply discard
+   this version.
+2. Then, we also removed the remote locally by using the command 'git
+   remote remove' because this remote is useless for us in this case.
+#+begin_example 
+git remote remove test-zenodo-newver
+#+end_example
+When we listed the information about the remotes afterwards, we got
+the result we wanted with this remote not being within the list.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||
+: X__ test0.txt
+: X__ test1.txt
+: XX_ test2.txt
+: XX_ test3.txt
+: X__ test4.txt
