@@ -3,50 +3,98 @@
 
 
 * Plan.
-** Focalisation.
+** Focalisation. (3 pages)
 - Qu'est-ce que la recherche reproductible?
 - L'utilité de la recherche reproductible.
 - D'où le mooc: expliquer le mooc, ce qu'il apporte de plus, parler de
   l'utilité du backend pour stocker ses fichiers et de l'importance de
   garder une trace de l'état de ces fichiers / versions / lieux de
   stockage -> d'où l'utilité de git-annex pour les bien gérer. 
-  
 
-** Développement.
-*** Le problème initial:
-      + pourquoi on a décidé d'implémenter un backend Zenodo comme un
-        remote git-annex.
-      + l'utilité d'un special remote zenodo en lien avec le sujet
-        principal de la recherche reproductible.
-      + les outils qui existent déjà et pourquoi on a fait ce choix
-        (zenodo vs d'autres backend git-annex qui existent déjà ou vs
-        datalad).
-      + Approches possibles. 
+  +++ le plan national pour la science ouverte (nso) : open access (les
+  droits d'acces) : pb pourqu qlq uni car pas tout le monde peut payer
+  pour ça et donc il y a des uni qui ont l'acess à plus de docs que
+  d'autres.
+  - les archives ouvertes (hal - arxiv): pas de review.
+  - open data: il faut aussi avoir acces aux données (c'est pas
+    suffisant d'avoir acces juste au pdf) (!!! FAIR data: il faut etre sur
+    que les archives sont bien la, qu'elles sont accessibles et
+    trouvables ...) on sait qu'il faut faire ça mais comment le faire
+    -> mooc (grâce à les outils donnés).
+  - open protocol: prise de notes (details )
+
+   
+    
+  +++ 
+
+** Etat de l'art:
+*** historique / gros fichiers.
+      + pourquoi git? pourquoi git-annex? control de version car
+        c'est le plus utilisé mais il y a un souci avec les fichiers
+        qui snt de taille tres grande.
+	voir git-annex vs lsf -> 2 pbs
+	1 pb avec lfs c'est que l'on peut pas
+        supprimer un blob puisque un blob ets partagé par plusieurs
+        repo git et du coup c'est compliqué de toucher à ça car ça
+        peut causer des pb -> il y a des scripts .
+	on ne peut que tout supprimer (delete tout le projet et du
+        coup on perd tout le contenu de github).
+	> exception: bitbucket solution mais cela ne se fait pas au
+        niveau de git lfs.
+	> test: git lfs vers zenodo pour voir ce qui se passe au
+        fichier lfs quand on push.
+	> c'est un vrai pb surtout quand on gere des fichiers de
+        grandes tailles.
+	2 pb: un pb avec la taille car les ficheis sont stoqués 2 fois
+        car il n y a pas des liens symb et donc les fichiers sont
+        stockées avec leurs tailles toutes entieres et du coup il y a
+        des soucis quand on gere des data set de grandes tailles.
+
+	> > git annex is (remote.log)
+*** archivage.
+	> zenodo(cern), figshare, nakala, comparaison de ces outils.
+	
+      + github vers zenodo (permet de deposer) != gitlab vers zenodo:
+        pourquoi pas git directement? au lieu de passer par github
+        donc on peut juste passer de git <- git annex -> zenodo.
+
+      + parler de datalad et comme quoi il y a aussi un problem là
+          car a seule solution d'archivage de ce type proposée par
+          datalad est d'upload des archive zip sur figshare. donc on a
+          implémenté le remote zenodo pour faire ça.
+  
+** Contributions.
+*** modele de donnees.
+    les limitations de zenodo et le fonctionnement de git-annex et
+    donc voila ce quon a fait pour faire fonctionner le truc. -> les
+    choix
+
       
-*** Contexte technologique.
-    introduire les outils utilisés.
-*** Contributions personnelles:
-      + parler des tutos faits au début / des petits programmes écrits
-        pour tester les outils (API Zenodo, tuto git-annex, tuto
-        snakemake?)
       + Remote Zenodo: expliquer l'architecture des dépôts Zenodo et
         donc les problèmes rencontrés lors de l'implémentation du
         backend (les moments où il fallait faire un choix: key vs
         filename , architecture, tests nombres de fichiers possibles à
         mettre dans un dépôts, ...)
-	
 
-** Valorisation.
-   - Ce qui a été fait: expliquer tous les choix qui ont été faits et
-     pourquoi. 
-   - Description circonstanciée de ce qui n’a pu être réalisé ou
-     description de ce que pourrait être la suite du travail.
-   - Gestion du projet: Description de la gestion de votre projet
-     (cycle de vie, structuration en taches, durées estimées et
-     réelles, gestion de risques …)
+*** implem de remote zenodo.
+- api rest
+- biblio python qui implemente deja le protocol
+- operation principale: creation d'un depot, upload, check, remove, get.
+- tests: avec les exceptions du protocol pour s'assurer que les pb de
+  l'api passent bien à git-annex et qu'il y a une coherence en les
+  deux .
+- les options possibles (newversion, 
+*** archiver disableremote.
+- les options pour par exemple publier le fichier .json ou 
+
+*** restaurer une archive.
 
 
-** Compétences développées.
+** Evaluation: documentaion de l'ensemble du processus avec un tutorial.
+    
+    
+** Méthodologie et Compétences développées.
+*** comp
    - Bilan des connaissances et expériences acquises ou approfondies au
    cours de ce stage.
    - Description sur une page d'une ou deux compétences développées
@@ -54,11 +102,35 @@
      d'ingénieur en informatique ou aussi des compétences
      transversales au métier d'ingénieur (voir les deux fichiers excel
      attachés).
-   - ex: parler du journal (application directe des éléments de la RR).
+
+*** metho
+- ex: parler du journal (application directe des éléments de la RR).
+
+   + parler des tutos faits au début / des petits programmes écrits
+        pour tester les outils (API Zenodo, tuto git-annex, tuto
+        snakemake?)
++ tests
+  + doc
+    + reunions
+- Gestion du projet: Description de la gestion de votre projet
+     (cycle de vie, structuration en taches, durées estimées et
+     réelles, gestion de risques …)
 
      
 ** Conclusion.
+ce j'ai pas pu faire: nakala - datalad (submodules ) voir comment ça
+peut s'integrer avec zenodo (ex de figshare par opposition) -
+(snakemake <-> git-annex) : pb: où integrer les commandes git annex
+simples (ex get) dans un workflow snakemake.
 
 ** Bibliographie.
 
+   
+
+
+* notes.                                                           :noexport:
+   - Ce qui a été fait: expliquer tous les choix qui ont été faits et
+     pourquoi. 
+   - Description circonstanciée de ce qui n’a pu être réalisé ou
+     description de ce que pourrait être la suite du travail.
    

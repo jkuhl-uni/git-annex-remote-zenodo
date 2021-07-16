@@ -9692,13 +9692,15 @@ git annex enableremote test-zenodo-newver2 type=external newversion=879747 exter
   that calls the query method) so as to be able to show where exactly
   the error / success is. Whenever a request is finished successfully,
   we return returned code and the method that executed it.
-  
+
+*** changes to git-annex-disableremote.
+
 ** brainstorming: uploading an archive to Zenodo independently of git-annex.
 We have these files / structure before publishing:
 Local: | F1  ...  Fn | <-> Remote Zenodo: |K1  ...  Km| 
 
 - Before executing git-annex-disableremotezenodo (ie. before
-  publishing and disabling the remote): upload an archive f the files
+  publishing and disabling the remote): upload an archive of the files
   (all the ones that we have on the remote) to Zenodo to keep track of
   the files (this is done independently of git-annex since the files
   that we will now upload in the archive are just stored in a simple
