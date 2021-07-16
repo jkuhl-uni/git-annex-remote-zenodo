@@ -9651,6 +9651,7 @@ git annex enableremote test-zenodo-newver2 type=external newversion=879747 exter
 : git-annex: external special remote error: 'ZenodoRemote' object has no attribute 'getgitremotename'
 
 * Friday 16/07.
+** finishing with linking the files.
 - To be able to keep the link between the files in the new version of
   the deposit with the files that are annexed and are in the new
   version the solution that I found is by trying to copy them (only
@@ -9673,3 +9674,43 @@ git annex enableremote test-zenodo-newver2 type=external newversion=879747 exter
   of all the files, and 'git annex info': to get the keys). Finally,
   and for each file on the remote, it tries to copy it into it using
   the command 'git annex copy'.
+
+** making the changes of the meeting.
+*** changes to git-annex-remote-zenodo.
+- first, let's start with creating a method showinfo which uses the
+  method info of the class Annex and allows us to show the info to the
+  user.
+- Now, moving to showing messages that are important when
+  debugging. There are a few messages that the program prints here and
+  there (for instance, showing the return code of a request to the
+  API) and these could be useful to keep so as to faciliate tracking
+  the problem when it arises. So instead of removing the printed
+  messages, we can instead direct them to be shown when the debug mode
+  is on.
+- adding an argument to the query method that takes care of all the
+  API requests with the name of the parent function (is the function
+  that calls the query method) so as to be able to show where exactly
+  the error / success is. Whenever a request is finished successfully,
+  we return returned code and the method that executed it.
+  
+** brainstorming: uploading an archive to Zenodo independently of git-annex.
+We have these files / structure before publishing:
+Local: | F1  ...  Fn | <-> Remote Zenodo: |K1  ...  Km| 
+
+- Before executing git-annex-disableremotezenodo (ie. before
+  publishing and disabling the remote): upload an archive f the files
+  (all the ones that we have on the remote) to Zenodo to keep track of
+  the files (this is done independently of git-annex since the files
+  that we will now upload in the archive are just stored in a simple
+  Zenodo deposit that has nothing to do with git-annex.)
+
+- Have a python script that takes care of retrieving these files when
+  needed:
+  + download the tarball.
+  + untar.
+  + "do something with the files if needed."
+  -> do we transform them into git-annex web remotes as well or is it
+  not needed? (when we disable the remote we already take care of
+  transforming the files into web remotes.)
+  -> or do we keep them just like that without annexing them, letting
+  the user do what they want with them?
