@@ -3,7 +3,7 @@
 
 from annexremote import Master
 from annexremote import ExportRemote
-from annexremote import RemoteError, ProtocolError
+from annexremote import RemoteError
 
 import sys
 
@@ -44,15 +44,59 @@ class ZenodoRemote(ExportRemote):
 
     # linking the files that were in the old deposit and that are now in the new deposit with git-annex
     def link_files(self, response):
+        import os
+        import shlex
+        import subprocess
+
+        # sending a request to the API to get info about the new version
         newdeposit_id = response.json()['id']
         url = self.url + '/' + str(newdeposit_id) + '/files'
         r = self.query('get', url)
+
+
+        # first step: getting the name of the remote
+        # reading the file from the other branch without checking into it
+        output = subprocess.getoutput("git show git-annex:./remote.log")
+
+        # we can have multiple remotes in one log and they are separated by lines.
+        lines = output.splitlines()
+        remote_name = ''	
+        # going through the remotes
+        for line in lines:
+            # parsing the output and separating the lines in a list where each element is a file
+            s = shlex.split(line, comments=True, posix=False)
+            # now, let's go through the list
+            for elm in s:
+                # looking through the elemnts for the index of the id
+                if elm.startswith("deposit_id"):
+                    id = elm.split("=")[-1]
+                # we have found the name of the remote that we are looking for
+                if (elm.startswith("name")) and (id == self.annex.getconfig('deposit_id')):
+                    remote_name = elm.split("=")[-1]
+
+        # fetching the keys of these files
+        # getting the output from trom the command
+        output = subprocess.getoutput("git-annex find")
+        # parsing the output and separating the lines in a list where each element is a file
+        s = shlex.split(output, comments=True, posix=False)
+        dico ={}
+        for file in s:
+            output = subprocess.getoutput("git-annex info %s" % file)
+            l = shlex.split(output)
+            # we won't take care of the ones with the fatal error now
+            if l[0] == 'file:':
+                k = l[6]
+                dico[str(k)] = file
+                
+
+        # second step: copying the files from the remote to keep the link
         # going through the list of the files in this deposit
         for i in range(len(r.json())):
             file_key = r.json()[i]['filename']
-            self.checkpresent(file_key)
+            if file_key in dico:
+                name = dico[file_key]
+                output = subprocess.getoutput("git annex copy " + name + " --to " + remote_name)
         return
-
 
     def create_newversion(self, oldrecord_id):
         # making sure that the given id for the old record is correct
@@ -77,16 +121,10 @@ class ZenodoRemote(ExportRemote):
 
         # making a new get request to get the information about this reposit and returning the response
         url = self.url + '/' + str(newdeposit_id) 
-        r = self.query('get', url)
-        
-        # other settings
-        self.annex.setconfig('deposit', r)
-        self.annex.setconfig('url', self.url)
-        self.annex.setconfig('key', self.key)
-        # setting the id for this deposit
-        self.annex.setconfig('deposit_id', r.json()['id'])
-        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
-            
+        r = self.query('get', url)  
+
+        # test
+        #
         self.link_files(r)
         return r
         

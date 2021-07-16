@@ -1,0 +1,64 @@
+
+
+
+
+* Plan.
+** Focalisation.
+- Qu'est-ce que la recherche reproductible?
+- L'utilité de la recherche reproductible.
+- D'où le mooc: expliquer le mooc, ce qu'il apporte de plus, parler de
+  l'utilité du backend pour stocker ses fichiers et de l'importance de
+  garder une trace de l'état de ces fichiers / versions / lieux de
+  stockage -> d'où l'utilité de git-annex pour les bien gérer. 
+  
+
+** Développement.
+*** Le problème initial:
+      + pourquoi on a décidé d'implémenter un backend Zenodo comme un
+        remote git-annex.
+      + l'utilité d'un special remote zenodo en lien avec le sujet
+        principal de la recherche reproductible.
+      + les outils qui existent déjà et pourquoi on a fait ce choix
+        (zenodo vs d'autres backend git-annex qui existent déjà ou vs
+        datalad).
+      + Approches possibles. 
+      
+*** Contexte technologique.
+    introduire les outils utilisés.
+*** Contributions personnelles:
+      + parler des tutos faits au début / des petits programmes écrits
+        pour tester les outils (API Zenodo, tuto git-annex, tuto
+        snakemake?)
+      + Remote Zenodo: expliquer l'architecture des dépôts Zenodo et
+        donc les problèmes rencontrés lors de l'implémentation du
+        backend (les moments où il fallait faire un choix: key vs
+        filename , architecture, tests nombres de fichiers possibles à
+        mettre dans un dépôts, ...)
+	
+
+** Valorisation.
+   - Ce qui a été fait: expliquer tous les choix qui ont été faits et
+     pourquoi. 
+   - Description circonstanciée de ce qui n’a pu être réalisé ou
+     description de ce que pourrait être la suite du travail.
+   - Gestion du projet: Description de la gestion de votre projet
+     (cycle de vie, structuration en taches, durées estimées et
+     réelles, gestion de risques …)
+
+
+** Compétences développées.
+   - Bilan des connaissances et expériences acquises ou approfondies au
+   cours de ce stage.
+   - Description sur une page d'une ou deux compétences développées
+     pendant le stage. Cela peut être des compétences du métier
+     d'ingénieur en informatique ou aussi des compétences
+     transversales au métier d'ingénieur (voir les deux fichiers excel
+     attachés).
+   - ex: parler du journal (application directe des éléments de la RR).
+
+     
+** Conclusion.
+
+** Bibliographie.
+
+   

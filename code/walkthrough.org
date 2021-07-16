@@ -207,7 +207,9 @@ finished the put operation. Here is the returned message :200
 
 finished exporting the file... 
 
-ok
+
+
+ok
 (recording state in git...)
 copy test2.txt finished the get operation. Here is the returned message :200
 
@@ -216,7 +218,9 @@ finished the get operation. Here is the returned message :200
 (to test-zenodo...) 
 finished the put operation. Here is the returned message :200
 
-finished exporting the file... 
+
+
+finished exporting the file... 
 
 ok
 (recording state in git...)
@@ -227,7 +231,9 @@ finished the get operation. Here is the returned message :200
 (to test-zenodo...) 
 finished the put operation. Here is the returned message :200
 
-finished exporting the file... 
+
+
+finished exporting the file... 
 
 ok
 (recording state in git...)
@@ -393,7 +399,9 @@ git annex get test3.txt --from test-zenodo
 : 
 : finished the get operation. Here is the returned message :200
 : 
-: (checksum...) ok
+: 
+
+(checksum...) ok
 : (recording state in git...)
 
 Now, let's check to see if git-annex succeeded in getting the file
@@ -559,130 +567,7 @@ git remote
 
 
 * Initializing a new version of a deposit.
-In this part, we will test the feature of the program that allows us
-to create a new version of a deposit that we have already
-published. To do this, we can simply initialize a new remote in the
-directory where we want to continue the test by using the option
-newversion=id and giving the id of the deposit that we want to create
-the new version of.
-
-To get the id of the deposit that we want to create a new version of,
-we need to check on the uploads on Zenodo by clicking on the deposit
-and then fetching the id from the url.
-
-#+begin_src shell :session *shell* :results output :exports both
-git annex initremote test-zenodo-newver type=external newversion=879747 externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
-#+end_src
-
-#+RESULTS:
-: initremote test-zenodo-newver finished the get operation. Here is the returned message :200
-: 
-: finished the post operation. Here is the returned message :201
-: 
-: finished the get operation. Here is the returned message :200
-: 
-: ok
-: (recording state in git...)
-
-Now, we can check to see information about the directory and the
-remotes that have been initialized in
-
-#+begin_src shell :session *shell* :results output :exports both
-git annex list
-#+end_src
-
-#+RESULTS:
-#+begin_example
-here
-|web
-||bittorrent
-|||test-zenodo-newver
-||||
-X___ test0.txt
-X___ test1.txt
-XX__ test2.txt
-XX__ test3.txt
-X___ test4.txt
-#+end_example
 
 
 
-#+begin_src shell :session *shell* :results output :exports both
-git annex copy test2.txt --to test-zenodo-newver
-#+end_src
 
-#+RESULTS:
-: copy test2.txt finished the get operation. Here is the returned message :200
-: 
-: finished the get operation. Here is the returned message :200
-: 
-: Yes, this file exists in the remote: SHA256E-s155--d87820702c4e436875270b5ad392d7a54c3fca4a06b15db98f64d7054e6a86e6.txt
-: ok
-: (recording state in git...)
-
-
-#+begin_src shell :session *shell* :results output :exports both
-git annex list
-#+end_src
-
-#+RESULTS:
-#+begin_example
-here
-|web
-||bittorrent
-|||test-zenodo-newver
-||||
-X___ test0.txt
-X___ test1.txt
-XX_X test2.txt
-XX__ test3.txt
-X___ test4.txt
-#+end_example
-
-
-#+begin_src shell :session *shell* :results output :exports both
-git annex copy test3.txt --to test-zenodo-newver
-#+end_src
-
-#+RESULTS:
-: copy test3.txt finished the get operation. Here is the returned message :200
-: 
-: finished the get operation. Here is the returned message :200
-: 
-: Yes, this file exists in the remote: SHA256E-s384--4e2ab8d53db6354bb9dd3e019eb47e0578ea60f4e898bc2c64d5814ab6f33fda.txt
-: ok
-: (recording state in git...)
-
-#+begin_src shell :session *shell* :results output :exports both
-git annex list
-#+end_src
-
-#+RESULTS:
-#+begin_example
-here
-|web
-||bittorrent
-|||test-zenodo-newver
-||||
-X___ test0.txt
-X___ test1.txt
-XX_X test2.txt
-XX_X test3.txt
-X___ test4.txt
-#+end_example
-
-
-#+begin_src shell :session *shell* :results output :exports both
-git annex list
-#+end_src
-
-#+RESULTS:
-: here
-: |web
-: ||bittorrent
-: |||
-: X__ test0.txt
-: X__ test1.txt
-: XX_ test2.txt
-: XX_ test3.txt
-: X__ test4.txt

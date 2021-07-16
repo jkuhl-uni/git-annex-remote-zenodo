@@ -9302,8 +9302,9 @@ using the walkthrough.
   the user.
 - pass arguments to the functions so that we can print out in the
   debug mode where the problem is.
-
-* Wednesday 15/07.
+* Wednesday 14/07.
+holidays.
+* Thursday 15/07.
 ** test newversion.
 *** first test with no changes in the program.
 In this part, we will test the feature of the program that allows us
@@ -9433,7 +9434,6 @@ XX_X test2.txt
 XX_X test3.txt
 X___ test4.txt
 #+end_example
-
 
 *** second test.
 **** brainstorming.
@@ -9632,3 +9632,44 @@ XX__ test3.txt
 X___ test4.txt
 #+end_example
  
+
+
+**** test 3.
+adding a command for git annex inside??
+
+#+begin_src shell :session *shell* :results output :exports both
+git annex enableremote test-zenodo-newver2 type=external newversion=879747 externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
+#+end_src
+
+#+RESULTS:
+: enableremote test-zenodo-newver2 finished the get operation. Here is the returned message :200
+: 
+: finished the post operation. Here is the returned message :201
+: 
+: finished the get operation. Here is the returned message :200
+: 
+: git-annex: external special remote error: 'ZenodoRemote' object has no attribute 'getgitremotename'
+
+* Friday 16/07.
+- To be able to keep the link between the files in the new version of
+  the deposit with the files that are annexed and are in the new
+  version the solution that I found is by trying to copy them (only
+  these files and not the rest of the files that are annexed and do no
+  figure in the remote obviously) into the remote (newversion). This
+  is kind of a redundant task since we already know that they are
+  there but since git-annex doesn't know we have to let it know. When
+  doing this, the program checks to see if those files are in the
+  remote and because they are they don't upload them but they are
+  still linked since now it knows that they are the same keys.
+
+  The function that was implemented to do this is linkfiles which
+  first sends an API request to the API to get the list of the files
+  there, and then fetches the name of the remote that we have just
+  initialized (it uses the file remote.log in the git-annex branch by
+  comparing the id of the deposit of each line with the id that we
+  have and then selects the element where the name is written to get
+  the name of the remote). Then, it retrieves the name of each of
+  these files by using the commands ('git annex find': to get the list
+  of all the files, and 'git annex info': to get the keys). Finally,
+  and for each file on the remote, it tries to copy it into it using
+  the command 'git annex copy'.
