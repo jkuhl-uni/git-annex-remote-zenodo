@@ -1,6 +1,6 @@
-# This program will be used when finalizing the publishing in a remote. 
-# by executing this command 'git-annex-disableremote', the deposit will 
-# be publsihed using informaion given by the user or submitted in a json 
+# This program will be used when finalizing the publishing in a remote.
+# by executing this command 'git-annex-disableremote', the deposit will
+# be publsihed using informaion given by the user or submitted in a json
 # file. The remote will also be removed locally.
 # Possible options:
 # - deposit_id: the id of the deposit we want to publish.
@@ -16,12 +16,12 @@ ACCESS_CONDITIONS= ''
 # function to call whenever we can to choose an upload type:
 def setting_uploadtype():
     # the possible types of the uploads
-    uploadtypes = ['publication', 'poster', 'presentation', 'dataset', 'image', 
+    uploadtypes = ['publication', 'poster', 'presentation', 'dataset', 'image',
                     'video', 'software', 'lesson', 'physicalobject', 'other']
 
     # in the case: upload_type == 'publication'
-    publicationtypes = ['annotationcollection', 'book', 'section', 'conferencepaper', 'datamanagementplan', 
-                        'article', 'patent', 'prepint', 'deliverable', 'milestone', 'proposal', 'report', 
+    publicationtypes = ['annotationcollection', 'book', 'section', 'conferencepaper', 'datamanagementplan',
+                        'article', 'patent', 'prepint', 'deliverable', 'milestone', 'proposal', 'report',
                         'softwaredocumentation', 'taxonomictreatment', 'technicalnote', 'thesis', 'workingpaper', 'other']
     # in the case: upload_type == 'image'
     imagetypes = ['figure', 'plot', 'drawing', 'diagram', 'photo', 'other']
@@ -33,7 +33,7 @@ def setting_uploadtype():
     print("2 - presentation \n")
     print("3 - dataset \n")
     print("4 - image \n")
-    print("5 - video \n")        
+    print("5 - video \n")
     print("6 - software \n")
     print("7 - lesson \n")
     print("8 - physical object \n")
@@ -74,10 +74,10 @@ def setting_uploadtype():
         print("5 - other \n")
         n = int(input('Enter the correspoding number: '))
         upload_type = imagetypes[n]
-        
-    return upload_type 
 
-# function to call to set the creators of the upload. 
+    return upload_type
+
+# function to call to set the creators of the upload.
 # This function is called whenever the user wants to publish an upload.
 def setting_creators():
     creators = []
@@ -101,26 +101,26 @@ def setting_creators():
 
     return creators
 
-# function to call to set the access right to the publication. The user 
-# chooses which type of access to give and takes care of any additional 
-# information that depends on the chosen access. 
+# function to call to set the access right to the publication. The user
+# chooses which type of access to give and takes care of any additional
+# information that depends on the chosen access.
 # This function is called whenever the user wants to publish an upload.
-def setting_accessright ():   
+def setting_accessright ():
     # initializing the list of options
     accessrights = ['open', 'embargoed', 'restricted', 'closed']
-    licenses = ['Creative Commons Attribution 4.0 International', 'Creative Commons Attribution 1.0 Generic', 
+    licenses = ['Creative Commons Attribution 4.0 International', 'Creative Commons Attribution 1.0 Generic',
                 'Creative Commons Attribution 2.0 Generic', 'Creative Commons Attribution 3.0 Unported']
-        
-    # choosing the access right 
+
+    # choosing the access right
     print("What is the access right of the upload? Please choose one of these options (ex: 2) \n")
     print("0 - open \n")
     print("1 - embargoed \n")
     print("2 - restricted \n")
-    print("3 - closed \n")        
+    print("3 - closed \n")
     n = int(input('Enter the correspoding number: '))
-    access_right = accessrights[n]        
+    access_right = accessrights[n]
 
-    # taking care of the extra information concerning all the possible access rights    
+    # taking care of the extra information concerning all the possible access rights
     if access_right == 'embargoed':
         # need to specify embargo_date
         print('Specify the Embargo date. The format is: YYYY-MM-DD. \n')
@@ -134,7 +134,7 @@ def setting_accessright ():
         print("1 - Creative Commons Attribution 1.0 Generic \n")
         print("2 - Creative Commons Attribution 2.0 Generic \n")
         print("3 - Creative Commons Attribution 3.0 Unported \n")
-        n = int(input('Enter the correspoding number: ')) 
+        n = int(input('Enter the correspoding number: '))
         license = licenses[n]
         LICENCE = license
 
@@ -154,7 +154,7 @@ def lookup_metadata(url, key):
     import requests
     r = requests.get(url, params = {'access_token': key})
     metadata = r.json()['metadata']
-    # In Zenodo, we can't change only one of these and save the file since we have to 
+    # In Zenodo, we can't change only one of these and save the file since we have to
     # give all of them (they are required) to be able to save it
     # so, by knowing that one of them is absent, we can know that they all are.
     if ('title' not in metadata.keys() ) or ('upload_type' not in metadata.keys()) or ('description' not in metadata.keys()) or ('creators' not in metadata.keys()) or ('access_right' not in metadata.keys()):
@@ -166,7 +166,8 @@ def lookup_metadata(url, key):
 def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     import json
     import requests
-   
+
+    # setting the url of the deposit
     if not sandbox_url:
         url = 'https://zenodo.org/api/deposit/depositions/%s' % deposit_id
     else:
@@ -174,12 +175,11 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
 
     # initializing the required metadata if the file is not given
     if not pub_file:
-        
         # look to see if the user has already set the metadata in the remote manually.
         # if it's the case, either ask the user if the info is ok and publish directly
         # or make them fill in the information manually on the command line.
-        bool, dict = lookup_metadata(url, key) 
-        # showing the user the metadata they have submitted so as to see if they want 
+        bool, dict = lookup_metadata(url, key)
+        # showing the user the metadata they have submitted so as to see if they want
         # to keep them or update them
         if bool:
             print("Here is the metadata of the deposit. Do you want to change it (y/n)? \n")
@@ -190,9 +190,9 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
         if response == False:
             data = dict
         # or else, they want to update the existing metadata or want to submit it from the start
-        elif response == True or bool == False: 
+        elif response == True or bool == False:
             # setting the type of the upload using the choosetype function
-            upload_type = setting_uploadtype() 
+            upload_type = setting_uploadtype()
             # setting the title of the upload
             title = input('Enter the title of the upload: ')
             # setting the description of the upload
@@ -210,10 +210,10 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
                     'creators': creators,
                     'access_right': access_right
                 }
-            }      
-            data = json.dumps(data) 
+            }
+            data = json.dumps(data)
 
-    # if the file is already written by the user, we can simply use it    
+    # if the file is already written by the user, we can simply use it
     else:
         with open(pub_file, "rb") as fp:
             #data = fp
@@ -222,31 +222,22 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     # finishing the publication
     headers = {"Content-Type": "application/json"}
     params = {'access_token': key}
-    
-    # updating the deposit with the needed metadata
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s' % deposit_id
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % deposit_id
-    r = requests.put(url, params=params, data=json.dumps(data), headers=headers)
-    #print(r.json())
-    
-    # publishing
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s/actions/publish' % deposit_id    
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/actions/publish' % deposit_id
-    r = requests.post(url,params=params, json={}, headers=headers)    
-    #print(r.json())
 
-    
+    # updating the deposit with the needed metadata
+    requests.put(url, params=params, data=json.dumps(data), headers=headers)
+
+    # publishing
+    url = url + "/actions/publish"
+    requests.post(url,params=params, json={}, headers=headers)
+
+
 # method that transforms the files into web remotes
 def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
     # we can simply use the git annex addurl --file and do this for each file as has been previously tested
     # the option --file will attach the url to the existing file instead of creating a new one.
     # this way, a trace has been kept of where this file exists (the remotes in this case being Zenodo and the web remote)
     # to do this, we can use a shell command with a library to facilitate the interaction between the two interfaces.
-    
+
     import subprocess
     import shlex
     import os
@@ -270,7 +261,7 @@ def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
             dico[str(k)] = file
 
     # second step
-    if not sandbox_url: 
+    if not sandbox_url:
         url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
     else:
         url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % deposit_id
@@ -286,33 +277,33 @@ def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
         file_name = dico[file_id]
         # now, we can finally create the web url
         url = download_link + '?access_token='+ key
-        #print('git annex addurl '+ url + ' --file=' + file_name) 
+        #print('git annex addurl '+ url + ' --file=' + file_name)
         # now, let's turn the files into web remotes
         u = os.system('git annex addurl '+ url + ' --file=' + file_name + " --relaxed")
 
         """
         # let's study the two cases, either the remote is in the local path
         if remote_path is None:
-            os.system('git annex addurl '+ url + ' --file=' + file_name) 
-        
+            os.system('git annex addurl '+ url + ' --file=' + file_name)
+
             # or it's on a different path that is given by the user
         else:
             # if this is the case, we need to go to that directory before executing the command
             u = os.path.expanduser(remote_path)
             os.chdir(u)
             os.system('git annex addurl '+ url + ' --file=' + file_name)
-       """ 
+       """
     # this is just to make sure
     #os.system('git annex list')
-    
 
 
-# method to disable the remote locally with git rm 
+
+# method to disable the remote locally with git rm
 def disableremotelocally(deposit_id):
     # use a shell command to remove the remote locally with git rm
     # this could be done with the library that has been previously tested
-    # this is the last step to be done after having already published the deposit on Zenodo.    
-    
+    # this is the last step to be done after having already published the deposit on Zenodo.
+
     import subprocess
     import shlex
     import os
@@ -322,7 +313,7 @@ def disableremotelocally(deposit_id):
 
     # we can have multiple remotes in one log and they are separated by lines.
     lines = output.splitlines()
-    remote_name = ''	
+    remote_name = ''
     # going through the remotes
     for line in lines:
         # parsing the output and separating the lines in a list where each element is a file
@@ -341,6 +332,18 @@ def disableremotelocally(deposit_id):
     else:
         u = os.system("git remote remove " + remote_name)
         print(u)
+
+
+# this function takes care of looking for the ids of the remotes.
+# For instance, if there is only one zenodo remote that has been initialized in
+# this repository, the program uses that id to disable the remote. If not, we can
+# list the ids to the user for them to choose from.
+def lookup_depositid():
+
+    return
+
+
+
 
 # this is the main function
 def main(argv):

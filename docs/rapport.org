@@ -1,68 +1,126 @@
-
+#+TITLE:       rapport stage
+#+AUTHOR:      Oumaima Hajji
+#+STARTUP: overview indent inlineimages logdrawer
+#+TAGS: R(R) Python(p) OrgMode(O) 
 
 
 
 * Plan.
-** Focalisation. (3 pages)
-- Qu'est-ce que la recherche reproductible?
-- L'utilité de la recherche reproductible.
-- D'où le mooc: expliquer le mooc, ce qu'il apporte de plus, parler de
-  l'utilité du backend pour stocker ses fichiers et de l'importance de
-  garder une trace de l'état de ces fichiers / versions / lieux de
-  stockage -> d'où l'utilité de git-annex pour les bien gérer. 
-
-  +++ le plan national pour la science ouverte (nso) : open access (les
-  droits d'acces) : pb pourqu qlq uni car pas tout le monde peut payer
-  pour ça et donc il y a des uni qui ont l'acess à plus de docs que
-  d'autres.
-  - les archives ouvertes (hal - arxiv): pas de review.
-  - open data: il faut aussi avoir acces aux données (c'est pas
-    suffisant d'avoir acces juste au pdf) (!!! FAIR data: il faut etre sur
-    que les archives sont bien la, qu'elles sont accessibles et
-    trouvables ...) on sait qu'il faut faire ça mais comment le faire
-    -> mooc (grâce à les outils donnés).
-  - open protocol: prise de notes (details )
-
-   
-    
-  +++ 
-
-** Etat de l'art:
-*** historique / gros fichiers.
-      + pourquoi git? pourquoi git-annex? control de version car
-        c'est le plus utilisé mais il y a un souci avec les fichiers
-        qui snt de taille tres grande.
-	voir git-annex vs lsf -> 2 pbs
-	1 pb avec lfs c'est que l'on peut pas
-        supprimer un blob puisque un blob ets partagé par plusieurs
-        repo git et du coup c'est compliqué de toucher à ça car ça
-        peut causer des pb -> il y a des scripts .
-	on ne peut que tout supprimer (delete tout le projet et du
-        coup on perd tout le contenu de github).
-	> exception: bitbucket solution mais cela ne se fait pas au
-        niveau de git lfs.
-	> test: git lfs vers zenodo pour voir ce qui se passe au
-        fichier lfs quand on push.
-	> c'est un vrai pb surtout quand on gere des fichiers de
-        grandes tailles.
-	2 pb: un pb avec la taille car les ficheis sont stoqués 2 fois
-        car il n y a pas des liens symb et donc les fichiers sont
-        stockées avec leurs tailles toutes entieres et du coup il y a
-        des soucis quand on gere des data set de grandes tailles.
-
-	> > git annex is (remote.log)
-*** archivage.
-	> zenodo(cern), figshare, nakala, comparaison de ces outils.
-	
-      + github vers zenodo (permet de deposer) != gitlab vers zenodo:
-        pourquoi pas git directement? au lieu de passer par github
-        donc on peut juste passer de git <- git annex -> zenodo.
-
-      + parler de datalad et comme quoi il y a aussi un problem là
-          car a seule solution d'archivage de ce type proposée par
-          datalad est d'upload des archive zip sur figshare. donc on a
-          implémenté le remote zenodo pour faire ça.
+** Focalisation.
+*** points (3 pages).
+  - En France, il y a un mouvement autour de la science ouverte (def v)
+   https://www.enseignementsup-recherche.gouv.fr/cid132529/le-plan-national-pour-la-science-ouverte-les-resultats-de-la-recherche-scientifique-ouverts-a-tous-sans-entrave-sans-delai-sans-paiement.html
+  - la science ouverte: "c’est la diffusion sans entrave des
+    publications et des données de la recherche.
+    Son objectif : faire sortir la recherche financée sur fonds
+    publics du cadre confiné des bases de données fermées. Elle réduit
+    les efforts dupliqués dans la collecte, la création, le transfert
+    et la réutilisation du matériel scientifique. Elle augmente ainsi
+    l’efficacité de la recherche."
+  - Le plan national pour la science ouverte: "rend obligatoire
+    l’accès ouvert pour les publications et pour les données issues de
+    recherches financées sur projets. Il met en place un Comité pour
+    la science ouverte et soutient des initiatives majeures de
+    structuration du paysage concernant les publications et les
+    données."
+  - open science, open peer review, open protocol (mooc 1: focalisé
+    sur la prise des notes, le document computationnal), open data.
+    ("FAIR is not equal to Open: The 'A' in FAIR stands for 'Accessible
+    under well defined conditions'. ... As such, while FAIR data does
+    not need to be open, in order to comply with the condition of
+    reusability, FAIR data are required to have a clear, preferably
+    machine readable, license.":
+    https://www.go-fair.org/resources/faq/ask-question-difference-fair-data-open-data/) 
+  - FAIR data: https://www.go-fair.org/fair-principles/
+  - on sait qu'il faut faire ça (respecter les principes de FAIR data)
+    mais comment le faire -> mooc (grâce à les outils donnés).
+  - Cette version du mooc se focalise sur la partie archivage data
+    pour s'assurer de sa disponibilité, ... 
   
+*** liens.
+ - les principes de FAIR data: https://www.go-fair.org/fair-principles/
+ - open science: https://fr.wikipedia.org/wiki/Science_ouverte
+   "La science ouverte (open science ou open research pour les
+   anglophones) est un mouvement qui cherche à rendre la recherche
+   scientifique et les données qu'elle produit accessibles à tous et
+   dans tous les niveaux de la société."
+ - open peer review:
+   https://openscience.pasteur.fr/2020/06/04/open-peer-review-un-mouvement-qui-prend-de-lampleur/
+ - open protocol.
+ - open data: https://fr.wikipedia.org/wiki/Donn%C3%A9es_ouvertes
+   
+** Etat de l'art.
+*** historique / gros fichiers (1 page).
+    - Dans la recherche scientifique, on travaille sur des milliers de
+      fichiers de données qui évoluent au cours du temps. Il faut donc
+      garder une trace de chaque version de données et du code
+      exécuté à un instant pour pouvoir avoir une empreinte continue du
+      développement de la recherche et donc pour suivre et comprendre
+      tous les pas de l'expérience. C'est pour raison que l'on se sert
+      de Git qui est le logiciel le plus utilisé pour la gestion de
+      versions. 
+    - Puisque c'est difficile de gérer les fichiers de grandes tailles
+      sur Git on va se servir de git-annex qui fait ça sans
+      enregistrer le contenu des fichiers sur Git. En effet, blablabla.
+    - Mais git-annex n'est pas le seul outil existant qui permet la
+      gestion des fichiers des gros fichiers. En effet, Git a une
+      extension qui permet de faire juste ça: Git
+      lfs. (https://www.atlassian.com/git/tutorials/git-lfs). Mais il
+      y a des problème avec cet outil qui gênent son utilisation:
+      expliquer les deux problèmes..
+    - Le choix entre les deux outils est donc fait: git-annex!
+      
+*** archivage (2 page).
+    - Maintenant que l'on sait comment gérer les fichiers il faut
+      passer à l'autre étape importante dans ce procès qui est l'étape
+      de l'archivage.
+    - Expliquer que le principe de special remotes est intéressant
+      puisque la gestion est déjà faite par git-annex et qu'il faut
+      juste choisir l'un des remotes qui nous est pratique et après on
+      peut stocker les données dessus.
+    - Expliquer pourquoi on n'a pas choisi les special remotes qui
+      sont déjà implémenté par git-annex:
+      https://git-annex.branchable.com/special_remotes/
+    - Expliquer que la solution la plus évidente est de se servir de
+      ce principe pour implémenter un special remote qui répond à nos
+      attentes. Mais pour faire cela il y a plusieurs plateformes
+      d'archivage: zenodo(cern), figshare, nakala, .. Il faut faire une
+      comparaison de ces outils pour arriver à la conclusion que
+      Zenodo est l'outil le plus intéressant pour nous.
+    - Mais quand on s'appuie sur Zenodo pour faire de l'archivage, on
+      remarque que il y a un shortcut entre Zenodo et github où les deux
+      comptes de l'utilisateur sont connectés pour lui permettre
+      d'upload ses projets github directement sur Zenodo et de les
+      archiver facilement. Pourquoi pas juste utiliser ce shortcut au
+      lieu de passer par git et git-annex? Le problème c'est que ce
+      mechanisme est personnalisé juste pour github et donc on ne peut
+      pas faire cela avec des autres plateformes comme gitlab sans
+      devoir passer par des biblio. Et même quand on fait ça, il y a
+      toujours un problème avec le lien Zenodo-Gitlab car cette
+      méthode permet juste d'upload des fichiers sur Zenodo en
+      utilisant l'API et ne permet pas de faire plus que ça. Donc la
+      solution la plus évidente est de commencer par git et de
+      construire un chemin vers Zenodo.
+    - Parler de datalad et comme quoi il y a aussi un problem là car a
+      seule solution d'archivage de ce type proposée par datalad est
+      d'upload des archive zip sur figshare. donc on a implémenté le
+      remote zenodo pour faire ça. 
+
+*** liens.
+- comparing the archiving platforms: https://espacechercheurs.enpc.fr/fr/donnees-recherche-aspects-techniques
+- git-annex vs lfs: https://stackoverflow.com/questions/39337586/how-do-git-lfs-and-git-annex-differ
+- nakala: https://documentation.huma-num.fr/nakala/#introduction-et-presentation
+- mendeley: https://data.mendeley.com/archive-process
+- datalad.
+- figshare.
+- github to zenodo: we know that there is alink between the two which allows to archive a github repository on zenodo (this is especially useful in the case of  when a researcher wants to cite the findings they have on github but they don't have the doi, so the next step to do is to use zenodo to archive the files that are on this repository and so we get at the end the doi number which allows us to cite): https://guides.github.com/activities/citable-code/
+- l'archivage gitlab -> zenodo ne gère pas les fichiers dans git LFS: https://gitlab.com/lnesi/icpp21/-/jobs/1430800588
+- library allowing to archive from gitlab to zenodo. It's still in beta stages and has just been developped since there isn't one that is already there like the github direct link: https://pypi.org/project/gitlab2zenodo/
+https://gitlab.com/gitlab-org/gitlab/-/issues/25587
+https://github.com/zenodo/zenodo/issues/1404 !!
+https://gitlab.com/gitlab-org/gitlab/-/issues/18763
+
+
 ** Contributions.
 *** modele de donnees.
     les limitations de zenodo et le fonctionnement de git-annex et
@@ -89,9 +147,7 @@
 
 *** restaurer une archive.
 
-
 ** Evaluation: documentaion de l'ensemble du processus avec un tutorial.
-    
     
 ** Méthodologie et Compétences développées.
 *** comp
@@ -115,8 +171,7 @@
 - Gestion du projet: Description de la gestion de votre projet
      (cycle de vie, structuration en taches, durées estimées et
      réelles, gestion de risques …)
-
-     
+  
 ** Conclusion.
 ce j'ai pas pu faire: nakala - datalad (submodules ) voir comment ça
 peut s'integrer avec zenodo (ex de figshare par opposition) -
@@ -134,3 +189,23 @@ simples (ex get) dans un workflow snakemake.
    - Description circonstanciée de ce qui n’a pu être réalisé ou
      description de ce que pourrait être la suite du travail.
    
+
+----- intro.
+   - Qu'est-ce que la recherche reproductible?
+- L'utilité de la recherche reproductible.
+- D'où le mooc: expliquer le mooc, ce qu'il apporte de plus, parler de
+  l'utilité du backend pour stocker ses fichiers et de l'importance de
+  garder une trace de l'état de ces fichiers / versions / lieux de
+  stockage -> d'où l'utilité de git-annex pour les bien gérer. 
+
+  +++ le plan national pour la science ouverte (nso) : open access (les
+  droits d'acces) : pb pourqu qlq uni car pas tout le monde peut payer
+  pour ça et donc il y a des uni qui ont l'acess à plus de docs que
+  d'autres.
+  - les archives ouvertes (hal - arxiv): pas de review.
+  - open data: il faut aussi avoir acces aux données (c'est pas
+    suffisant d'avoir acces juste au pdf) (!!! FAIR data: il faut etre sur
+    que les archives sont bien la, qu'elles sont accessibles et
+    trouvables ...) on sait qu'il faut faire ça mais comment le faire
+    -> mooc (grâce à les outils donnés).
+  - open protocol: prise de notes (details )

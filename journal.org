@@ -9694,7 +9694,14 @@ git annex enableremote test-zenodo-newver2 type=external newversion=879747 exter
   we return returned code and the method that executed it.
 
 *** changes to git-annex-disableremote.
-
+- add a function in the disableremoteprogram that takes care of
+  looking for the ids of the remotes. For instance, if there is only
+  one zenodo remote that has been initialized in this repository, the
+  program uses that id to disable the remote. If not, we can list the
+  ids to the user for them to choose from.
+- add an option -l to list the ids of the existent remotes to the
+  user.
+  
 ** brainstorming: uploading an archive to Zenodo independently of git-annex.
 We have these files / structure before publishing:
 Local: | F1  ...  Fn | <-> Remote Zenodo: |K1  ...  Km| 
@@ -9716,3 +9723,4 @@ Local: | F1  ...  Fn | <-> Remote Zenodo: |K1  ...  Km|
   transforming the files into web remotes.)
   -> or do we keep them just like that without annexing them, letting
   the user do what they want with them?
+* Monday 19/07.
