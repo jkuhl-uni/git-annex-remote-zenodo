@@ -21,7 +21,6 @@
    https://git-annex.branchable.com/walkthrough/
    https://git-annex.branchable.com/special_remotes/external/
 
-
 ** Zenodo.
 *** intro.
     Zenodo is a general-purpose open-access repository developed under
@@ -36,7 +35,6 @@
 *** useful links.
     https://developers.zenodo.org/#quickstart-upload
 
-    
 ** Datalad.
 *** intro.
     DataLad builds on top of git-annex and extends it with an
@@ -89,8 +87,7 @@
       datasets, the origin of files obtained from web sources,
       complete machine-readable and automatically reproducible records
       of how files were created (including software environments).
-      
-      
+            
 *** exporting the content of a dataset as a ZIP archive to figshare.
     Ideally figshare should be supported as a proper git annex
     special remote. Unfortunately, figshare does not support having
@@ -108,7 +105,6 @@
     https://carpentries.topicbox.com/groups/discuss/Tb776978a905c0bf8-M3d3e4bb2f0a49fdf2391282c 
     http://handbook.datalad.org/en/latest/index.html
 
-    
 ** Snakemake.
 *** intro.
     Snakemake is a workflow engine that provides a readable
@@ -130,7 +126,6 @@
     https://www.youtube.com/watch?v=NNPBDOBHlxo&ab_channel=EdinburghGenomicsTraining
     https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
 
-    
 ** GUIX.
 *** intro.
    "GNU GUIX is a general-purpose package manager that implements 
@@ -150,7 +145,6 @@
     https://guix.gnu.org/manual/en/html_node/Binary-Installation.html
     https://guix.gnu.org/en/manual/en/guix.html
 
-    
 ** Docker.
 *** intro.
     Docker is a software for developing, shipping, and running
@@ -183,7 +177,6 @@
    https://reproducible-analysis-workshop.readthedocs.io/en/latest/8.Intro-Docker.html
    https://gigascience.biomedcentral.com/articles/10.1186/s13742-016-0135-4
 
-   
 ** Conda
    Conda is an open source package management system and environment
    management system that runs on Windows, macOS and Linux. Conda
@@ -194,7 +187,6 @@
    conda-pack create platform and operating system specific copies of
    an environment. 
    
-
 ** Singularity.
    Singularity is a container platform. It allows you to create and
    run containers that package up pieces of software in a way that is
@@ -254,7 +246,6 @@
     https://git-annex.branchable.com/walkthrough/
     https://git-annex.branchable.com/special_remotes/external/
 
-
 ** Zenodo.
 *** Uploading through the API.
 **** with cURL:
@@ -300,7 +291,6 @@ bucket_url = r.json()["links"]["bucket"]
     database. To do this, I simply used the sandbox and uploaded
     a report I worked on with an other student last year.
 
-    
 ** Snakemake.
    I created a simple Snakefile in which I wrote a couple rules with
    shell commands and tried to compile some old projects in order to
@@ -308,7 +298,6 @@ bucket_url = r.json()["links"]["bucket"]
    - LINK:
      https://www.youtube.com/watch?v=hPrXcUUp70Y&ab_channel=NCSAatIllinois
 
-     
 ** Docker.
    In the case of Docker, I've alredy used this tool during the
    project of the semester 8 and so I have a grasp on its basic
@@ -477,7 +466,7 @@ with Guix/ by _Ludovic Courtès_ and _Ricardo Wurmus_.
    are not well suited to handle large binary data. As a Git
    repository stores every version of every file that is added to it,
    large files that undergo regular modifications can inflate the size
-   of a·project significantly. If others try to clone your repository
+   of a project significantly. If others try to clone your repository
    or fetch/pull to update it locally, it will take longer to do this
    if it contains larger files that have been versioned and modified.
 

@@ -50,10 +50,11 @@
  - open data: https://fr.wikipedia.org/wiki/Donn%C3%A9es_ouvertes
    
 ** Etat de l'art.
-*** historique / gros fichiers (1 page).
+*** historique / gros fichiers (1.5 page).
+**** points.
     - Dans la recherche scientifique, on travaille sur des milliers de
       fichiers de données qui évoluent au cours du temps. Il faut donc
-      garder une trace de chaque version de données et du code
+      garder une trace de chaque version de données et du code (*)
       exécuté à un instant pour pouvoir avoir une empreinte continue du
       développement de la recherche et donc pour comprendre et suivre
       tous les pas de l'expérience. C'est pour cette raison que l'on se sert
@@ -69,8 +70,67 @@
       y a des problèmes avec cet outil qui gênent son utilisation:
       expliquer les deux problèmes..
     - Le choix entre les deux outils est donc fait: git-annex!
-      
+**** extra notes.
+***** Importance of Version Controlling Data.
+   The reality is that data is only rarely invariant. For example,
+   throughout a scientific project, datasets can be extended with new
+   data, adapted to new naming schemes, reorganised into different
+   file hierarchies, updated with new data points or modified to fix
+   any errors.
+   If a dataset that is the basis for computing a scientific result
+   changes without version control, reproducibility can be threatened:
+   results may become invalid, or scripts that are based on file names
+   that change between versions can break.
+   Therefore, version controlling data and other large files in a
+   similar way to version controlling code or manuscripts can help
+   ensure the reproducibility of a project and capture the provenance
+   of results.
+   (*) L'importance de 'Data Version Control' est évidente puisque dans
+   le domaine de la recherche on gère des données de différents types
+   et de grande taille et ces données peuvent changer et évoluer
+   rapidement et donc au final on aura plusieurs version de chaque
+   fichier et quand on compile les fichiers sources on peut avoir des
+   différents résultats si on prend les mauvaises versions des
+   fichiers. Mais on peut pas toujours tout mettre sur Git (surtout
+   dans le cas des fichiers de grande taille qui évoluent
+   exponentiellement). On gère ça alors with git-annex qui crée un
+   directory annex où sont stockés les noms et les métadata des
+   fichiers. Donc quand le dépôt est push sur Github, seuls les
+   métadata sont transmises et alors les dépôts ne sont plus
+   lourds. Les données peuvent être transmises sur des autres depôts
+   (figshare, amazon, ...) et on peut facilement les récupérer avec
+   une commande.
+   
+***** Challenges in version controlling data.
+   When you work, share, and collaborate on large, potentially binary
+   files (such as many scientific data formats), you need to think
+   about ways to version control this data with specialised
+   tools. This is because most version control tools - such as Git -
+   are not well suited to handle large binary data. As a Git
+   repository stores every version of every file that is added to it,
+   large files that undergo regular modifications can inflate the size
+   of a project significantly. If others try to clone your repository
+   or fetch/pull to update it locally, it will take longer to do this
+   if it contains larger files that have been versioned and modified.
+***** Version controlling data with git-annex.
+   The git-annex tool is a distributed system that can manage and
+   share large files independent from a central service or
+   server. git-annex manages all file content in a separate directory
+   in the repository (.git/annex/objects, the so-called annex) and
+   only places file names with some metadata into version control by
+   Git. When a Git repository with an annex is pushed to a web-hosting
+   service such as GitHub, the contents stored in the annex are not
+   uploaded. Instead, they can be pushed to a storage system.
+   If a repository with an annex is cloned, the clone will not
+   contain the contents of all annexed files by default, but display
+   only file names. This makes the repository small, even if it tracks
+   hundreds of gigabytes of data, and cloning fast, while file
+   contents are stored in one or more free or commercial external
+   storage solutions.
+https://the-turing-way.netlify.app/reproducible-research/vcs/vcs-data.html
+
 *** archivage (2 page).
+**** points.
     - Maintenant que l'on sait comment gérer les fichiers il faut
       passer à l'autre étape importante dans ce procès qui est l'étape
       de l'archivage.
@@ -106,6 +166,39 @@
       d'upload des archive zip sur figshare. donc on a implémenté le
       remote zenodo pour faire ça. 
 
+**** extra notes.
+***** zenodo.
+ Zenodo is a general-purpose open-access repository developed under
+ the European OpenAIRE program and operated by CERN. It allows
+ researchers to deposit research papers, data sets, research
+ software, reports, and any other research related digital artifacts.
+ - We will be using Zenodo as the database where the articles and
+   research papers will be deposited at the end of the mooc. The API
+   is easily accessible through Python with the use of the package
+   requests which allows the use of the basic HTTP queries.
+***** datalad.
+- DataLad builds on top of git-annex and extends it with an
+  intuitive command-line interface. It enables users to operate
+  on data using familiar concepts, such as files and directories,
+  while transparently managing data access and authorization with
+  underlying hosting providers.
+  A powerful and complete Python API is also provided to enable
+  authors of data-centric applications to bring versioning and the
+  fearless acquisition of data into continuous integration workflows.
+- Converting an existing Git or git-annex repository into a
+  DataLad dataset: 	$ datalad create -f
+- DataLad only cares (knows) about two things: Datasets and
+  files. A DataLad dataset is a collection of files in
+  folders. And a file is the smallest unit any dataset can
+  contain. Thus, a DataLad dataset has the same structure as any
+  directory on your computer, and DataLad itself can be
+  conceptualized as a content-management system that operates on
+  the units of files.
+- exporting the content of a dataset as a ZIP archive to figshare:
+  Ideally figshare should be supported as a proper git annex special
+  remote. Unfortunately, figshare does not support having directories,
+  and can store only a flat list of files. That makes it impossible
+  for any sensible publishing of complete datasets.
 *** liens.
 - comparing the archiving platforms: https://espacechercheurs.enpc.fr/fr/donnees-recherche-aspects-techniques
 - git-annex vs lfs: https://stackoverflow.com/questions/39337586/how-do-git-lfs-and-git-annex-differ
@@ -121,25 +214,43 @@ https://github.com/zenodo/zenodo/issues/1404 !!
 https://gitlab.com/gitlab-org/gitlab/-/issues/18763
 ** Contributions.
 *** modele de donnees.
-- Même si Zenodo paraît une la plateforme parfaite à utiliser comme un
+- Même si Zenodo paraît comme une la plateforme parfaite à utiliser comme un
   special remote de git-annex, il y a toujours un problème
   architecturel qui nous a gêné quand on a commencé la réfléxion de
-  comment structurer notre remote. 
-- 
-   
-    les limitations de zenodo et le fonctionnement de git-annex et
-    donc voila ce quon a fait pour faire fonctionner le truc. -> les
-    choix
-
-      
-      + Remote Zenodo: expliquer l'architecture des dépôts Zenodo et
-        donc les problèmes rencontrés lors de l'implémentation du
-        backend (les moments où il fallait faire un choix: key vs
-        filename , architecture, tests nombres de fichiers possibles à
-        mettre dans un dépôts, ...)
+  comment structurer notre remote. Quand on fait un upload Zenodo,
+  puisque son infrastructure ne permet pas d'avoir des directory,
+  alors le stockage se fait dans une liste des fichiers mal structurée.  
+- Un autre problème est aussi le fait que dans Zenodo quand on crée un
+  nouveau upload, c'est toujours un dépôt où on va mettre tous nos
+  fichiers. Donc, on peut choisir des différents modèles
+  d'implémentation du remote Zenodo et pour chaque modèle, la
+  fréquence de création des dépôts et les fichiers qui sont dedans
+  changent. Si un dépôt est créé au moment de l'initialisation du
+  remote, alors toutes les opérations qui viennent seront appliquées
+  sur ce dépôt, et on aura ainsi un seul dépôt pour chaque remote
+  créé. Mais on fait un autre choix, où l'initialisation du remote ne
+  déclenche pas la création du dépôt, et au lieu faire cela après,
+  alors c'est possible d'avoir plusieurs dépôts, et alors plusieurs
+  identificateurs de dépôts pour un seul remote git-annex. Or, cela
+  n'est pas nécéssaire puisque l'on peut choisir les fichiers à mettre
+  dans un dépôt et ceux à laisser en local, et donc avoir un seul
+  dépôt par directory (l'endroit où on initialise le remote) est
+  suffisant puisqu'on peut l'utiliser quand on veut pour manipuler les
+  fichiers que l'on veut sans avoir des problèmes de confusion. Si
+  l'utilisateur veut créer un autre dépôt Zenodo avec un remote
+  git-annex dans le même endroit que le premier remote, c'est toujours
+  possible d'initialiser plusieurs remotes git-annex dans la même
+  directory. 
+- On a aussi fait des tests pour voir s'il y a des limites imposées
+  sur le nombre de fichiers possibles à mattre dans un dépôt mais il
+  n'y avait pas des problèmes avec ces tests et donc c'est possible
+  d'uplad des milliers de fichiers mais la taille du dépôt ne doit pas
+  atteindre 50GB. C'est la seule limite imposée par Zenodo. On les a
+  contacté pour s'assurer de cette hypothèse et on a eu une réponse positive.
 
 *** implem de remote zenodo.
-- api rest
+L'implémentation du remote Zenodo s'est faite en plusieurs étapes:
+- api rest: la première partie du procès 
 - biblio python qui implemente deja le protocol
 - operation principale: creation d'un depot, upload, check, remove, get.
 - tests: avec les exceptions du protocol pour s'assurer que les pb de
@@ -188,13 +299,13 @@ simples (ex get) dans un workflow snakemake.
 
 
 * notes.                                                           :noexport:
+** a inclure.
    - Ce qui a été fait: expliquer tous les choix qui ont été faits et
      pourquoi. 
    - Description circonstanciée de ce qui n’a pu être réalisé ou
      description de ce que pourrait être la suite du travail.
    
-
------ intro.
+** intro.
    - Qu'est-ce que la recherche reproductible?
 - L'utilité de la recherche reproductible.
 - D'où le mooc: expliquer le mooc, ce qu'il apporte de plus, parler de
@@ -217,8 +328,7 @@ simples (ex get) dans un workflow snakemake.
 
 ------
 
-
-** Etat de l'art:
+** Etat de l'art.
 *** historique / gros fichiers.
       + pourquoi git? pourquoi git-annex? control de version car
         c'est le plus utilisé mais il y a un souci avec les fichiers
@@ -254,3 +364,14 @@ simples (ex get) dans un workflow snakemake.
           datalad est d'upload des archive zip sur figshare. donc on a
           implémenté le remote zenodo pour faire ça.
 	  
+
+
+** contributions.
+*** modeles de données.
+- les limitations de zenodo et le fonctionnement de git-annex et donc voila ce quon a fait pour faire fonctionner le truc. -> les choix
++ Remote Zenodo: expliquer l'architecture des dépôts Zenodo et donc
+  les problèmes rencontrés lors de l'implémentation du backend (les
+  moments où il fallait faire un choix: key vs filename ,
+  architecture, tests nombres de fichiers possibles à mettre dans un
+  dépôts, ...)
+  
