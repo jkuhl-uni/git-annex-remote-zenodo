@@ -121,6 +121,12 @@ https://github.com/zenodo/zenodo/issues/1404 !!
 https://gitlab.com/gitlab-org/gitlab/-/issues/18763
 ** Contributions.
 *** modele de donnees.
+- Même si Zenodo paraît une la plateforme parfaite à utiliser comme un
+  special remote de git-annex, il y a toujours un problème
+  architecturel qui nous a gêné quand on a commencé la réfléxion de
+  comment structurer notre remote. 
+- 
+   
     les limitations de zenodo et le fonctionnement de git-annex et
     donc voila ce quon a fait pour faire fonctionner le truc. -> les
     choix
