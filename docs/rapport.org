@@ -469,3 +469,39 @@ liens à mettre après.
 * Footnotes
 
 [fn:git-annex-protocol] Le protocole =git-annex= http://git-annex.org/protocol  
+
+
+
+
+
+- git lfs met  une archive toute entiere sur zenodo quand on passe par
+  github et donc c'est pas vraiment pratique pour nous puisque la
+  recherche d'un fichier unique n'est pas possible. Il faut a chaque
+  fois que l'on veut récupérer un fichier telecharger l'archive toute
+  entiere et donc c'est pas pratique pour nous.
+
+
+https://forum.openmod.org/t/breakout-group-best-practice-on-how-to-structure-publish-open-data/116
+https://caltechlibrary.github.io/git-desktop/09-preservation/
+
+
+- git annex a un special remote de git lfs qui permet de store les
+  fichiers dans des repository git lfs:
+  https://git-annex.branchable.com/special_remotes/git-lfs/
+  https://git-annex.branchable.com/tips/storing_data_in_git-lfs/
+
+
+- "LFS breaks this system. Once you mark a file to be managed by LFS
+  no longer does everyone hold a copy to every version of that
+  file. Now the central server holds the history and everyone else
+  only has the latest copy. This is a fundamental change to Git."
+  https://andrewzuo.com/post/619470647039557632/git-lfs-a-solution-that-wont-work-to-a-problem
+
+
+- to look into:
+  https://workingconcept.com/blog/git-annex-vs-git-lfs
+  https://gregoryszorc.com/blog/2021/05/12/why-you-shouldn't-use-git-lfs/
+  https://lwn.net/Articles/774125/
+
+
+
