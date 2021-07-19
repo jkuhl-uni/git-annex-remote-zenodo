@@ -7,7 +7,7 @@
 
 * Plan (17.5 / 20 pages).
 ** Focalisation (2.5 / 3 pages).
-*** points (2.5 / 3 pages).
+*** points (2 pages).
   - En France, il y a un mouvement autour de la science ouverte (def v)
    https://www.enseignementsup-recherche.gouv.fr/cid132529/le-plan-national-pour-la-science-ouverte-les-resultats-de-la-recherche-scientifique-ouverts-a-tous-sans-entrave-sans-delai-sans-paiement.html
   - la science ouverte: "c’est la diffusion sans entrave des
@@ -52,14 +52,16 @@
 ** Etat de l'art (3.5 / 4 pages).
 *** historique / gros fichiers (1.5 / 2 pages).
 **** points importants à inclure.
-    - Dans la recherche scientifique, on travaille sur des milliers de
+    - Dans la science moderne (science compitationnelle / data
+      science) , on travaille sur des milliers de
       fichiers de données qui évoluent au cours du temps. Il faut donc
       garder une trace de chaque version de données et du code (*)
       exécuté à un instant pour pouvoir avoir une empreinte continue du
       développement de la recherche et donc pour comprendre et suivre
       tous les pas de l'expérience. C'est pour cette raison que l'on se sert
       de Git qui est le logiciel le plus utilisé pour la gestion de
-      versions. 
+      versions.
+      changer l'ordre.
     - Puisque c'est difficile de gérer les fichiers de grandes tailles
       sur Git on va se servir de git-annex qui fait ça sans
       enregistrer le contenu des fichiers sur Git. En effet, blablabla.
@@ -131,9 +133,19 @@ https://the-turing-way.netlify.app/reproducible-research/vcs/vcs-data.html
 
 *** archivage (2 pages).
 **** points importants à inclure.
-    - Maintenant que l'on sait comment gérer les fichiers il faut
++ archivage: pourquoi (pérénité, mise à disposition à une communauté à
+  définir) et ce que ça fourni (référencement pérène)
++ Exemples: zenodo, nakala, figshare, ...
++ Chainon manquant dans le workflow de gestion de données: l'archivage
+  est une opération manuelle.
++ Ébauches de solution:  github-zenodo, gitlab-zenodo
++ Ma proposition: proposer un remote zenodo
+
+
+     - Maintenant que l'on sait comment gérer les fichiers il faut
       passer à l'autre étape importante dans ce procès qui est l'étape
-      de l'archivage.
+      de l'archivage !!
+      
     - Expliquer que le principe de special remotes est intéressant
       puisque la gestion est déjà faite par git-annex et qu'il faut
       juste choisir l'un des remotes qui nous est pratique et après on
@@ -165,7 +177,7 @@ https://the-turing-way.netlify.app/reproducible-research/vcs/vcs-data.html
       seule solution d'archivage de ce type proposée par datalad est
       d'upload des archive zip sur figshare. donc on a implémenté le
       remote zenodo pour faire ça. 
-
+      
 **** extra notes.
 ***** zenodo.
  Zenodo is a general-purpose open-access repository developed under
@@ -214,6 +226,7 @@ https://github.com/zenodo/zenodo/issues/1404 !!
 https://gitlab.com/gitlab-org/gitlab/-/issues/18763
 ** Contributions (6.5 / 8 pages).
 *** modele de donnees (1 / 1.5 page).
+
 - Même si Zenodo paraît comme une la plateforme parfaite à utiliser comme un
   special remote de git-annex, il y a toujours un problème
   architecturel qui nous a gêné quand on a commencé la réfléxion de
@@ -248,9 +261,28 @@ https://gitlab.com/gitlab-org/gitlab/-/issues/18763
   atteindre 50GB. C'est la seule limite imposée par Zenodo. On les a
   contacté pour s'assurer de cette hypothèse et on a eu une réponse positive.
 
-*** implem de remote zenodo (3.5 / 4.5 pages).
+**** Outline                                                    :noexport:
+Trois problèmes:
+1. Contraintes sur les tailles et nombres de fichiers:
+2. mapping annex/zenodo: remote vs. dépot. 1-to-1 ou autre ?
+3. architecture: flat, pas de répertoires, convention de nommage ?
+
+
+
+
+*** Implem de remote zenodo (3.5 / 4.5 pages)
 L'implémentation du remote Zenodo s'est faite en plusieurs étapes:
 **** api rest (0.5 page).
+~new_version~ ou ~publish~
+
+un /record/ ou un truc important
+
+- nouveau dépot ::
+- publish :: 
+
+ou alors *new_record* et *publish*
+
+
 la première partie du procès est de comprendre comment fonctionne
 l'API Zenodo et de tester les fonctionnalités possibles de cette
 API. Il fallait faire des tests pour chacune des requêtes HTTP pour
@@ -269,7 +301,8 @@ ses données en gardant des traces (chaque version publiée d'un record
 a son doi, et puisque l'on peut juste avoir une seule nouvelle version
 à la fois, on peut s'assurer du développement des données).
 **** biblio python qui implemente deja le protocol (0.5 page).
-- Afin d'implémenter un remote git-annex il faut d'abord être sûr que son
+- Afin d'implémenter un remote git-annex[fn:git-annex-protocol] il
+  faut d'abord être sûr que son. \cite{zenodo}
 program implémente bien le protocole 'external special remote' de
 git-annex qui fait le lien entre git-annex et son remote externe. Les
 deux bout de la communication échangent des requêtes et des réponses
@@ -296,28 +329,26 @@ creation d'un depot, upload, check, remove, get.
 **** tests (0.5 page).
 avec les exceptions du protocol pour s'assurer que les pb de l'api
 passent bien à git-annex et qu'il y a une coherence en les deux .
-**** les options possibles (0.5 / 1 page).
-newversion,
-*** archiver disableremote (1 page).
+debug mode 
+*** archiver avec disableremote (1 page)
 Quand la première partie de la gestion des données finit, et on stocke
 tous les fichiers qui nous intéressent dans le remote, il faut
 maintenant passer à la deuxième partie de l'archivage qui se fait
 indépendamment de la première, et où on finalise son dépôt avec toutes
 les méta-données nécessaires avant de le publier.
 - les options pour par exemple publier le fichier .json ou 
+**** newversion.
+*** restaurer une archive (1 page)
 
-*** restaurer une archive (1 page).
-
-*** liens.
+*** liens.                                                       :noexport:
 https://developers.zenodo.org/?python#quickstart-upload
 https://git-annex.branchable.com/design/external_special_remote_protocol/
 https://git-annex.branchable.com/special_remotes/external/
 https://github.com/Lykos153/AnnexRemote
 
 ** Evaluation (1 page).
-*** documentaion de l'ensemble du processus (0.5 page).
-*** rédaction d'un tutorial pour tester et comprendre la totalité du projet (0.5 page).
-    walkthrough
+rédaction d'un tutorial pour tester et comprendre la totalité du projet (0.5 page).
+- walkthrough, intégration au MOOC 2 en cours
 ** Méthodologie et Compétences développées (3 pages).
 *** comppétences développées (1 page).
    - Bilan des connaissances et expériences acquises ou approfondies au
@@ -327,8 +358,11 @@ https://github.com/Lykos153/AnnexRemote
      d'ingénieur en informatique ou aussi des compétences
      transversales au métier d'ingénieur (voir les deux fichiers excel
      attachés).
+   - MOOC 1 (prise des notes! rendre mon travail compréhensible par
+     quelqu'un d'autre)
 
-*** méthodologie (2 page). 
+*** méthodologie (2 page).
+**** documentaion de l'ensemble du processus (0.5 page).
 - ex: parler du journal (application directe des éléments de la RR).
 
    + parler des tutos faits au début / des petits programmes écrits
@@ -336,12 +370,16 @@ https://github.com/Lykos153/AnnexRemote
         snakemake?)
 + tests
   + doc
-    + reunions
-- Gestion du projet: Description de la gestion de votre projet
+**** Gestion du projet:
+Description de la gestion de votre projet
      (cycle de vie, structuration en taches, durées estimées et
      réelles, gestion de risques …)
+    + reunions hebdomadaires, agile,
+    + gantt chart, a posteriori, planification légère
+    + identifier mes propositions personnelles (que ce soit des
+      trouvailles ou des directions à ne pas emprunter)
   
-** Conclusion (1 page).
+** Conclusion (1 - 2 page).
 ce j'ai pas pu faire: nakala - datalad (submodules ) voir comment ça
 peut s'integrer avec zenodo (ex de figshare par opposition) -
 (snakemake <-> git-annex) : pb: où integrer les commandes git annex
@@ -427,4 +465,7 @@ liens à mettre après.
   moments où il fallait faire un choix: key vs filename ,
   architecture, tests nombres de fichiers possibles à mettre dans un
   dépôts, ...)
-  
+
+* Footnotes
+
+[fn:git-annex-protocol] Le protocole =git-annex= http://git-annex.org/protocol  
