@@ -268,11 +268,30 @@ l'API, et c'est grâce à cette opération que l'on veut faire évoluer
 ses données en gardant des traces (chaque version publiée d'un record
 a son doi, et puisque l'on peut juste avoir une seule nouvelle version
 à la fois, on peut s'assurer du développement des données).
-**** biblio python qui implemente deja le protocol
-**** operation principale: creation d'un depot, upload, check, remove, get.
-**** tests: avec les exceptions du protocol pour s'assurer que les pb de
-  l'api passent bien à git-annex et qu'il y a une coherence en les
-  deux .
+**** biblio python qui implemente deja le protocol (0.5 page).
+- Afin d'implémenter un remote git-annex il faut d'abord être sûr que son
+program implémente bien le protocole 'external special remote' de
+git-annex qui fait le lien entre git-annex et son remote externe. Les
+deux bout de la communication échangent des requêtes et des réponses
+durant la période de l'exécution du programme
+(celui qui implémente le remote X: git-annex-remote-X). Pour ne pas
+avoir des soucis de confusion des intéractions, à chaque fois l'une des
+deux parties prend l'initiative en n'envoyant que des requêtes et
+l'autre partie répond alors avec des reponses à ces requêtes.
+- On utilise la bibliothèque *AnnexRemote* de python qui implémente la
+  totalité du protocole et respecte toutes ses spécifications. Il faut
+  donc juste importer cette les modèles de cette bibiliothèque que
+  l'on veut utiliser dans notre programme. On définit alors une classe
+  pour notre remote qui extend la classe SpecialRemote de la
+  bibliothèque. Ensuite, il nous reste à implémenter les fonctions que
+  l'on va utiliser pour déposer les données sur le remote et les
+  manipuler.
+   
+**** operation principale ().
+creation d'un depot, upload, check, remove, get.
+**** tests.
+avec les exceptions du protocol pour s'assurer que les pb de l'api
+passent bien à git-annex et qu'il y a une coherence en les deux .
 **** les options possibles (newversion, 
 *** archiver disableremote.
 - les options pour par exemple publier le fichier .json ou 
@@ -281,6 +300,9 @@ a son doi, et puisque l'on peut juste avoir une seule nouvelle version
 
 *** liens.
 https://developers.zenodo.org/?python#quickstart-upload
+https://git-annex.branchable.com/design/external_special_remote_protocol/
+https://git-annex.branchable.com/special_remotes/external/
+https://github.com/Lykos153/AnnexRemote
 
 ** Evaluation: documentaion de l'ensemble du processus avec un tutorial.
     
