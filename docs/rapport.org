@@ -129,7 +129,7 @@
    storage solutions.
 https://the-turing-way.netlify.app/reproducible-research/vcs/vcs-data.html
 
-*** archivage (2 page).
+*** archivage (2 pages).
 **** points.
     - Maintenant que l'on sait comment gérer les fichiers il faut
       passer à l'autre étape importante dans ce procès qui est l'étape
@@ -213,7 +213,7 @@ https://gitlab.com/gitlab-org/gitlab/-/issues/25587
 https://github.com/zenodo/zenodo/issues/1404 !!
 https://gitlab.com/gitlab-org/gitlab/-/issues/18763
 ** Contributions.
-*** modele de donnees.
+*** modele de donnees (1.5 page).
 - Même si Zenodo paraît comme une la plateforme parfaite à utiliser comme un
   special remote de git-annex, il y a toujours un problème
   architecturel qui nous a gêné quand on a commencé la réfléxion de
@@ -250,17 +250,37 @@ https://gitlab.com/gitlab-org/gitlab/-/issues/18763
 
 *** implem de remote zenodo.
 L'implémentation du remote Zenodo s'est faite en plusieurs étapes:
-- api rest: la première partie du procès 
-- biblio python qui implemente deja le protocol
-- operation principale: creation d'un depot, upload, check, remove, get.
-- tests: avec les exceptions du protocol pour s'assurer que les pb de
+**** api rest (0.5 page).
+la première partie du procès est de comprendre comment fonctionne
+l'API Zenodo et de tester les fonctionnalités possibles de cette
+API. Il fallait faire des tests pour chacune des requêtes HTTP pour
+tester les opérations possibles Zenodo. Les opérations les plus
+importantes comme la création du dépôt, l'envoi des fichiers sur le
+dépôt, la suppression, et l'obtention des informations sur le dépôt et
+les fichiers stockés dedans. Il y a aussi des autres opérations pour
+publier le dépôt pour archiver les données (une fois un dépôt est
+publié, il devient un record qui a un doi et que l'on peut citer alors
+quand on veut, on ne peut donc pas supprimer un record une fois
+publié. C'est comme ça que l'on garantie son existence et on le rend
+accessible et trouvable depuis le doi). On peut aussi créer des
+nouvelles versions d'un record avec une simple requête post vers
+l'API, et c'est grâce à cette opération que l'on veut faire évoluer
+ses données en gardant des traces (chaque version publiée d'un record
+a son doi, et puisque l'on peut juste avoir une seule nouvelle version
+à la fois, on peut s'assurer du développement des données).
+**** biblio python qui implemente deja le protocol
+**** operation principale: creation d'un depot, upload, check, remove, get.
+**** tests: avec les exceptions du protocol pour s'assurer que les pb de
   l'api passent bien à git-annex et qu'il y a une coherence en les
   deux .
-- les options possibles (newversion, 
+**** les options possibles (newversion, 
 *** archiver disableremote.
 - les options pour par exemple publier le fichier .json ou 
 
 *** restaurer une archive.
+
+*** liens.
+https://developers.zenodo.org/?python#quickstart-upload
 
 ** Evaluation: documentaion de l'ensemble du processus avec un tutorial.
     
