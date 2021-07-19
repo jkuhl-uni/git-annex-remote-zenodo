@@ -55,8 +55,8 @@
       fichiers de données qui évoluent au cours du temps. Il faut donc
       garder une trace de chaque version de données et du code
       exécuté à un instant pour pouvoir avoir une empreinte continue du
-      développement de la recherche et donc pour suivre et comprendre
-      tous les pas de l'expérience. C'est pour raison que l'on se sert
+      développement de la recherche et donc pour comprendre et suivre
+      tous les pas de l'expérience. C'est pour cette raison que l'on se sert
       de Git qui est le logiciel le plus utilisé pour la gestion de
       versions. 
     - Puisque c'est difficile de gérer les fichiers de grandes tailles
@@ -66,7 +66,7 @@
       gestion des fichiers des gros fichiers. En effet, Git a une
       extension qui permet de faire juste ça: Git
       lfs. (https://www.atlassian.com/git/tutorials/git-lfs). Mais il
-      y a des problème avec cet outil qui gênent son utilisation:
+      y a des problèmes avec cet outil qui gênent son utilisation:
       expliquer les deux problèmes..
     - Le choix entre les deux outils est donc fait: git-annex!
       
@@ -119,8 +119,6 @@
 https://gitlab.com/gitlab-org/gitlab/-/issues/25587
 https://github.com/zenodo/zenodo/issues/1404 !!
 https://gitlab.com/gitlab-org/gitlab/-/issues/18763
-
-
 ** Contributions.
 *** modele de donnees.
     les limitations de zenodo et le fonctionnement de git-annex et
@@ -209,3 +207,44 @@ simples (ex get) dans un workflow snakemake.
     trouvables ...) on sait qu'il faut faire ça mais comment le faire
     -> mooc (grâce à les outils donnés).
   - open protocol: prise de notes (details )
+
+
+------
+
+
+** Etat de l'art:
+*** historique / gros fichiers.
+      + pourquoi git? pourquoi git-annex? control de version car
+        c'est le plus utilisé mais il y a un souci avec les fichiers
+        qui snt de taille tres grande.
+	voir git-annex vs lsf -> 2 pbs
+	1 pb avec lfs c'est que l'on peut pas
+        supprimer un blob puisque un blob ets partagé par plusieurs
+        repo git et du coup c'est compliqué de toucher à ça car ça
+        peut causer des pb -> il y a des scripts .
+	on ne peut que tout supprimer (delete tout le projet et du
+        coup on perd tout le contenu de github).
+	> exception: bitbucket solution mais cela ne se fait pas au
+        niveau de git lfs.
+	> test: git lfs vers zenodo pour voir ce qui se passe au
+        fichier lfs quand on push.
+	> c'est un vrai pb surtout quand on gere des fichiers de
+        grandes tailles.
+	2 pb: un pb avec la taille car les ficheis sont stoqués 2 fois
+        car il n y a pas des liens symb et donc les fichiers sont
+        stockées avec leurs tailles toutes entieres et du coup il y a
+        des soucis quand on gere des data set de grandes tailles.
+
+	> > git annex is (remote.log)
+*** archivage.
+	> zenodo(cern), figshare, nakala, comparaison de ces outils.
+	
+      + github vers zenodo (permet de deposer) != gitlab vers zenodo:
+        pourquoi pas git directement? au lieu de passer par github
+        donc on peut juste passer de git <- git annex -> zenodo.
+
+      + parler de datalad et comme quoi il y a aussi un problem là
+          car a seule solution d'archivage de ce type proposée par
+          datalad est d'upload des archive zip sur figshare. donc on a
+          implémenté le remote zenodo pour faire ça.
+	  
