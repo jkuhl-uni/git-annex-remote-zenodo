@@ -61,16 +61,15 @@
       tous les pas de l'expérience. C'est pour cette raison que l'on se sert
       de Git qui est le logiciel le plus utilisé pour la gestion de
       versions.
-      changer l'ordre.
-    - Puisque c'est difficile de gérer les fichiers de grandes tailles
-      sur Git on va se servir de git-annex qui fait ça sans
-      enregistrer le contenu des fichiers sur Git. En effet, blablabla.
     - Mais git-annex n'est pas le seul outil existant qui permet la
       gestion des fichiers des gros fichiers. En effet, Git a une
       extension qui permet de faire juste ça: Git
       lfs. (https://www.atlassian.com/git/tutorials/git-lfs). Mais il
       y a des problèmes avec cet outil qui gênent son utilisation:
       expliquer les deux problèmes..
+    - Puisque c'est difficile de gérer les fichiers de grandes tailles
+      sur Git on va se servir de git-annex qui fait ça sans
+      enregistrer le contenu des fichiers sur Git. En effet, blablabla.
     - Le choix entre les deux outils est donc fait: git-annex!
 **** extra notes.
 ***** Importance of Version Controlling Data.
@@ -226,7 +225,6 @@ https://github.com/zenodo/zenodo/issues/1404 !!
 https://gitlab.com/gitlab-org/gitlab/-/issues/18763
 ** Contributions (6.5 / 8 pages).
 *** modele de donnees (1 / 1.5 page).
-
 - Même si Zenodo paraît comme une la plateforme parfaite à utiliser comme un
   special remote de git-annex, il y a toujours un problème
   architecturel qui nous a gêné quand on a commencé la réfléxion de
@@ -266,8 +264,6 @@ Trois problèmes:
 1. Contraintes sur les tailles et nombres de fichiers:
 2. mapping annex/zenodo: remote vs. dépot. 1-to-1 ou autre ?
 3. architecture: flat, pas de répertoires, convention de nommage ?
-
-
 
 
 *** Implem de remote zenodo (3.5 / 4.5 pages)
@@ -387,6 +383,136 @@ simples (ex get) dans un workflow snakemake.
 
 ** Bibliographie.
 liens à mettre après.
+
+
+* draft.
+** Etat de l’art
+*** Historique, gros fichiers
+Dans la science moderne, particulièrement la science computationnelle
+et la data science, on gère un énorme volume des fichiers et de
+données qui évoluent fréquemment au cours du temps. Il faut donc
+garder une trace de chaque version de données utilisées et du code
+exécuté à un instant pour pouvoir garder une empreinte continue du
+développement de la recherche et donc pour comprendre et suivre tous
+les pas de l'expérience. C’est là où se manifeste l’importance de
+‘Data Version Control’ dans un domaine de recherche où on manipule un
+tas de données; on perd la reproductibilité du résultat quand on ne
+manage pas du contrôle de données. C’est avec cette philosophie en
+tête que l’on cherche à utiliser un outil pour s’occuper de cette
+tâche.  Le logiciel que l’on a décidé d’utiliser est Git puisque c’est
+l’outil le plus utilisé pour la gestion des versions. Mais il y a
+toujours un problème avec cet outil malgré son excellente performance:
+il ne permet pas de gérer les fichiers binaires de grandes
+tailles. Cela est dû au fait qu’un dépôt Git stock toutes les versions
+de chacun des fichiers ajoutés dedans. Ainsi, au fur et à mesure qu’un
+projet avance, l’utilisateur se rend compte de l’inflation de la
+taille de ce projet  et donc les opérations importante que l’on peut
+effectuer comme les fetch/pull ne seront plus performant. Il faut
+aussi ne jamais dépasser 10 GB pour chaque dépôt car c’est la taille
+maximale possible. Heureusement, Git a plusieurs extensions dont on
+peut se servir quand on a des fichiers de grandes tailles. Les deux
+outils les plus recommandés sont: git-annex et Git LFS.
+Git LFS est ….
+git-annex ...
+*** Archivage
+Maintenant que l'on sait comment gérer les fichiers il faut passer à
+l'autre étape importante dans ce procès qui est l'étape de
+l'archivage. Dans le cadre de la recherche, c’est impératif de bien
+archiver pas seulement ses trouvailles, mais aussi tous les outils
+utilisés pour y arriver (Il faut mettre en disposition le code source,
+les données utilisés, les notes détaillant les pistes prises, …). On
+ne peut pas faire un puzzle sans avoir toutes ls pièces
+nécessaires. Ainsi, quand un rechercheur archive bien ses travaux, il
+garantie leur pérennité et assure leur disponibilité pour une
+communauté. Non seulement cela, mais il peut aussi récupérer un
+identificateur pérenne pour référencer ses travaux. Il existe
+plusieurs outils à utiliser pour bien archiver les fruits de son
+labeur, en particulier: Zenodo, Nakala, et figshare. Les trois sont
+utilisés dans le domaine de la recherche et permettent de stocker,
+partager, et préserver les travaux scientifiques. Ils fournissent
+aussi un identificateur unique pour les bien citer et référencier.  Et
+puisque les trois outils offrent des services similaires, on a décidé
+de se servir de Zenodo qui est un outil multidisciplinaire (on peut
+déposer des papiers de recherche, des datasets, des logiciels, des
+rapports, ...) développé par OpenAIRE ( ) et exploité par CERN ( ).
+C’est l’un des entrepôts les plus utilisés dans tous les domaines de
+recherche qui ne coûte rien et qui permet d’avoir des dépôts de 50 GB
+(https://public.tableau.com/app/profile/bibdesponts/viz/tableauDATAv2_0/Tableaudebord1).
+Maintenant que l’on connait les deux parties imporantes pour bien
+gérer les gros fichiers et les archiver, il faut forger une liaison
+directe entre elles. Un souci que l’on rencontre c’est que l’archivage
+est une opération manuelle qui se fait sur les plateformes d’archivage
+sans passer par un mécanisme d’automatisation. C’est donc parfois
+compliqué de bien gérer les versions de ses fichiers en local avant de
+les déplacer vers un entrepôt d’archivage. Une solution possible est
+d’utiliser des raccourcis entre Zenodo et un serveur de Git. En effet,
+il y a un shortcut entre Zenodo et github où les deux comptes de
+l'utilisateur sont connectés pour lui permettre de mettre ses projets
+github directement sur Zenodo et de les archiver facilement. Même si
+ce méchanisme est facile à utiliser et garantie une automatisation du
+processus, il y a toujours le problème de la taille des dépôts qui
+sont hébergés sur Github. Un autre problème c’est le fait que ce
+raccourci est personnalisé pour Github, et donc on ne peut pas faire
+cela avec des autres plateformes comme gitlab sans passer par des
+bibliothèques ( link). Et même quand utilise une bibliothèque pour
+faire ce lien Zenodo-Gitlab, il y a toujours un problème puisque cette
+méthode permet juste de publier des fichiers sur Zenodo en utilisant
+l'API et ne permet pas de faire plus que ça (on ne peut pas par
+exemple récupérer des fichiers dans l’autre sens).
+La proposition que j’ai est donc de commencer par git (sans passer par
+ses serveurs) et de construire un chemin vers Zenodo. C’est ce que
+l’on va faire git-annex en s’appuyant sur le mécanisme des remotes. Un
+special remote de git-annex c’est un backend que l’on peut utiliser
+pour transferer les données. Les commandes git-annex permettent de
+contrôler le déplacement de ces données et de savoir où elles sont à
+chaque moment. Il y a déjà une dizaine de remotes qui sont développés
+par git-annex et sont prêts pour être configurés et utilisés (ex: adb,
+Amazon S3, git lfs, …) , mais Zenodo ne figure pas dans cette
+liste. On va donc implémenter un special remote git-annex pour Zenodo
+qui va répondre à toutes nos attentes.
+//
+Datalad, , a suit la même logique lors du développement d’un backend
+pour figshare. Puisque figshare a la même architecture plate que
+Zenodo (on n’a pas une notion de répertoire), les développeur ont
+essayé de résoudre ce problème et ont décidé au final de mettre tous
+les fichiers dans une archive avant de l’envoyer à figshare. Cette
+solution n’est pas pratique parceque ...  
+
+** Contributions
+*** Modèle de données
+Avant de commencer l’implémentation du remote, il y avait quelques
+choix à faire pour savoir comment bien répondre à des problèmes qui
+couvrent le côté git-annex mais aussi l’architecture et le modèle d’un
+dépôt Zenodo. 
+La première question que l’on s’est posé c’était par rapport aux
+contraintes sur les tailles et le nombre de fichiers. Puisque l’on a
+déjà une information sur la taille maximale de tout le dépôt (50 GB
+mais un utilisateur peut demander d’en avoir plus dans des cas
+particuliers), il fallait aussi savoir si Zenodo impose des limites
+sur le nombre des fichiers dans un dépôt. On a contacté Zenodo pour
+poser cette question, et en attendant la réponse, on a aussi fait des
+tests où on a déposé des milliers de fichiers de différentes
+tailles. La réponse était positive et c'est donc possible de stocker
+un nombre indéfini de fichiers mais la taille du dépôt ne doit pas
+atteindre 50GB. C'est la seule limite imposée par Zenodo.
+Le deuxième problème s’est avéré lors de la conception du remote; Il
+fallait faire un choix de mappage remote git-annex / dépôt Zenodo. Les
+deux entités sont différentes et alors le fonctionnement final de
+notre mécanisme de gestion et d’archivage de données dépend de comment
+on décide de relier les deux concepts. Un dépôt sur Zenodo c’est un
+récipient où on peut mettre des fichiers de différents types et que
+l’on peut publier à la fin pour archiver ces fichiers. De l’autre
+côté, un remote git-annex est un dépôt distant qu’il faut initialiser
+et configurer afin de l’utiliser pour gérer les données. On peut donc
+initialiser plusieurs remote dans un répertoire de fichiers et on peut
+choisir quels fichiers à stocker sur quel remote, et lesquels à
+laisser en local. Donc pour faire le mapping git-annex / Zenodo, on
+avait deux possibilités: soit avoir une implémentation bijective
+1-to-1 où on associe chaque dépôt Zenodo à un remote, ou une relation
+surjective où l’utilisateur choisit le nombre de dépôt Zenodo à lier à
+un seul remote.
+
+
 
 
 * notes.                                                           :noexport:
