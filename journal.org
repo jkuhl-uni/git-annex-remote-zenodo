@@ -10176,6 +10176,7 @@ with open("restore_archive", 'r+') as f:
 
 import requests
 import os
+import subprocess
 
 deposit_id = '882202'
 headers = {"Content-Type": "application/json"}
@@ -10184,13 +10185,13 @@ params = {'access_token': key}
 
 ########### creating the archive and uploading it
 # first, going to the test directory
-u = os.path.expanduser("~/Desktop/test_remote")
+u = os.path.expanduser("~/test_remote")
 os.chdir(u)
 
 # creating the archive: in this example i decided not to add
 # the prefix but we can also add it loke we did in the last
 # example if want to 
-os.system("git archive --output=./../archive.tar --format=tar HEAD")
+os.system("git archive --output=./../Desktop/archive.tar --format=tar HEAD")
 
 # creating a new deposit on Zenodo
 url= 'https://sandbox.zenodo.org/api/deposit/depositions'
@@ -10202,26 +10203,26 @@ archivedeposit_id = r.json()['id']
 archivedeposit_bucket = r.json()['links']['bucket']
 
 # setting the id of the new deposit in the restoring script
-with open("~/Desktop/Internship/code/restore_archive.py", 'r+') as f:
+with open("/home/nubudi/Desktop/Internship/code/restore_archive.py", 'r+') as f:
     #line = f.read()
     f.seek(0, 0)
-    st = "archivedeposit_id=%s" % deposit_id
+    st = "archivedeposit_id=%s" % archivedeposit_id
     #f.write(st.rstrip('\r\n') + '\n' + line)
-    f.write(st.rstrip('\r\n') + '\n')
+    f.write(st + '\n \n')
     f.close()
    
 # uploading the two files into the deposit
-with open("~/Desktop/Internship/code/restore_archive.py", "rb") as fp:
+with open("/home/nubudi/Desktop/Internship/code/restore_archive.py", "rb") as fp:
     r = requests.put("%s/%s" % (archivedeposit_bucket, 'restore_archive.py'), params=params, json={}, data=fp)
 print(r.status_code)
                      
-with open("./../archive.tar", "rb") as fp:
+with open("./../Desktop/archive.tar", "rb") as fp:
     r = requests.put("%s/%s" % (archivedeposit_bucket, 'archive.tar'), params=params, json={}, data=fp)
 print(r.status_code)                     
 
 ##########################
 # first, going to the test directory
-u = os.path.expanduser("~/Desktop/test-remote-newver-archive")
+u = os.path.expanduser("/home/nubudi/Desktop/test-remote-newver-archive")
 os.chdir(u)
 
 # retrieving the archive from Zenodo.
@@ -10241,7 +10242,49 @@ for i in range(len(r.json())):
                 f.write(chunk)
         f.close()
 
+# now that we have retrieved the program that will allow us to move on, we can just simply execute it
+#os.system("python3 restore_archive.py -i " + deposit_id + " -k " + key + " -u sandbox" )
+
 #+end_src
 
+#+RESULTS:
+: 200
+: 200
+: 200
+: 200
 
+
+Now let's execute the last program to restore all the files.
+
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/Desktop/test-remote-newver-archive
+#+end_src
+
+#+begin_src shell :session *shell* :results output :exports both
+python3 restore_archive.py -i 882202 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -u sandbox
+#+end_src
+
+As we can see, the files have been successfully restored and the
+problems with the broken sym links have been solved.
+#+RESULTS:
+: 200
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   155  100   155    0     0    363      0 --:--:-- --:--:-- --:--:--   362100   155  100   155    0     0    362      0 --:--:-- --:--:-- --:--:--   362
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   384  100   384    0     0   2704      0 --:--:-- --:--:-- --:--:--  2704
+
+
+We can also see if the files are retored by trying to open them and
+reading into them. If the symbolic links are broken, this wouldnt be
+possible, but since we have recovered the files, we can use them like
+we would normally do.
+
+#+begin_src shell :session *shell* :results output :exports both
+file test2.txt
+#+end_src
+
+#+RESULTS:
+: test2.txt: ASCII text, with no line terminators
 

@@ -1,30 +1,6 @@
+archivedeposit_id=885993
 
-
-def download_archive(deposit_id, key, sandbox_url=None):
-    import requests, os, shlex, subprocess
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % deposit_id
-
-    params = {'access_token': key}
-
-    r = requests.get(url, params=params)
-
-    for i in range(len(r.json())):
-        url = r.json()[i]['links']['download']
-        filename=r.json()[i]['filename']
-        q = requests.get(url, params=params, stream=True)
-        print(q.status_code)
-        # downloading the files
-        with open(filename, "wb") as f:
-            for chunk in q.iter_content(chunk_size=120):
-                f.write(chunk)
-        f.close()
-
-    return
-
-def restore(deposit_id, key, sandbox_url=None):
+def restore_files(deposit_id, key, sandbox_url=None):
     import requests, os, shlex, subprocess
     # setting the url 
     if not sandbox_url:
@@ -37,35 +13,61 @@ def restore(deposit_id, key, sandbox_url=None):
     # init the dico 
     dico = {}
 
-	# untaring the archive
+    # untaring the archive
     os.system("tar -xf archive.tar")
 
-	# getting the keys of the files (the links are broken so we need to know the keys of the files they used to point to)
+    # getting the keys of the files (the links are broken so we need to know the keys of the files they used to point to)
 
-	# getting the output from trom the command 
+    # getting the output from trom the command 
     output = subprocess.getoutput("ls -ltra | grep '\->'")
-	# parsing the output and separating the lines in a list where each element is a file
+    # parsing the output and separating the lines in a list where each element is a file
     s = shlex.split(output, comments=True, posix=False)
-	
+    
 
-	# fetching the keys of these files 
+    # fetching the keys of these files 
     for i in range(len(s)):
-	    if s[i] == '->':
-		    file_name = s[i-1]
-		    key_file = s[i+1].split('/')[-1]
-		    dico[key_file] = file_name
-
-	# sending a request to the API to get the file 
+        if s[i] == '->':
+            file_name = s[i-1]
+            key_file = s[i+1].split('/')[-1]
+            dico[key_file] = file_name
+            # we delete the files locally because they nothing but broken symbolic links at the moment
+            os.system("rm "+ file_name)
+    
+    # sending a request to the API to get the file 
     r = requests.get(url, params=params)
     
     for i in range(len(r.json())):
-	    url = r.json()[i]['links']['download']
-	    file_key = r.json()[i]['filename']
-	    file_name = dico[file_key]
-	    os.system("curl " + url + " --output " + file_name)
+        url = r.json()[i]['links']['download'] + '?access_token=' + key
+        file_key = r.json()[i]['filename']
+        file_name = dico[file_key]
+        os.system("curl " + url + " --output " + "./" + file_name)
 
+def download_archive(key, sandbox_url=None):
+    import requests
 
+    if not sandbox_url:
+        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
+    else:
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
 
+    params = {'access_token': key}
+
+    # sending the request to the API to get the list of files stored in the deposit
+    r = requests.get(url, params=params)
+    
+    # downloading the archive
+    for i in range(len(r.json())):
+        if r.json()[i]['filename'] == 'archive.tar':
+            url = r.json()[i]['links']['download']
+            filename=r.json()[i]['filename']
+            q = requests.get(url, params=params, stream=True)
+            print(q.status_code)
+            # downloading the files
+            with open(filename, "wb") as f:
+                for chunk in q.iter_content(chunk_size=120):
+                    f.write(chunk)
+            f.close()
+    return        
 
 def main(argv):
     import sys, getopt
@@ -90,11 +92,15 @@ def main(argv):
             url= arg
 
     # downloading the archive and the file from the new 
-    download_archive(deposit_id, key, url)
-    restore(deposit_id, key, url)
+    download_archive(key, url)
+    
+    restore_files(deposit_id, key, url)
 
 if __name__ == "__main__":
     import sys
     main(sys.argv[1:])
-	    
+        
+
+
+
 
