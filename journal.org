@@ -9256,14 +9256,12 @@ python3 git-annex-disableremote.py -i 876772 -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQ
 
 
 
-
 *** possible solution.
 When testing the command git annex addurl on the terminal after it
 didn't work on the walkthrough and having taken the same command and
 copied it into the terminal, we notice that it works and that the
 possibe problem is the size of the file (added the option --relaxed
 for now to see if it's gonna work).
-
 
 *** modification in disableremotelocally.
 This time, the command that was used to disable the remote has been
@@ -9723,4 +9721,334 @@ Local: | F1  ...  Fn | <-> Remote Zenodo: |K1  ...  Km|
   transforming the files into web remotes.)
   -> or do we keep them just like that without annexing them, letting
   the user do what they want with them?
-* Monday 19/07.
+* Monday 19/07 - Wednesday 21/07.
+Working on the report. Started writing the first draft and taking
+notes.
+* Thursday 22/07.
+** first test with git-archive.
+We want to upload an archive of the state of the head to the deposit
+when we finalize it. This is to be done in the program disableremote
+just before publishing it. For this, we will be using the command 'git
+archive' which creates an archive file from specified Git Refs like,
+commits, branches, or trees. It also accepts additional arguments
+that will alter the archive output.
+
+- Basic example:
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/Desktop/test-remote-newver
+git archive --format=tar HEAD
+#+end_src
+
+This command creates an archive from the current HEAD ref of the
+repository and streams the archive output to the ephemoral stdout
+stream
+#+RESULTS:
+#+begin_example
+
+pax_global_header                                                                                   0000666 0000000 0000000 00000000064 14076223101 0014506 g                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        52 comment=dbce76614dbbec1d5ba7a6a2c40b6bea98fbb2d1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            742ff947337d1cc0bc030e98d59b2851369ebe2a.paxheader                                                  0000666 0000000 0000000 00000000170 14076223101 0020434 x                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        120 path=0f344ae4-f8d1-4713-bb42-8dfd6df7437f?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+                                                                                                                                                                                                                                                                                                                                                                                                        742ff947337d1cc0bc030e98d59b2851369ebe2a.data                                                       0000664 0000000 0000000 00000000776 14076223101 0017306 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        {"checksum": "fc5b92e373b269a0c4411ce11ea6345d", "filename": "SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf", "filesize": 46788, "id": "0f344ae4-f8d1-4713-bb42-8dfd6df7437f", "links": {"download": "https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf", "self": "https://sandbox.zenodo.org/api/deposit/depositions/869911/files/0f344ae4-f8d1-4713-bb42-8dfd6df7437f"}}  1d5/                                                                                                0000775 0000000 0000000 00000000000 14076223101 0011443 5                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        1d5/02f/                                                                                            0000775 0000000 0000000 00000000000 14076223101 0012032 5                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        1d5/02f/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json.log   0000664 0000000 0000000 00000000075 14076223101 0026513 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        1624364997.906258435s 1 3d398bfb-f0a3-4635-92f5-02f31c0c054e
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ccbb45b097dc15124800cf10558616bc3b2fd38a.paxheader                                                  0000666 0000000 0000000 00000000320 14076223101 0020455 x                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        208 linkpath=.git/annex/objects/FJ/kj/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+                                                                                                                                                                                                                                                                                                                Essay.pdf                                                                                           0000777 0000000 0000000 00000000000 14076223101 0022657 2see ccbb45b097dc15124800cf10558616bc3b2fd38a.paxheader                                              ustar 00root                            root                            0000000 0000000                                                                                                                                                                        ec4/                                                                                                0000775 0000000 0000000 00000000000 14076223101 0011525 5                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        ec4/7a6/                                                                                            0000775 0000000 0000000 00000000000 14076223101 0012122 5                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        ec4/7a6/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.log        0000664 0000000 0000000 00000000172 14076223101 0025425 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        1624373191.486581327s 1 00000000-0000-0000-0000-000000000001
+1624376010.646793123s 1 3d398bfb-f0a3-4635-92f5-02f31c0c054e
+                                                                                                                                                                                                                                                                                                                                                                                                      ec4/7a6/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.log.web    0000664 0000000 0000000 00000000670 14076223101 0026204 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        1624373191.461627182s 1 https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+1624376010.644363173s 1 https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+                                                                        f.py                                                                                                0000664 0000000 0000000 00000001544 14076223101 0011655 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        
+import subprocess
+import shlex
+checking into the git-annex branch
+subprocess.getoutput("git checkout git-annex")
+getting the output from trom the command
+output = subprocess.getoutput("cat remote.log")
+we can have multiple remotes in one log and they are separated by lines.
+lines = output.splitlines()
+deposit_name = ''	
+
+for line in lines:
+parsing the output and separating the lines in a list where each element is a file
+	s = shlex.split(line, comments=True, posix=False)
+now, let's go through the list
+	for elm in s:
+looking through the elemnts for the index of the id
+		if elm.startswith("deposit_id"):
+			id = elm.split("=")[-1]
+		
+		if (elm.startswith("name")) and (id =='869900'):
+    			deposit_name = elm.split("=")[-1]
+print(deposit_name)
+checking into the master branch
+subprocess.getoutput("git checkout master")
+    
+                                                                                                                                                            f7c/                                                                                                0000775 0000000 0000000 00000000000 14076223101 0011531 5                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        f7c/f3a/                                                                                            0000775 0000000 0000000 00000000000 14076223101 0012202 5                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        f7c/f3a/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf.log    0000664 0000000 0000000 00000000362 14076223101 0026256 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        1624376447.767849298s 1 00000000-0000-0000-0000-000000000001
+1624375573.430179362s 0 3d398bfb-f0a3-4635-92f5-02f31c0c054e
+1624365013.45555395s 1 ae1c6500-551f-48dd-90ae-1e92a4f238fc
+1624367730.53553308s 1 cd38fd0c-ba02-4046-932f-b4b2e110abd9
+                                                                                                                                                                                                                                                                              f7c/f3a/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf.log.web0000664 0000000 0000000 00000000400 14076223101 0027023 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        1624376447.76573766s 1 https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+                                                                                                                                                                                                                                                                0261be8a36c94fe60a0b955ae142cff1b461b176.paxheader                                                  0000666 0000000 0000000 00000000322 14076223101 0020466 x                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        210 linkpath=.git/annex/objects/0G/qZ/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json
+deposit_bucket=https://sandbox.zenodo.org/api/files/66b7b6cc-18d2-4476-b4c5-d8224534212d deposit_id=869900 encryption=none externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG name=test-zenodo newversion=848907 type=external url=https://sandbox.zenodo.org/api/deposit/depositions timestamp=1624364802.896466238s
+deposit_bucket=https://sandbox.zenodo.org/api/files/59c5f480-4755-4ebf-9a40-6741794179e4 deposit_id=869911 encryption=none externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG name=test-zenodo2 newversion=869900 type=external url=https://sandbox.zenodo.org/api/deposit/depositions timestamp=1624367187.401165357s
+                                                                                                                                                                                                             1df39e1dea55f6196e2e2ffea7d32e29818855b5.paxheader                                                  0000666 0000000 0000000 00000000662 14076223101 0020621 x                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        234 path=sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+200 linkpath=.git/annex/objects/Fj/94/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc
+                                                                              1df39e1dea55f6196e2e2ffea7d32e29818855b5.data                                                       0000777 0000000 0000000 00000000000 14076223101 0027634 2see 1df39e1dea55f6196e2e2ffea7d32e29818855b5.paxheader                                              ustar 00root                            root                            0000000 0000000                                                                                                                                                                        uuid.log                                                                                            0000664 0000000 0000000 00000000423 14076223101 0012522 0                                                                                                    ustar 00root                            root                            0000000 0000000                                                                                                                                                                        3d398bfb-f0a3-4635-92f5-02f31c0c054e nubudi@ubunto:~/Desktop/test-remote-newver timestamp=1624364798.812058439s
+ae1c6500-551f-48dd-90ae-1e92a4f238fc test-zenodo timestamp=1624364802.895294319s
+cd38fd0c-ba02-4046-932f-b4b2e110abd9 test-zenodo2 timestamp=1624367187.351786364s
+#+end_example
+
+
+This time, let's specify the output path for the file.
+#+begin_src shell :session *shell* :results output :exports both
+git archive --output=./../ex_archive.tar --format=tar HEAD
+#+end_src
+
+#+RESULTS:
+
+
+Now, let's try to add a prefix option to the command. We want to be
+able to have the same prefix for all the files so as to be able to
+keep a homogeneous look.
+#+begin_src shell :session *shell* :results output :exports both
+git archive --output=./../ex_archive.tar --format=tar HEAD --prefix=remote_newver/
+#+end_src
+
+#+RESULTS:
+
+As we can see, the archive has been created and put in the chosen
+directory, we can list its content easily.
+#+begin_src shell :session *shell* :results output :exports both
+tar -tvf ~/Desktop/ex_archive.tar
+#+end_src
+
+#+RESULTS:
+#+begin_example
+drwxrwxr-x root/root         0 2021-07-22 10:03 remote_newver/
+-rw-rw-r-- root/root       510 2021-07-22 10:03 remote_newver/0f344ae4-f8d1-4713-bb42-8dfd6df7437f?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+drwxrwxr-x root/root         0 2021-07-22 10:03 remote_newver/1d5/
+drwxrwxr-x root/root         0 2021-07-22 10:03 remote_newver/1d5/02f/
+-rw-rw-r-- root/root        61 2021-07-22 10:03 remote_newver/1d5/02f/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json.log
+.git/annex/objects/FJ/kj/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+drwxrwxr-x root/root         0 2021-07-22 10:03 remote_newver/ec4/
+drwxrwxr-x root/root         0 2021-07-22 10:03 remote_newver/ec4/7a6/
+-rw-rw-r-- root/root       122 2021-07-22 10:03 remote_newver/ec4/7a6/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.log
+-rw-rw-r-- root/root       440 2021-07-22 10:03 remote_newver/ec4/7a6/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.log.web
+-rw-rw-r-- root/root       868 2021-07-22 10:03 remote_newver/f.py
+drwxrwxr-x root/root         0 2021-07-22 10:03 remote_newver/f7c/
+drwxrwxr-x root/root         0 2021-07-22 10:03 remote_newver/f7c/f3a/
+-rw-rw-r-- root/root       242 2021-07-22 10:03 remote_newver/f7c/f3a/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf.log
+-rw-rw-r-- root/root       256 2021-07-22 10:03 remote_newver/f7c/f3a/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf.log.web
+.git/annex/objects/0G/qZ/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json
+-rw-rw-r-- root/root       819 2021-07-22 10:03 remote_newver/remote.log
+.git/annex/objects/Fj/94/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc/SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc
+-rw-rw-r-- root/root       275 2021-07-22 10:03 remote_newver/uuid.log
+#+end_example
+
+** brainstorming on how to add the archive.
+*** intro.
+Now, let's move to the next part of implementing the disableremote
+program. this time, we want to be able to fetch an archive from zenodo
+and have it be accessible to fetch and then use to get the files
+without having to go through git-annex. To do this, we will be using
+'git archive' to turn the git repository into a tarball first before
+then uploading it into zenodo without annexing it. Since this
+operation will cause the sym links to break, we will also have to
+upload a script to detail how to fetch the files from the remote. This
+should fetch the archive and extract it before fetching the files one
+by one from the remote.
+
+The steps of this process:
+- git archive --output=X --format=tar HEAD --prefix=remotename
+- write the instruction file
+- upload the two to Zenodo
+
+When the user wants to get the content of the archive, they can just
+fetch it and follow the instructions given in it to restore the
+files.
+
+The instructions of the script:
+- untar the archive
+- for each of the sym links:
+  we get where they are pointing to (fi>.git/annex/objects/ki/ki)
+  we fetch the id of each of the files
+  curl /deposit/depositions/id/files/ki --to fi
+
+*** first step.
+Now, let's start implemnting this solution by starting with the first
+step of creating the archive and then moving into the rest. We will be
+implementing a function to test in here before adding it to the
+program.
+
+This test will be done in a directory where we have already
+initialized git and worked with it. So, we first need to change
+directories to there, and then we will go on with the rest of the
+steps. 
+#+begin_src python :results output :exports both
+import requests
+import os
+
+# first, going to the test directory
+u = os.path.expanduser("~/Desktop/test-remote-newver")
+os.chdir(u)
+
+# creating the archive
+os.system("git archive --output=./archive.tar --format=tar HEAD --prefix=remotename")
+
+# creating the instruction file: this is just a test and not the actual script for later
+body = "The instructions of the script: - untar the archive - for each of the sym links: we get where they are pointing to (fi>.git/annex/objects/ki/ki) we fetch the id of each of the files curl /deposit/depositions/id/files/ki --to fi"
+with open("restore_archive.py", "w") as f:
+    f.write("deposit_id=id \n")
+    f.write(body)
+
+# creating a new deposit on Zenodo
+url= 'https://sandbox.zenodo.org/api/deposit/depositions'
+headers = {"Content-Type": "application/json"}
+key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+params = {'access_token': key}
+r = requests.post(url, params=params, json={}, headers=headers)
+
+# setting the id & the bucket url
+newdeposit_id = r.json()['id']
+newdeposit_bucket = r.json()['links']['bucket']
+
+# uploading the two files into the deposit
+with open("./restore_archive.py", "rb") as fp:
+    r = requests.put("%s/%s" % (newdeposit_bucket, 'restore_archive.py'), params=params, json={}, data=fp)
+print(r.status_code)
+                     
+with open("./archive.tar", "rb") as fp:
+    r = requests.put("%s/%s" % (newdeposit_bucket, 'archive.tar'), params=params, json={}, data=fp)
+print(r.status_code)                     
+
+#+end_src
+
+As we can see, this has been successfully done, and we can also check
+the deposits on Zenodo to see if the files have been well uploaded.
+#+RESULTS:
+: 200
+: 200
+
+Here is a request to Zenodo to see the content of our deposit.
+
+#+begin_src python :results output :exports both
+import requests
+import json
+
+url= 'https://sandbox.zenodo.org/api/deposit/depositions/885751/files'
+headers = {"Content-Type": "application/json"}
+key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+params = {'access_token': key}
+r = requests.get(url, params=params, json={}, headers=headers)
+print(json.dumps(r.json(), indent=4))
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    {
+        "checksum": "8e19e04311d4e32f2bc3dba5ab5038dc",
+        "filename": "archive.tar",
+        "filesize": 30720,
+        "id": "d6c05ba6-62ec-49d0-94aa-26668e1ca857",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/8344e2e6-b1dc-4d2e-9ca7-b127404ecc40/archive.tar",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/885751/files/d6c05ba6-62ec-49d0-94aa-26668e1ca857"
+        }
+    },
+    {
+        "checksum": "f006846baf12c472400c5ff3b04b3010",
+        "filename": "restore_archive.py",
+        "filesize": 242,
+        "id": "d4b4302a-16f7-4236-9165-43f07e55743d",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/8344e2e6-b1dc-4d2e-9ca7-b127404ecc40/restore_archive.py",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/885751/files/d4b4302a-16f7-4236-9165-43f07e55743d"
+        }
+    }
+]
+#+end_example
+
+*** second step.
+Now, moving on to the second step of the process which is the step of
+restoring the archive and getting the files back using the restore
+file. Since the file hasnt been written yet, we will be writing it as
+we go along with this process.  
+
+Let's retrieve the content of the upload into a new directory where we
+will be working on the rest of the tests.
+
+#+begin_src python :results output :exports both
+import requests
+import os
+import json
+
+# first, going to the test directory
+u = os.path.expanduser("~/Desktop/test-remote-newver-archive")
+os.chdir(u)
+
+# retrieving the archive from Zenodo.
+url= 'https://sandbox.zenodo.org/api/deposit/depositions/885751/files'
+headers = {"Content-Type": "application/json"}
+key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+params = {'access_token': key}
+r = requests.get(url, params=params)
+
+# getting the files from the response
+for i in range(len(r.json())):
+    url = r.json()[i]['links']['download']
+    filename=r.json()[i]['filename']
+    q = requests.get(url, params=params, stream=True)
+    print(q.status_code)
+    # downloading the files
+    with open(filename, "wb") as f:
+        for chunk in q.iter_content(chunk_size=120):
+            f.write(chunk)
+    f.close()
+
+#+end_src
+
+As we can see, this function managed to get the files from the remote
+and download them in the wanted directory. 
+#+RESULTS:
+: 200
+: 200
+
+*** third step.
+Now, we can move on to the script and implement a function which
+extracts the tarball and fetches the files using it.
+
+We can try to do this at first using a python script and then we can
+test this on a directory where we have already some annexed files that
+we uploaded to the remote.
+
+We will need the id of the deposit where we had uploaded the files at
+first and which we published in the disableremote program after
+uploading the archive and this script to the other deposit. The reason
+we need the id of the deposit is because the only way we can fetch a
+file from the remote is by sending a request to the API on the url of
+the deposit that we want to get the files from. We also need to know
+whether this was done on the sandbox or not and this also easy to know
+because the program that we use to publish does take as an option
+sandbox to allow it to know what url to use to send the request to the
+API. We will get both of these needed information from the
+disableremote program and pass them to this script so as to remember
+them.
+
+If the user wants to do the restoring on their own without using this
+script they could just go to Zenodo and take a look at the
+uploads. They just have to specify (b looking at the list of the
+uploads) which is the id of the deposit they want to restore and if
+this is done on the sandbox or not.
+
+In our case, the program is supposed to take care of everything and so
+we will just pass the information when we write it.
+
+Next, we just add the other instructions that are needed to restore
+the archive in a simple python function.
+
+Here is a first try:
+#+begin_src python :results output :exports both
+deposit_id=
+sandbox=
+
+import requests
+
+#+end_src

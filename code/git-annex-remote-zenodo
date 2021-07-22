@@ -248,13 +248,13 @@ class ZenodoRemote(ExportRemote):
                 file_id =  r.json()[i]['id']
                 # getting the download link of the file
                 url = r.json()[i]['links']['download']
-                r = self.query('get', url, "transfer_retrieve", stream = True)  
+                q = self.query('get', url, "transfer_retrieve", stream = True)  
                 #r.raise_for_status()
                 # storing the file in the path given in filename
                 # this is done by reading the content of the file and writing it in the new file
                 # if the files are very large, we can make the chunk size bigger 
                 with open(filename, "wb") as f:
-                    for chunk in r.iter_content(chunk_size=120): 
+                    for chunk in q.iter_content(chunk_size=120): 
                         f.write(chunk)
                 # once we finish writing into the file we can close it
                 f.close()
