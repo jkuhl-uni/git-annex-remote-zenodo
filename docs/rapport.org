@@ -265,7 +265,6 @@ Trois problèmes:
 2. mapping annex/zenodo: remote vs. dépot. 1-to-1 ou autre ?
 3. architecture: flat, pas de répertoires, convention de nommage ?
 
-
 *** Implem de remote zenodo (3.5 / 4.5 pages)
 L'implémentation du remote Zenodo s'est faite en plusieurs étapes:
 **** api rest (0.5 page).
@@ -483,7 +482,7 @@ solution n’est pas pratique parceque ...
 Avant de commencer l’implémentation du remote, il y avait quelques
 choix à faire pour savoir comment bien répondre à des problèmes qui
 couvrent le côté git-annex mais aussi l’architecture et le modèle d’un
-dépôt Zenodo. 
+dépôt Zenodo.
 La première question que l’on s’est posé c’était par rapport aux
 contraintes sur les tailles et le nombre de fichiers. Puisque l’on a
 déjà une information sur la taille maximale de tout le dépôt (50 GB
@@ -501,17 +500,49 @@ deux entités sont différentes et alors le fonctionnement final de
 notre mécanisme de gestion et d’archivage de données dépend de comment
 on décide de relier les deux concepts. Un dépôt sur Zenodo c’est un
 récipient où on peut mettre des fichiers de différents types et que
-l’on peut publier à la fin pour archiver ces fichiers. De l’autre
+l’on peut publier à la fin pour archiver les fichiers. De l’autre
 côté, un remote git-annex est un dépôt distant qu’il faut initialiser
 et configurer afin de l’utiliser pour gérer les données. On peut donc
-initialiser plusieurs remote dans un répertoire de fichiers et on peut
-choisir quels fichiers à stocker sur quel remote, et lesquels à
-laisser en local. Donc pour faire le mapping git-annex / Zenodo, on
-avait deux possibilités: soit avoir une implémentation bijective
-1-to-1 où on associe chaque dépôt Zenodo à un remote, ou une relation
-surjective où l’utilisateur choisit le nombre de dépôt Zenodo à lier à
-un seul remote.
+initialiser plusieurs remotes dans un répertoire de fichiers et on
+peut choisir les fichiers à stocker dans un remote, et ceux à laisser
+en local. Donc pour faire le mapping git-annex / Zenodo, on avait deux
+possibilités: avoir une implémentation bijective 1-to-1 où on associe
+chaque dépôt Zenodo à un remote git-annex, ou une relation surjective
+où l’utilisateur choisit le nombre de dépôt Zenodo à lier à un seul
+remote. La première option paraît la plus logique puisqu’elle permet
+d’éviter les problèmes de confusion entre les dépôts Zenodo qui
+peuvent d’avérer. L’utilisateur peut également créer un autre dépôt
+Zenodo avec un remote nouveau remote git-annex s’il le souhaite; c'est
+toujours possible d'initialiser plusieurs remotes git-annex dans la
+même directory.
+Le troisième problème est purement architecturel; Zenodo a une
+architecture plate et donc on n’a pas de notion de répertoire dans un
+dépôt. Donc il fallait bien penser à comment structurer le dépôt pour
+pouvoir retrouver facilement les fichiers que l’on met
+dessus. Heureusement, et grâce à git-annex qui relie chaque fichier
+annexé à une clé unique, on a pu trouvé comment bien structurer le
+dépôt Zenodo. Au lieu de laisser les noms des fichiers que l’on a en
+local quand on fait un upload sur Zenodo, on a décidé de remplacer les
+noms des fichiers par les clés. Et puisque l’on a un lien unique entre
+le remote et le dépôt Zenodo, on peut facilement retrouver les
+fichiers que l’on veut et les récupérer en local.
 
+
+
+*** Implémentation du remote Zenodo
+**** API REST
+Afin de se communiquer avec Zenodo pour faire toutes les opérations
+implémentée, il fallait utiliser l’API de Zenodo. La première partie
+du procès donc est de comprendre comment elle fonctionne et de tester
+ses fonctionnalités. On a fait donc des tests pour chacune des
+requêtes HTTP pour tester les opérations possibles Zenodo.
+
+
+**** La bibliothèque python utilisée
+
+**** Les opérations principales
+
+**** Les tests effectués
 
 
 
