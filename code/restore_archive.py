@@ -1,10 +1,31 @@
-import requests
-import os
-import shlex
-import subprocess
-import sys, getopt
+
+
+def download_archive(deposit_id, key, sandbox_url=None):
+    import requests, os, shlex, subprocess
+    if not sandbox_url:
+        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
+    else:
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % deposit_id
+
+    params = {'access_token': key}
+
+    r = requests.get(url, params=params)
+
+    for i in range(len(r.json())):
+        url = r.json()[i]['links']['download']
+        filename=r.json()[i]['filename']
+        q = requests.get(url, params=params, stream=True)
+        print(q.status_code)
+        # downloading the files
+        with open(filename, "wb") as f:
+            for chunk in q.iter_content(chunk_size=120):
+                f.write(chunk)
+        f.close()
+
+    return
 
 def restore(deposit_id, key, sandbox_url=None):
+    import requests, os, shlex, subprocess
     # setting the url 
     if not sandbox_url:
         url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
@@ -47,6 +68,8 @@ def restore(deposit_id, key, sandbox_url=None):
 
 
 def main(argv):
+    import sys, getopt
+
     url = None
     deposit_id =''
     try:
@@ -66,9 +89,12 @@ def main(argv):
         elif opt in ("-u", "--url"):
             url= arg
 
+    # downloading the archive and the file from the new 
+    download_archive(deposit_id, key, url)
     restore(deposit_id, key, url)
 
 if __name__ == "__main__":
+    import sys
     main(sys.argv[1:])
 	    
 

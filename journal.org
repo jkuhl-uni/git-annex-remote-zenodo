@@ -10160,7 +10160,17 @@ version and made sure to link the files from the old version to the
 new one. This was successfully done and so now we can just try do the
 test there.
 
-The following program will contain the last 3 steps merged together.
+Notes:
+- We need to add the id of the new deposit to the restoring program so
+as to be able to restore the content of those files.
+#+begin_example
+with open("restore_archive", 'r+') as f:
+   line = f.read()
+   f.seek(0, 0)
+   st= "archivedeposit_id=%s" % deposit_id
+   f.write(st.rstrip('\r\n') + '\n' + line)
+#+end_example
+
 
 #+begin_src python :results output :exports both
 
@@ -10168,6 +10178,9 @@ import requests
 import os
 
 deposit_id = '882202'
+headers = {"Content-Type": "application/json"}
+key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+params = {'access_token': key}
 
 ########### creating the archive and uploading it
 # first, going to the test directory
@@ -10179,31 +10192,56 @@ os.chdir(u)
 # example if want to 
 os.system("git archive --output=./../archive.tar --format=tar HEAD")
 
-# the file we will use to restore this we already have but we
-# need to set the deposit_id 
-with open("restore_archive.py", "w") as f:
-    f.write("deposit_id=id \n")
-    f.write(body)
-
 # creating a new deposit on Zenodo
 url= 'https://sandbox.zenodo.org/api/deposit/depositions'
-headers = {"Content-Type": "application/json"}
-key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
-params = {'access_token': key}
+
 r = requests.post(url, params=params, json={}, headers=headers)
 
 # setting the id & the bucket url
-newdeposit_id = r.json()['id']
-newdeposit_bucket = r.json()['links']['bucket']
+archivedeposit_id = r.json()['id']
+archivedeposit_bucket = r.json()['links']['bucket']
 
+# setting the id of the new deposit in the restoring script
+with open("~/Desktop/Internship/code/restore_archive.py", 'r+') as f:
+    #line = f.read()
+    f.seek(0, 0)
+    st = "archivedeposit_id=%s" % deposit_id
+    #f.write(st.rstrip('\r\n') + '\n' + line)
+    f.write(st.rstrip('\r\n') + '\n')
+    f.close()
+   
 # uploading the two files into the deposit
-with open("./restore_archive.py", "rb") as fp:
-    r = requests.put("%s/%s" % (newdeposit_bucket, 'restore_archive.py'), params=params, json={}, data=fp)
+with open("~/Desktop/Internship/code/restore_archive.py", "rb") as fp:
+    r = requests.put("%s/%s" % (archivedeposit_bucket, 'restore_archive.py'), params=params, json={}, data=fp)
 print(r.status_code)
                      
-with open("./archive.tar", "rb") as fp:
-    r = requests.put("%s/%s" % (newdeposit_bucket, 'archive.tar'), params=params, json={}, data=fp)
+with open("./../archive.tar", "rb") as fp:
+    r = requests.put("%s/%s" % (archivedeposit_bucket, 'archive.tar'), params=params, json={}, data=fp)
 print(r.status_code)                     
 
+##########################
+# first, going to the test directory
+u = os.path.expanduser("~/Desktop/test-remote-newver-archive")
+os.chdir(u)
+
+# retrieving the archive from Zenodo.
+url= 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
+r = requests.get(url, params=params)
+
+# getting the file restore_archive.py from the response
+for i in range(len(r.json())):
+    if r.json()[i]['filename'] == 'restore_archive.py':
+        url = r.json()[i]['links']['download']
+        filename=r.json()[i]['filename']
+        q = requests.get(url, params=params, stream=True)
+        print(q.status_code)
+        # downloading the files
+        with open(filename, "wb") as f:
+            for chunk in q.iter_content(chunk_size=120):
+                f.write(chunk)
+        f.close()
 
 #+end_src
+
+
+
