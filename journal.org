@@ -10179,7 +10179,8 @@ os.chdir(u)
 # example if want to 
 os.system("git archive --output=./../archive.tar --format=tar HEAD")
 
-# creating the instruction file: this is just a test and not the actual script for later
+# the file we will use to restore this we already have but we
+# need to set the deposit_id 
 with open("restore_archive.py", "w") as f:
     f.write("deposit_id=id \n")
     f.write(body)
