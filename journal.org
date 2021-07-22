@@ -10044,11 +10044,165 @@ we will just pass the information when we write it.
 Next, we just add the other instructions that are needed to restore
 the archive in a simple python function.
 
+- Since we will be using curl to download the files, we need to
+  specify the output (ie where we want our files to be downloaded). In
+  this case, we can simply just output the content of the files in the
+  local depository so as to write their content into the files that
+  are now broken symbolic links.
+
+- A problem: when we want to download a fileusing curl for instance,
+  we need to give the url of the download. This is sometimes hard to
+  do because the link of the download (url: api/files/fileid) is different than the link of
+  self (api/deposit/depositions/depositid/files/fileid). When we use
+  the self link to download the file, we only get the content od the
+  request and not the content of the file. So, we will have to go
+  through the list of files on the remote and retrieve the files that
+  way. Since we have the archive containing the files already, and we
+  also have the id of the deposit, we can just continue with the same
+  logic that we had.
+
+ - Here is a possible algorithm of the whole process:
+   #+begin_example 
+   untar archive
+   for each of the sym links:
+      dico[key_i] = file_i
+   GET request to API (url: id/files)
+   for i in range(len(request)):
+      get download_link[key_i]
+      curl url --to dico[key_i]
+   #+end_example
+   
 Here is a first try:
 #+begin_src python :results output :exports both
-deposit_id=
-sandbox=
+import requests
+import os
+import json
+import shlex
+import subprocess
+
+deposit_id= '885751'
+sandbox= True
+
+
+# first, going to the test directory
+u = os.path.expanduser("~/Desktop/test-remote-newver-archive")
+os.chdir(u)
+
+# untaring the archive
+os.system("tar -xf archive.tar")
+
+# getting the keys of the files (the links are broken so we need to know the keys of the files they used to point to)
+
+# getting the output from trom the command
+output = subprocess.getoutput("ls -ltra | grep '\->'")
+# parsing the output and separating the lines in a list where each element is a file
+s = shlex.split(output, comments=True, posix=False)
+# init the dico
+dico = {}
+
+# fetching the keys of these files
+for i in range(len(s)):
+    if s[i] == '->':
+        file_name = s[i-1]
+        key_file = s[i+1].split('/')[-1]
+        dico[key_file] = file_name
+
+# sending a request to the API to get the file
+key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+params = {'access_token': key}
+url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % deposit_id
+r = requests.get(url, params=params)
+print(json.dumps(r.json(), indent=4))
+
+for i in range(len(r.json())):
+    url = r.json()[i]['links']['download']
+    file_key = r.json()[i]['filename']
+    file_name = dico[file_key]
+    os.system("curl " + url + " --output " + file_name)
+    
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    {
+        "checksum": "8e19e04311d4e32f2bc3dba5ab5038dc",
+        "filename": "archive.tar",
+        "filesize": 30720,
+        "id": "d6c05ba6-62ec-49d0-94aa-26668e1ca857",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/8344e2e6-b1dc-4d2e-9ca7-b127404ecc40/archive.tar",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/885751/files/d6c05ba6-62ec-49d0-94aa-26668e1ca857"
+        }
+    },
+    {
+        "checksum": "f006846baf12c472400c5ff3b04b3010",
+        "filename": "restore_archive.py",
+        "filesize": 242,
+        "id": "d4b4302a-16f7-4236-9165-43f07e55743d",
+        "links": {
+            "download": "https://sandbox.zenodo.org/api/files/8344e2e6-b1dc-4d2e-9ca7-b127404ecc40/restore_archive.py",
+            "self": "https://sandbox.zenodo.org/api/deposit/depositions/885751/files/d4b4302a-16f7-4236-9165-43f07e55743d"
+        }
+    }
+]
+#+end_example
+
+*** complete test.
+Now, let's make a complete program with all the parts that we have
+just implemented. The steps might work separately but we need to test
+them on an actual archive to see if there are no errors in the
+flow. We can use the deposit that we created when we were working on
+manipulating the files in the tutorial (walkthrough.org). In that
+directory, we have initialized a remote and worked with it and then we
+disabled it and published the files. Then, we also created a new
+version and made sure to link the files from the old version to the
+new one. This was successfully done and so now we can just try do the
+test there.
+
+The following program will contain the last 3 steps merged together.
+
+#+begin_src python :results output :exports both
 
 import requests
+import os
+
+deposit_id = '882202'
+
+########### creating the archive and uploading it
+# first, going to the test directory
+u = os.path.expanduser("~/Desktop/test_remote")
+os.chdir(u)
+
+# creating the archive: in this example i decided not to add
+# the prefix but we can also add it loke we did in the last
+# example if want to 
+os.system("git archive --output=./../archive.tar --format=tar HEAD")
+
+# creating the instruction file: this is just a test and not the actual script for later
+with open("restore_archive.py", "w") as f:
+    f.write("deposit_id=id \n")
+    f.write(body)
+
+# creating a new deposit on Zenodo
+url= 'https://sandbox.zenodo.org/api/deposit/depositions'
+headers = {"Content-Type": "application/json"}
+key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+params = {'access_token': key}
+r = requests.post(url, params=params, json={}, headers=headers)
+
+# setting the id & the bucket url
+newdeposit_id = r.json()['id']
+newdeposit_bucket = r.json()['links']['bucket']
+
+# uploading the two files into the deposit
+with open("./restore_archive.py", "rb") as fp:
+    r = requests.put("%s/%s" % (newdeposit_bucket, 'restore_archive.py'), params=params, json={}, data=fp)
+print(r.status_code)
+                     
+with open("./archive.tar", "rb") as fp:
+    r = requests.put("%s/%s" % (newdeposit_bucket, 'archive.tar'), params=params, json={}, data=fp)
+print(r.status_code)                     
+
 
 #+end_src
