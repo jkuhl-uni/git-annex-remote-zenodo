@@ -1,5 +1,36 @@
 archivedeposit_id=885993
 
+
+"""
+def download_archive(key, url):
+    import requests
+    # setting the url to get the list of the files
+    url = url + '/' + archivedeposit_id + '/files'
+    params = {'access_token': key}
+
+    # sending the request to the API to get the list of files stored in the deposit
+    r = requests.get(url, params=params)
+    
+    # downloading the archive and the info file
+    # since the archivename has been set when we wrote the file while archiving
+    # we don't need to study the case where the archive hasnt been found because of
+    # an error with the name. If we decide to ask the user to pass the name of the archive 
+    # as an argument, we need to study that case.
+    for i in range(len(r.json())):
+        if r.json()[i]['filename'] == archivename or r.json()[i]['filename'] == 'git-annex-info.json':
+            url_download = r.json()[i]['links']['download']
+            filename=r.json()[i]['filename']
+            q = requests.get(url_download, params=params, stream=True)
+            # downloading the files
+            with open(filename, "wb") as f:
+                for chunk in q.iter_content(chunk_size=120):
+                    f.write(chunk)
+            f.close()
+    return 
+"""
+
+
+
 def restore_files(deposit_id, key, sandbox_url=None):
     import requests, os, shlex, subprocess
     # setting the url 

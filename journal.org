@@ -10552,6 +10552,7 @@ git annex lookupkey flows.json
   
 **** In restoreremote (restoring).
 - download the archive.
+- download git-annex-info.json.
 - untar the archive.
 - use git-annex-info.json to get info about the files.
 - then depending on the case:
@@ -10563,7 +10564,7 @@ git annex lookupkey flows.json
     annex registerurl (or addurl) and add the file into a web remote.
 
 *** first implementation of each of the functions.
-
+**** archiving.
 #+begin_src python :results output :exports both
 import tempfile
 import json
@@ -10646,6 +10647,7 @@ archivedeposit_id = r.json()['id']
 archivedeposit_bucket = r.json()['links']['bucket']
 
 # setting the id of the new deposit in the restoring script
+# we also need to set the name of the archive
 with open("/home/nubudi/Desktop/Internship/code/restore_archive.py", 'r+') as f:
     f.seek(0, 0)
     st = "archivedeposit_id=%s" % archivedeposit_id
@@ -10690,8 +10692,21 @@ for i in range(len(r.json())):
                 f.write(chunk)
         f.close()
 
-
-
-
-
 #+end_src
+
+**** restoring.
+Now, we need to make changes in the restorearchive program to add the
+new options and all the things that are needed to make them
+functional. We will also need to remove some options because we won't
+be needing them anymore (like the id of the deposit since all the info
+about the files is on the git-annex-info file). Let's start first with
+first part of the program where we download the archive from the
+remote. This time, we also need to download the git-annex-info.json
+file and so we will do this in the same function
+(downloadarchive). There will be a slight change in the command that
+untars the archive ('tar -xzf test.tar.gz'). We also need to go into
+the folder that gets created whenever we use the option prefix of git
+archive (when we are going to publish we can ask the user the name
+they want to give to the archive, ie the name of the project).  
+
+The second part 
