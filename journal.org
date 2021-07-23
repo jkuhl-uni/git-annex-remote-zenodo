@@ -10288,3 +10288,75 @@ file test2.txt
 #+RESULTS:
 : test2.txt: ASCII text, with no line terminators
 
+* Friday 23/07.
+** meeting notes.
+*** for the function that uploads the archive.
+- Use a temporary file when creating an archive (the idea was to
+  create it and then delete once we finish with it but it's better to
+  just have it be there temporarily).
+- Compress the archive when creating it. Now, we only create the
+  archive in tar format (which is not a compressed format) but we only
+  need to specify that we want to compress it when we create it (we
+  can use 'git archive --format=tar.gz' when we create it).
+- Add the prefix when creating the archive. We can name the archive
+  with the name of our project and then also use a prefix with that
+  name when creating it.
+*** for restorearchive.
+- Do not execute repetitive requests to the API. When executing the
+  GET command to get the list of the files just use it once and keep
+  the response in a glabal variable so as to use it again. There is no
+  reason to do that twice. Also, when setting the url for the deposit,
+  do that in the main function just once and instead of passing the
+  sandbox=None as argument if it's there, we can always pass the url
+  as argument but this time with the url of either zenodo or
+  sandbox.zenodo. 
+- When we are looking for the symbolic links to retrieve the keys of
+  the files, we need to also look to see if it's 100% a git-annex
+  symbolic link or it's an other one pointing somewhere else. This
+  could cause problems later on if for instance we have a git sym link
+  and we try to retrieve the key from where it's pointing thinking
+  that it's for git-annex but it's not.
+- We can also recreate the annex when retrieve the files in
+  local. This could be simply done by giving the path to where we want
+  to have the file and so the sym links stay where they are (we don't
+  delete them this time) and they end up pointing to where the files
+  have now been downloaded. To do this, we need to add a new file to
+  the depost that wil allow us to link the symlink to the file where
+  it's pointing. We can create this file (have it in json format so
+  it's easy to just dump the dictionary into it) by using a few
+  git-annex commands (the command 'git-annex whereused could be
+  really helpful in this case but it's not actually there).
+- Here a list of the commands we can use when doing this:
+  + git annex find: this lists all the annexed files locally.
+  + git annex info: for each of the files, this is how we get the
+    keys.
+  + git annex contentlocation: this is how we get where the symbolic
+    links are pointing. We give the key of each of the files as an
+    argument and we can then just store the path along with the name
+    of the file and the key in the json file. This way, we don't have
+    to redo the same work when we try to download the files and have
+    to look for info about them with 'ls' for instance.
+  + git annex unused: this could give us the list of the unused file
+    content. We can use this along with the commands listed above to
+    get a list of files that are all used (used = total - unused).
+- When we do this, we could solve the problem of listing the files
+  (ls) and this could also work on windows where the output of certain
+  commands and how git-annex shows the symlinks could be different.
+- Add options to the program to allow the user to do what they want
+  with the files they want to restore:
+  + We can give them the choice to either download the files by making
+    them replace the symlinks. This is what we have done so far. We
+    delete the sym link of the files before downloading them.
+  + We recreate the annex format by creating the directories where
+    each of the files are pointing and then letting the symbolic links
+    point to that directory.
+  + We can let the user choose to initialize a new git-annex
+    repository and adding each of the files into it. By doing this,
+    the user can now work with the files like they would have done
+    normally with git-annex and they can automatically have all the
+    files added to the annex and uploaded to a web remote as well. To
+    add the files to a web remote, we can use the command 'git-annex
+    addurl' so as to link all the files there and have them all
+    available, or we can also use 'git-annex registerurl' for a more
+    lenient application where the user can then choose what to add and
+    when.   

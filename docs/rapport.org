@@ -528,14 +528,19 @@ le remote et le dépôt Zenodo, on peut facilement retrouver les
 fichiers que l’on veut et les récupérer en local.
 
 
-
 *** Implémentation du remote Zenodo
 **** API REST
+
 Afin de se communiquer avec Zenodo pour faire toutes les opérations
-implémentée, il fallait utiliser l’API de Zenodo. La première partie
-du procès donc est de comprendre comment elle fonctionne et de tester
-ses fonctionnalités. On a fait donc des tests pour chacune des
-requêtes HTTP pour tester les opérations possibles Zenodo.
+implémentée, il fallait utiliser son API. La première partie du procès
+donc est de comprendre comment elle fonctionne et de tester ses
+fonctionnalités. On a fait donc des tests pour chacune des requêtes
+HTTP pour tester les opérations possibles Zenodo. Afin de pouvoir
+manipuler les données il faut avoir déjà créé un dépôt pour les
+héberger: c’est ce que l’on fait avec une requête GET. Après, on
+commence à transférer les données et à les manipuler en utisant les
+requêtes GET/POST/PUT. Avec GET, on arrive à récupérer un dépôt ou un
+fichier,
 
 
 **** La bibliothèque python utilisée
