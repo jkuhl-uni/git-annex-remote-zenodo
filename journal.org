@@ -10362,6 +10362,7 @@ file test2.txt
     when.   
 
 ** Creating the file that has the info about the annex.
+*** testing the commands.
 - Let's start first by doing a few tests to see how the commands
   function and how they could work together. Seeing that we have
   already used the commands 'git annex find' and 'git annex info', we
@@ -10508,7 +10509,7 @@ git annex list
 : X____ flows.json
 : XX___ sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
 
-- Note: instead of using the command 'info' to get the key of a file we
+- Note 1: instead of using the command 'info' to get the key of a file we
   can simply use the command 'lookupkey'. As we can see below, it's an
   easier and way more direct way to get that information when it's the
   only one needed.
@@ -10520,3 +10521,46 @@ git annex lookupkey flows.json
 : SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json
 
 
+- Note 2: fetch the urls of the files (r.json()['links']['download'])
+  when we are doing the archiving part. We need to fill the file
+  git-annex-info.json with as much information as possible (ie: have
+  the name of the files, their keys, the path pointed at by the
+  symlinks, the download links, ...). If we do this, we can facilitate
+  the task of restoring the files because we will have all the needed
+  information in the file and so don't have to send queries to the API
+  and we wouldn't even need the access token and the id of the
+  deposit.
+
+*** simplifying the steps.
+**** In disableremote (archiving).
+- create the archive in tmp file (named as the project and prefixed as
+  that as well).  git archive --format=tar.gz --prefix=project 
+- create a new deposit on zenodo.
+- setting the id and the bucket url of the deposit.
+- writing the id of the new deposit in restorearchive.py
+- writing the git-annex-info.json file:
+  + git annex find (store filename).
+  + git annex lookupkey for each f (store filekey).
+  + git annex contentlocation for each f (store contentpath).
+  + git annex unused (then remove f that are in unused).
+  + API request: get download link for each f (store downloadlink).
+  + write stored info into the file (json file the filekey is the
+    key).
+- upload archive.tar.gz
+- upload restorearchive.py.
+- upload git-annex-info.json.
+  
+**** In restoreremote (restoring).
+- download the archive.
+- untar the archive.
+- use git-annex-info.json to get info about the files.
+- then depending on the case:
+  + either just rm the broken symlinks and download the files.
+  + or use curl giving it the directory that is the path that the
+    symlinks point to.
+  + initialize a git repository, and a git annex repository before
+    adding the files into the annex. For each file added, use git
+    annex registerurl (or addurl) and add the file into a web remote.
+
+
+*** first implementation of each of the functions.
