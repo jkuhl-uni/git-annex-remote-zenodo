@@ -10292,7 +10292,7 @@ file test2.txt
 ** meeting notes.
 *** for the function that uploads the archive.
 - Use a temporary file when creating an archive (the idea was to
-  create it and then delete once we finish with it but it's better to
+  create it and then delete it once we finish with it but it's better to
   just have it be there temporarily).
 - Compress the archive when creating it. Now, we only create the
   archive in tar format (which is not a compressed format) but we only
@@ -10360,3 +10360,163 @@ file test2.txt
     available, or we can also use 'git-annex registerurl' for a more
     lenient application where the user can then choose what to add and
     when.   
+
+** Creating the file that has the info about the annex.
+- Let's start first by doing a few tests to see how the commands
+  function and how they could work together. Seeing that we have
+  already used the commands 'git annex find' and 'git annex info', we
+  don't have to retest them. So we will focus more on 'git annex
+  contentlocation' and 'git annex unused'.
+  So, let's go to a directory where have already initialized and used
+  git annex and test the commands.
+
+Going to the test directory.
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/Desktop/test-remote-newver
+#+end_src
+
+#+RESULTS:
+
+First, let's execute this command which shows which remotes contain
+files.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+As we can see from the results, three files are annexed and only one
+of them is not available locally (Essay.pdf).
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: _X_XX Essay.pdf
+: X____ flows.json
+: XX___ sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+
+We can also see this by executing this command which shows the files
+that are available. We can't see Essay.pdf in the list since
+it's not here locally.
+#+begin_src shell :session *shell* :results output :exports both
+git annex find
+#+end_src
+
+#+RESULTS:
+: flows.json
+: sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+
+This following command shows information about the files but the info
+is not that detailed since we only really learn from this the key and
+the size.
+#+begin_src shell :session *shell* :results output :exports both
+git annex info flows.json
+#+end_src
+
+#+RESULTS:
+: file: flows.json
+: size: 10.4 kilobytes
+: key: SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json
+: present: true
+
+Now, we can move to the new commands starting with contentlocation
+which will allow us to access the path where the symbolic links are
+pointing. 
+#+begin_src shell :session *shell* :results output :exports both
+git annex contentlocation SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json
+#+end_src
+
+#+RESULTS:
+: .git/annex/objects/0G/qZ/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json/SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json
+
+For the files that are not stored here locally like Essay.pdf, we
+can't access the location where it's stored locally since it's not
+stored. To be able to get that information, it needs to be available
+here.
+
+Now, moving to the other new command. Let's test it in the same
+directory to see the result.
+#+begin_src shell :session *shell* :results output :exports both
+git annex unused
+#+end_src
+
+As we can see, there are two files that have unused content.
+#+RESULTS:
+: unused . (checking for unused data...) 
+:   Some partially transferred data exists in temporary files:
+:     NUMBER  KEY
+:     1       SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+:     2       URL--https://sandbox.zenodo.org/api/-15061b552ec08f8c7644192c4d4599a5
+:   
+:   To remove unwanted data: git-annex dropunused NUMBER
+:   
+: ok
+
+Let's try to drop one of them.
+#+begin_src shell :session *shell* :results output :exports both
+git annex dropunused 2
+#+end_src
+
+#+RESULTS:
+: dropunused 2 ok
+
+Now, there is only one file that is unused.
+#+begin_src shell :session *shell* :results output :exports both
+git annex unused
+#+end_src
+
+#+RESULTS:
+: unused . (checking for unused data...) 
+:   Some partially transferred data exists in temporary files:
+:     NUMBER  KEY
+:     1       SHA256E-s46788--1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf
+:   
+:   To remove unwanted data: git-annex dropunused NUMBER
+:   
+: ok
+
+It's been dropped.
+#+begin_src shell :session *shell* :results output :exports both
+git annex dropunused 1
+#+end_src
+
+#+RESULTS:
+: dropunused 1 ok
+
+Now, we can see that there is no unsed file content.
+#+begin_src shell :session *shell* :results output :exports both
+git annex unused
+#+end_src
+
+#+RESULTS:
+: unused . (checking for unused data...) ok
+
+Here again, we can see where the files are.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||test-zenodo
+: ||||test-zenodo2
+: |||||
+: _X_XX Essay.pdf
+: X____ flows.json
+: XX___ sandbox.zenodo.org_api_files_59c5f480_4755_4ebf_9a40_6741794179e4_SHA256E_s46788__1e08de73e6d0a8cce849344d5ab02b516221e4d62cf57809ff3cc580e06884dc.pdf_access_token_K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG
+
+- Note: instead of using the command 'info' to get the key of a file we
+  can simply use the command 'lookupkey'. As we can see below, it's an
+  easier and way more direct way to get that information when it's the
+  only one needed.
+#+begin_src shell :session *shell* :results output :exports both
+git annex lookupkey flows.json
+#+end_src
+
+#+RESULTS:
+: SHA256E-s10405--8ab0f15ebd0087fff23688dee2fa3797442a686f6d2c2aa677cc10af0be885f8.json
+
+
