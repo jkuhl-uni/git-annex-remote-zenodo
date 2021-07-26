@@ -1,28 +1,28 @@
-archivedeposit_id=887971
+archivedeposit_id=888019
 remote_name='test-zenodo-newver2'
 
 
+
 ## function to download the archive from zenodo as well as download the json file containing the info
-def download_archive(key, sandbox_url=None):
+def download_archive(key, url):
     import requests
-
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
-
+    # setting the url to get the list of the files
+    url = url + '/' + str(archivedeposit_id) + '/files'
     params = {'access_token': key}
 
     # sending the request to the API to get the list of files stored in the deposit
     r = requests.get(url, params=params)
     
-    # downloading the archive
+    # downloading the archive and the info file
+    # since the archivename has been set when we wrote the file while archiving
+    # we don't need to study the case where the archive hasnt been found because of
+    # an error with the name. If we decide to ask the user to pass the name of the archive 
+    # as an argument, we need to study that case.
     for i in range(len(r.json())):
-        if r.json()[i]['filename'] == 'archive.tar':
-            url = r.json()[i]['links']['download']
+        if r.json()[i]['filename'] == "%s.tar.gz" % remote_name or r.json()[i]['filename'] == 'git-annex-info.json':
+            url_download = r.json()[i]['links']['download']
             filename=r.json()[i]['filename']
-            q = requests.get(url, params=params, stream=True)
-            print(q.status_code)
+            q = requests.get(url_download, params=params, stream=True)
             # downloading the files
             with open(filename, "wb") as f:
                 for chunk in q.iter_content(chunk_size=120):
@@ -30,64 +30,108 @@ def download_archive(key, sandbox_url=None):
             f.close()
     return  
 
-# function to restore the files: this is to be done depending on the option: there are three ways to do this
-def restore_files(deposit_id, key, sandbox_url=None):
-    import requests, os, shlex, subprocess
-    # setting the url 
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % deposit_id
+def restore_files(deposit_id, key, url, restoring_option):
+    import os, shlex, json, subprocess
 
-    params = {'access_token': key}
+    # extracting the files from the archive.
+    # u = os.path.expanduser(dir.name)
+    # os.chdir(u)
+    os.system("tar -xzf %s.tar.gz" % remote_name)
 
-    # init the dico 
-    dico = {}
+    # going to the folder where the files are
+    u = os.path.expanduser(remote_name)
+    os.chdir(u)
 
-    # untaring the archive
-    os.system("tar -xf archive.tar")
-
-    # getting the keys of the files (the links are broken so we need to know the keys of the files they used to point to)
-
-    # getting the output from trom the command 
-    output = subprocess.getoutput("ls -ltra | grep '\->'")
+    # getting the names of the files in the archive
+    u = subprocess.getoutput('ls -1')
     # parsing the output and separating the lines in a list where each element is a file
-    s = shlex.split(output, comments=True, posix=False)
-    
+    s = shlex.split(u, comments=True, posix=False)
 
-    # fetching the keys of these files 
-    for i in range(len(s)):
-        if s[i] == '->':
-            file_name = s[i-1]
-            key_file = s[i+1].split('/')[-1]
-            dico[key_file] = file_name
-            # we delete the files locally because they nothing but broken symbolic links at the moment
-            os.system("rm "+ file_name)
-    
-    # sending a request to the API to get the file 
-    r = requests.get(url, params=params)
-    
-    for i in range(len(r.json())):
-        url = r.json()[i]['links']['download'] + '?access_token=' + key
-        file_key = r.json()[i]['filename']
-        file_name = dico[file_key]
-        os.system("curl " + url + " --output " + "./" + file_name)      
+    # loading the info in the json file into a dictionary
+    f = open('%s/../git-annex-info.json' % os.getcwd())
+    dico = json.load(f)
 
-# main function 
+    # let's delete the files from the dico that cannot be downloaded from the remote.
+    # when we recover the files, we can only recover the once that are in the remote and 
+    # so we delete the ones that we could have had locally when we created the archive with git
+    keep = []
+    delete = []
+    for k, v in dico.items():
+        if 'downloadlink' not in v.keys():
+            # let's register the keys of the files that we want to delete
+            delete.append(k)
+        else:
+            # let's register the names of the files that are on the remote in a list for later use
+            keep.append(v['filename'])
+    
+    # deleting the keys from the dico
+    for e in delete:
+        dico.pop(e)
+
+    # now, let's delete these files locally. When we untar the archive, there are some files that
+    # aren't on the remote and so we can delete them since they have been locally in the repo when
+    # the archive was created. Let's go through the list of files (s) and delete the ones not in dico.
+    for element in s:
+        if element not in keep:
+            os.system("rm "+ element)
+
+    # restoring the files using one of the chosen options.
+    if restoring_option == 'simpledownload':
+        for k, v in dico.items():
+            if v['filename'] in s:
+                url = v['downloadlink'] + '?access_token=' + key
+                file_name = v['filename']
+                # removing the file before downloading it
+                os.system("rm " + file_name)
+                # downloading the file using the download link
+                os.system("curl " + url + " --output " + "./" + file_name)
+    elif restoring_option == 'rebuildannex':
+        for k, v in dico.items():
+            if v['filename'] in s:
+                url = v['downloadlink'] + '?access_token=' + key
+                file_path = v['contentlocation']
+                os.system("curl " + url + " --output " + "./" + file_path)
+    elif restoring_option == 'usegitannex':
+        os.system("git init")
+        os.system("git annex init")
+        for k, v in dico.items():
+            if v['filename'] in s:
+                url = v['downloadlink'] + '?access_token=' + key
+                file_name = v['filename']
+                # removing the file before downloading it
+                os.system("rm " + file_name)
+                # downloading the file using the download link
+                os.system("curl " + url + " --output " + "./" + file_name)
+                # adding the file into the annex
+                os.system("git annex add " + file_name)
+                # adding the file as a web remote
+                
+            else:    
+                print("this is just a test to see if some elements havent been deleted from dico")
+
+    else:
+        print("The option that was given is not correct, please enter a correct option (simpledownload - rebuildannex - usegitannex).")
+
+
 def main(argv):
     import sys, getopt
 
     url = None
     deposit_id =''
     try:
-        opts, args = getopt.getopt(argv,"hi:k:u:",["id=", "key=", "url="])
+        opts, args = getopt.getopt(argv,"hi:k:u:o:",["id=", "key=", "url=", "option="])
     except getopt.GetoptError:
         print('Problem with the syntax of the command. Please enter the id of the deposit to restore. If the deposit is on the sandbox, enter url=sandbox or -u sandbox \n')
-        print ('restore_archive.py -i <deposit_id> -k <access_key> -u <sandbox if used>')
+        print('You need to choose the chosen option: rebuildannex / usegitannex / simpledownload. Enter -h for more help.')
+        print ('restore_archive.py -i <deposit_id> -k <access_key> -u <sandbox if used> -o <chosen option>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print ('restore_archive.py -i <deposit_id> -k <access_key> -u <sandbox if used>')
+            print ('restore_archive.py -i <deposit_id> -k <access_key> -u <sandbox if used> -o <chosen option>')
+            print('The option for restoring files: \n')
+            print("- 'rebuildannex': Rebuild the annex so that the downloaded symbolic links point to the files. \n")
+            print("- 'usegitannex': initialize a git-annex and add the restored files into it as well as store them as web remotes. \n")
+            print("- 'simpledownload': download the files once we restore them by making them replace the broken symbolic links. ")
             sys.exit()
         elif opt in ("-i", "--id"):
             deposit_id = arg
@@ -95,17 +139,20 @@ def main(argv):
             key = arg
         elif opt in ("-u", "--url"):
             url= arg
+        elif opt in ("-o", "--option"):
+            option = arg
+
+    if not url:
+        zenodo_url = 'https://zenodo.org/api/deposit/depositions'
+    else:
+        zenodo_url = 'https://sandbox.zenodo.org/api/deposit/depositions'
 
     # downloading the archive and the file from the new 
-    download_archive(key, url)
-    
-    restore_files(deposit_id, key, url)
+    download_archive(key, zenodo_url)
+    # restoring the files
+    restore_files(deposit_id, key, zenodo_url, option)
 
 if __name__ == "__main__":
     import sys
     main(sys.argv[1:])
         
-
-
-
-

@@ -10351,7 +10351,7 @@ file test2.txt
     each of the files are pointing and then letting the symbolic links
     point to that directory.
   + We can let the user choose to initialize a new git-annex
-    repository and adding each of the files into it. By doing this,
+    repository and add each of the files into it. By doing this,
     the user can now work with the files like they would have done
     normally with git-annex and they can automatically have all the
     files added to the annex and uploaded to a web remote as well. To
