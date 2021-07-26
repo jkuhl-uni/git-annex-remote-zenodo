@@ -90,7 +90,13 @@ def restore_files(deposit_id, key, url, restoring_option):
             if v['filename'] in s:
                 url = v['downloadlink'] + '?access_token=' + key
                 file_path = v['contentlocation']
-                os.system("curl " + url + " --output " + "./" + file_path)
+                file_path = "./" + file_path
+                # let's create the folders where we want to download the files
+                try:
+                    os.makedirs(os.path.dirname(file_path))
+                except OSError:
+                    print ("Failed to create the directory " % file_path)
+                os.system("curl " + url + " --output " + file_path)
     elif restoring_option == 'usegitannex':
         os.system("git init")
         os.system("git annex init")
