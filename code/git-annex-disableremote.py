@@ -281,22 +281,6 @@ def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
         # now, let's turn the files into web remotes
         u = os.system('git annex addurl '+ url + ' --file=' + file_name + " --relaxed")
 
-        """
-        # let's study the two cases, either the remote is in the local path
-        if remote_path is None:
-            os.system('git annex addurl '+ url + ' --file=' + file_name)
-
-            # or it's on a different path that is given by the user
-        else:
-            # if this is the case, we need to go to that directory before executing the command
-            u = os.path.expanduser(remote_path)
-            os.chdir(u)
-            os.system('git annex addurl '+ url + ' --file=' + file_name)
-       """
-    # this is just to make sure
-    #os.system('git annex list')
-
-
 
 # method to disable the remote locally with git rm
 def disableremotelocally(deposit_id):

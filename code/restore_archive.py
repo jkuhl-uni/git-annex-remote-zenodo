@@ -1,36 +1,36 @@
-archivedeposit_id=885993
+archivedeposit_id=887971
+remote_name='test-zenodo-newver2'
 
 
-"""
-def download_archive(key, url):
+## function to download the archive from zenodo as well as download the json file containing the info
+def download_archive(key, sandbox_url=None):
     import requests
-    # setting the url to get the list of the files
-    url = url + '/' + archivedeposit_id + '/files'
+
+    if not sandbox_url:
+        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
+    else:
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
+
     params = {'access_token': key}
 
     # sending the request to the API to get the list of files stored in the deposit
     r = requests.get(url, params=params)
     
-    # downloading the archive and the info file
-    # since the archivename has been set when we wrote the file while archiving
-    # we don't need to study the case where the archive hasnt been found because of
-    # an error with the name. If we decide to ask the user to pass the name of the archive 
-    # as an argument, we need to study that case.
+    # downloading the archive
     for i in range(len(r.json())):
-        if r.json()[i]['filename'] == archivename or r.json()[i]['filename'] == 'git-annex-info.json':
-            url_download = r.json()[i]['links']['download']
+        if r.json()[i]['filename'] == 'archive.tar':
+            url = r.json()[i]['links']['download']
             filename=r.json()[i]['filename']
-            q = requests.get(url_download, params=params, stream=True)
+            q = requests.get(url, params=params, stream=True)
+            print(q.status_code)
             # downloading the files
             with open(filename, "wb") as f:
                 for chunk in q.iter_content(chunk_size=120):
                     f.write(chunk)
             f.close()
-    return 
-"""
+    return  
 
-
-
+# function to restore the files: this is to be done depending on the option: there are three ways to do this
 def restore_files(deposit_id, key, sandbox_url=None):
     import requests, os, shlex, subprocess
     # setting the url 
@@ -71,35 +71,9 @@ def restore_files(deposit_id, key, sandbox_url=None):
         url = r.json()[i]['links']['download'] + '?access_token=' + key
         file_key = r.json()[i]['filename']
         file_name = dico[file_key]
-        os.system("curl " + url + " --output " + "./" + file_name)
+        os.system("curl " + url + " --output " + "./" + file_name)      
 
-def download_archive(key, sandbox_url=None):
-    import requests
-
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % archivedeposit_id
-
-    params = {'access_token': key}
-
-    # sending the request to the API to get the list of files stored in the deposit
-    r = requests.get(url, params=params)
-    
-    # downloading the archive
-    for i in range(len(r.json())):
-        if r.json()[i]['filename'] == 'archive.tar':
-            url = r.json()[i]['links']['download']
-            filename=r.json()[i]['filename']
-            q = requests.get(url, params=params, stream=True)
-            print(q.status_code)
-            # downloading the files
-            with open(filename, "wb") as f:
-                for chunk in q.iter_content(chunk_size=120):
-                    f.write(chunk)
-            f.close()
-    return        
-
+# main function 
 def main(argv):
     import sys, getopt
 

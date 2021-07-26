@@ -10563,7 +10563,7 @@ git annex lookupkey flows.json
     adding the files into the annex. For each file added, use git
     annex registerurl (or addurl) and add the file into a web remote.
 
-*** first implementation of each of the functions.
+** first implementation of each of the functions.
 **** archiving.
 #+begin_src python :results output :exports both
 import tempfile
@@ -10710,3 +10710,21 @@ archive (when we are going to publish we can ask the user the name
 they want to give to the archive, ie the name of the project).  
 
 The second part 
+
+* Monday 26/07.
+** archiving - new version.
+We take the program that was done previously and then add the missing
+details that we want to include (ie: setting the name of the archive
+as the name of the remote). We write this into a new python script and
+add all the needed info to test it (archiving.py). We can also easily
+test this first step by executing the program.
+
+We have tested the program in the same testing directory that we have
+already used and it's functional. We also need to add these functions
+into the program disableremote where this step will be done. Then some
+changes need to be made in order to make it fit.
+
+Now, we can just move on to the second part of the process which is
+recovering the files. 
+
+** recovering - new version.
