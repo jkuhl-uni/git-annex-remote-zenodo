@@ -111,13 +111,18 @@ def restore_files(deposit_id, key, url, restoring_option):
                 # adding the file into the annex
                 os.system("git annex add " + file_name)
                 # adding the file as a web remote
-                
+                os.system("git annex registerurl " + k + " " + url)
             else:    
                 print("this is just a test to see if some elements havent been deleted from dico")
-
     else:
         print("The option that was given is not correct, please enter a correct option (simpledownload - rebuildannex - usegitannex).")
 
+    # once we finish restoring the files, we can remote the archive and the other files if we no longer need them
+    u = os.path.expanduser(os.getcwd() + "/..")
+    os.chdir(u)
+    os.system("rm git-annex-info.json")
+    os.system("rm %s.tar.gz" % remote_name)
+    #os.system("rm restore_archive.py")
 
 def main(argv):
     import sys, getopt
