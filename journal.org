@@ -10741,4 +10741,69 @@ we tested the three types of restoring.
   on the next part of the report (the second part).
   
 * Wednesday 28/07.
-- 
+** testing the API of nakala.
+Let's start testing the nakala API using the info available in the
+following links:
+https://docplayer.fr/89216922-Nakala-documentation-de-l-api-rest.html
+https://api.nakala.fr/doc
+https://documentation.huma-num.fr/nakala/
+
+- The testapi:
+  https://test.nakala.fr/ (-)
+  https://apitest.nakala.fr/doc
+
+We will be using the logins given in (-) to do the tests. These logins
+are given by the developpers of nakala to allow new users to test the
+functionalities of nakala without having to go through the official
+site and create the credentials. The content of the database is reset
+regularly.
+
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/Desktop
+mkdir test_nakala
+cd test_nakala
+#+end_src
+
+Now, let's start sending requests to the API to test it.
+
+- The first test is to get information about the current user: to do
+  this, we can just add in the header the key (it's required to add it
+  as a authentication credential).
+#+begin_src shell :session *shell* :results output :exports both
+curl -X GET "https://apitest.nakala.fr/users/me" -H "X-API-KEY: 01234567-89ab-cdef-0123-456789abcdef" > f.txt
+#+end_src
+
+#+RESULTS:
+: 
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   277  100   277    0     0    110      0  0:00:02  0:00:02 --:--:--   110100   277  100   277    0     0    110      0  0:00:02  0:00:02 --:--:--   110
+
+Now let's see the result of the request. As can be seen in the result,
+this request allowed us to get information about the current user (the
+one who has the key).
+#+begin_src shell :session *shell* :results output :exports both
+more f.txt
+#+end_src
+
+#+RESULTS:
+: {"username":"tnakala","givenname":"Test","surname":"Nakala","mail":"nakala@huma-num.fr","photo":null,"firstLogin":"2020-03-18T11:20:00+01:00","lastLogin":"2021-07-28T11:22:51+02:00","roles":["ROLE_USER"],"apiKey":"01234567-89ab-cdef-0123-456789abcdef","fullname":"Test Nakala"}
+
+- Now, let's look for information about the data that has been
+  uploaded to nakala. Since we are using the test credential, we don't
+  have to upload new data just yet to test this, because other users
+  have already done this. So now, we can send a GET request to the API
+  to /datas/uploads to fetch the list of all the files that have been
+  uploaded on this login.
+
+  
+#+begin_src shell :session *shell* :results output :exports both
+curl -X GET "https://apitest.nakala.fr/datas/uploads" -H "X-API-KEY: 01234567-89ab-cdef-0123-456789abcdef" > f.txt
+#+end_src
+
+#+RESULTS:
+: 
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:08 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:09 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:11 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:12 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:13 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:14 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:15 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:16 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:17 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:18 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:19 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:20 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:21 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:22 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:23 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:24 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:25 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:26 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:27 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:28 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:29 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:30 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:31 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:32 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:33 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:34 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:35 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:36 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:37 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:38 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:39 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:40 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:41 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:42 --:--:--     0100   110  100   110    0     0      2      0  0:00:55  0:00:42  0:00:13    23
+
