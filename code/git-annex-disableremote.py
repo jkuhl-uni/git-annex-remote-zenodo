@@ -13,6 +13,124 @@ LICENCE = ''
 EMBARGO_DATE = ''
 ACCESS_CONDITIONS= ''
 
+# method to look for the name of the remote. This is to be used when we want to remove it in disableremotelocally
+# and when we want to create the archive in archiving
+def get_remotename(deposit_id):
+    import subprocess, shlex
+
+    # reading the file from the other branch without checking into it
+    output = subprocess.getoutput("git show git-annex:./remote.log")
+
+    # we can have multiple remotes in one log and they are separated by lines.
+    lines = output.splitlines()
+    remote_name = ''
+    # going through the remotes
+    for line in lines:
+        # parsing the output and separating the lines in a list where each element is a file
+        s = shlex.split(line, comments=True, posix=False)
+        # now, let's go through the list
+        for elm in s:
+            # looking through the elemnts for the index of the id
+            if elm.startswith("deposit_id"):
+                id = elm.split("=")[-1]
+            # we have found the name of the remote that we are looking for
+            if (elm.startswith("name")) and (id == deposit_id):
+                remote_name = elm.split("=")[-1]
+    return remote_name
+
+
+# this function creates an archive of the files and uploads it to Zenodo so as to allow the user
+# to recover the files later on if they wish to
+def archiving(deposit_id, key, url, path_restorearchive):
+    import tempfile, json, os, requests, subprocess, shlex 
+
+    headers = {"Content-Type": "application/json"}
+    params = {'access_token': key}
+
+    ########### creating the info file #############################
+    # getting the output from trom the command
+    output = subprocess.getoutput("git-annex find")
+    # parsing the output and separating the lines in a list where each element is a file
+    s = shlex.split(output, comments=True, posix=False)
+    # init the dico
+    dico_files = {}
+
+    # getting the name of the project: to get the name of project we can either ask the user about it // or use the name of the remote
+    # getting the name of the remote from the remote.log file
+    remote_name = get_remotename(deposit_id)
+    
+    # getting the list of the unused files
+    # fetching the keys of the files that are not unused
+    for file in s:
+        info_file = {}
+        info_file["filename"] = file
+        # getting the key
+        filekey = subprocess.getoutput("git-annex lookupkey %s" % file)
+        info_file["key"] = filekey
+        # getting the path it's pointing to
+        path = subprocess.getoutput("git-annex contentlocation %s" % filekey)
+        contentlocation = path
+        info_file["contentlocation"]= contentlocation
+        dico_files[filekey] = info_file
+
+    # getting the download link of the file
+    nurl = url + '/%s/files' % deposit_id
+    
+    # since this will be reused, we need to remember it
+    r = requests.get(nurl, params=params)
+    # for each of the files
+    for i in range(len(r.json())):
+    # fetching the necessary information
+        file_id = r.json()[i]['filename']
+        download_link = r.json()[i]['links']['download']
+        if file_id in dico_files:
+            dico_files[file_id]['downloadlink'] = download_link
+
+    # creating a temporary directory to store the files in
+    dir = tempfile.TemporaryDirectory()
+            
+    # write the file in the temporary directory     
+    f = open(dir.name + "/git-annex-info.json", "w+")
+    json.dump(dico_files, f)
+    f.close()
+
+
+    ########### creating the archive ###############################
+    # creating the archive
+    os.system("git archive --output=" + dir.name + "/%s.tar.gz" % remote_name + " --format=tar.gz HEAD --prefix=%s/" % remote_name)
+
+
+    ########### creating a new deposit on Zenodo ###################
+    r = requests.post(url, params=params, json={}, headers=headers)
+
+    # setting the id & the bucket url
+    archivedeposit_id = r.json()['id']
+    archivedeposit_bucket = r.json()['links']['bucket']
+
+    # setting the id of the new deposit in the restoring script
+    # we also need to set the name of the archive
+    with open(path_restorearchive, 'r+') as f:
+        f.seek(0, 0)
+        f.write("archivedeposit_id=%s" % archivedeposit_id)
+        f.write("\n \n")
+        f.write("remote_name='%s'" % remote_name)
+        f.write("\n\n")
+        f.close()
+    
+    # uploading the two files into the deposit
+    with open(path_restorearchive, "rb") as fp:
+        r = requests.put("%s/%s" % (archivedeposit_bucket, 'restore_archive.py'), params=params, json={}, data=fp)
+                        
+    with open(dir.name + '/%s.tar.gz' % remote_name, "rb") as fp:
+        r = requests.put("%s/%s" % (archivedeposit_bucket, '%s.tar.gz' % remote_name), params=params, json={}, data=fp)
+
+    with open(dir.name + "/git-annex-info.json", "rb") as fp:
+        r = requests.put("%s/%s" % (archivedeposit_bucket, 'git-annex-info.json'), params=params, json={}, data=fp)
+
+    # we need to remove the directory when we finish working with it
+    dir.cleanup()
+
+
 # function to call whenever we can to choose an upload type:
 def setting_uploadtype():
     # the possible types of the uploads
@@ -163,22 +281,19 @@ def lookup_metadata(url, key):
 
 
 # this is the function that will be used to publish the deposit
-def publish(deposit_id, key, pub_file = None, sandbox_url=None):
+def publish(deposit_id, key, url, pub_file = None):
     import json
     import requests
 
     # setting the url of the deposit
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s' % deposit_id
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s' % deposit_id
+    nurl = url + '/%s' % deposit_id
 
     # initializing the required metadata if the file is not given
     if not pub_file:
         # look to see if the user has already set the metadata in the remote manually.
         # if it's the case, either ask the user if the info is ok and publish directly
         # or make them fill in the information manually on the command line.
-        bool, dict = lookup_metadata(url, key)
+        bool, dict = lookup_metadata(nurl, key)
         # showing the user the metadata they have submitted so as to see if they want
         # to keep them or update them
         if bool:
@@ -224,27 +339,22 @@ def publish(deposit_id, key, pub_file = None, sandbox_url=None):
     params = {'access_token': key}
 
     # updating the deposit with the needed metadata
-    requests.put(url, params=params, data=json.dumps(data), headers=headers)
+    requests.put(nurl, params=params, data=json.dumps(data), headers=headers)
 
     # publishing
-    url = url + "/actions/publish"
-    requests.post(url,params=params, json={}, headers=headers)
+    nurl = nurl + "/actions/publish"
+    requests.post(nurl,params=params, json={}, headers=headers)
 
 
 # method that transforms the files into web remotes
-def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
+def transformtoweb(deposit_id, key, url):
     # we can simply use the git annex addurl --file and do this for each file as has been previously tested
     # the option --file will attach the url to the existing file instead of creating a new one.
     # this way, a trace has been kept of where this file exists (the remotes in this case being Zenodo and the web remote)
     # to do this, we can use a shell command with a library to facilitate the interaction between the two interfaces.
 
-    import subprocess
-    import shlex
-    import os
-    import requests
+    import subprocess, shlex, os, requests
 
-
-    # first step
     # getting the output from trom the command
     output = subprocess.getoutput("git-annex find")
     # parsing the output and separating the lines in a list where each element is a file
@@ -260,13 +370,9 @@ def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
             k = l[6]
             dico[str(k)] = file
 
-    # second step
-    if not sandbox_url:
-        url = 'https://zenodo.org/api/deposit/depositions/%s/files' % deposit_id
-    else:
-        url = 'https://sandbox.zenodo.org/api/deposit/depositions/%s/files' % deposit_id
+    nurl = url + '/%s/files' % deposit_id
 
-    r = requests.get(url, params={'access_token': key})
+    r = requests.get(nurl, params={'access_token': key})
 
     # third step
     # for each of the files
@@ -276,10 +382,9 @@ def transformtoweb(deposit_id, key, sandbox_url=None, remote_path=None):
         download_link = r.json()[i]['links']['download']
         file_name = dico[file_id]
         # now, we can finally create the web url
-        url = download_link + '?access_token='+ key
-        #print('git annex addurl '+ url + ' --file=' + file_name)
+        nurl = download_link + '?access_token='+ key
         # now, let's turn the files into web remotes
-        u = os.system('git annex addurl '+ url + ' --file=' + file_name + " --relaxed")
+        os.system('git annex addurl '+ nurl + ' --file=' + file_name + " --relaxed")
 
 
 # method to disable the remote locally with git rm
@@ -288,16 +393,32 @@ def disableremotelocally(deposit_id):
     # this could be done with the library that has been previously tested
     # this is the last step to be done after having already published the deposit on Zenodo.
 
-    import subprocess
-    import shlex
     import os
+
+    # getting the name of the remote
+    remote_name= get_remotename(deposit_id)
+
+    # removing the remote locally
+    if remote_name == '':
+        print("Error while looking for the name of the remote")
+    else:
+        os.system("git remote remove " + remote_name)
+
+
+# this function takes care of looking for the ids of the remotes.
+# For instance, if there is only one zenodo remote that has been initialized in
+# this repository, the program uses that id to disable the remote. If not, we can
+# list the ids to the user for them to choose from.
+def lookup_depositid():
+    import subprocess, shlex
 
     # reading the file from the other branch without checking into it
     output = subprocess.getoutput("git show git-annex:./remote.log")
 
     # we can have multiple remotes in one log and they are separated by lines.
     lines = output.splitlines()
-    remote_name = ''
+    # creating a list where we will be putting the deposit id we found
+    l = []
     # going through the remotes
     for line in lines:
         # parsing the output and separating the lines in a list where each element is a file
@@ -307,27 +428,27 @@ def disableremotelocally(deposit_id):
             # looking through the elemnts for the index of the id
             if elm.startswith("deposit_id"):
                 id = elm.split("=")[-1]
-            # we have found the name of the remote that we are looking for
-            if (elm.startswith("name")) and (id == deposit_id):
-                remote_name = elm.split("=")[-1]
-    # removing the remote locally
-    if remote_name == '':
-        print("Error while looking for the name of the remote")
-    else:
-        u = os.system("git remote remove " + remote_name)
-        print(u)
+                # adding the id of the deposit to the list
+                l.append(id)
+    # printing the ids of the deposits in this directory
+    print("The ids of the Zenodo deposits that have been created in this directory are: \n")
+    for i in l:
+        print(i)
+    return l
 
-
-# this function takes care of looking for the ids of the remotes.
-# For instance, if there is only one zenodo remote that has been initialized in
-# this repository, the program uses that id to disable the remote. If not, we can
-# list the ids to the user for them to choose from.
-def lookup_depositid():
-
-    return
-
-
-
+# prints information about the program and the options that could be used.
+def print_info():
+    print("------------ Disabling the Zenodo remote ------------")
+    print("This program is used to publish a Zenodo deposit and disble the remote locally while keeping a copy of the published files in a web remote. It also keeps an archive so that the user could recover the whole project when they want later on.")
+    print("Here are the possible options:")
+    print("'-h' : for help.")
+    print("'-i' <deposit_id> : this is the id of the deposit. The user can use the option -l to print out the ids that have been stored in this directory.")
+    print("'-k' <key> : the access token that was used when creating the deposit. ")
+    print("'-f' <path to zenodo.json file> : This is optional, the user could give the path to this file if they want, or they can fill in the information later on in the stdin.")
+    print("'-u' <sandbox if used> : If the deposit is on the sandbox, specify that by using this option. If not used, it means the deposit is not on the sandbox.")
+    print("'-p' <path to restore_archive.py> : if it's not given, it looks for the file is available in the current directory. ")
+    print("'-l' : to list the ids of the deposits in this directory.")
+    print("------------------------------------------------------")
 
 # this is the main function
 def main(argv):
@@ -335,14 +456,14 @@ def main(argv):
     file_path = None
     deposit_id =''
     try:
-        opts, args = getopt.getopt(argv,"hi:k:f:u:",["id=", "key=", "file=", "url="])
+        opts, args = getopt.getopt(argv,"hi:k:f:u:p:l",["id=", "key=", "file=", "url=", "path="])
     except getopt.GetoptError:
-        print('Problem with the syntax of the command. Please enter the id of the deposit to publish and/or the path to the file containing information about the publishing or leave it to be done manually. If the deposit is on the sandbox, enter url=sandbox or -u sandbox \n')
-        print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used>')
+        print('Problem with the syntax of the command.')
+        print_info()
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print ('test.py -i <deposit_id> -k <access_key> -f <file_path> -u <sandbox if used>')
+            print_info()
             sys.exit()
         elif opt in ("-i", "--id"):
             deposit_id = arg
@@ -352,14 +473,27 @@ def main(argv):
             file_path = arg
         elif opt in ("-u", "--url"):
             url= arg
+        elif opt in ("-p", "--path"):
+            path_restorearchive= arg
+        if opt == '-l':
+            lookup_depositid()
+            sys.exit()
+
+    # setting up the url
+    if not url:
+        url = 'https://zenodo.org/api/deposit/depositions'
+    else:
+        url = 'https://sandbox.zenodo.org/api/deposit/depositions'
 
 
-    # first step: publishing the deposit
+    # creating an archive and uploading it to a new deposit
+    archiving(deposit_id, key, url, path_restorearchive)
+    # publishing the deposit
     publish(deposit_id, key, file_path, url)
-    # second step: we need to transform each of the files into a web remote
+    # transforming each of the files into web remotes
     transformtoweb(deposit_id, key, url)
-    # third step: we need to disable the remote locally
-    disableremotelocally(deposit_id)
+    # disabling the remote locally
+    disableremotelocally(deposit_id, url)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

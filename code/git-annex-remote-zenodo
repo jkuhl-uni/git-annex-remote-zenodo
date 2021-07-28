@@ -317,10 +317,6 @@ class ZenodoRemote(ExportRemote):
         # store the file located at `local_file` to `remote_file` on the remote
         # raise RemoteError if the file couldn't be stored
         return self.transfer_store(key, local_file)
-        # and set the key later on using a put command to be able to retrieve files
-        # or: self.transfer_store(remote_file, local_file) which means setting 
-        # the name of the file in the remote as the key.
-        
         
     def transferexport_retrieve(self, key, local_file, remote_file):
         # get the file located at `remote_file` from the remote and store it to `local_file`
@@ -337,9 +333,10 @@ class ZenodoRemote(ExportRemote):
         # remove the file in `remote_file` from the remote
         # raise RemoteError if it couldn't be removed
         # note that removing a not existing key isn't considered an error
-
         return self.remove(key)
 
+    # there ae no directories in a deposit Zenodo since the architecture is flat. 
+    # using this deletes all the files that are on the deposit
     def removeexportdirectory(self, remote_directory):
         # remove the directory `remote_directory` from the remote
         # raise RemoteError if it couldn't be removed
@@ -362,31 +359,12 @@ class ZenodoRemote(ExportRemote):
                 # for each of the files
                 # raising RemoteError if there is a problem with the removal of the file
                 if r.status_code > 204: 
-                    self.annex.debug("[error]: failed to delete the file from the remote. Returned code: " + str(r.status_code))
+                    self.annex.debug("[error]: failed to delete the files from the remote. Returned code: " + str(r.status_code))
                     raise RemoteError('could not send a delete query to the API')
 
 
     # renaming files isn't needed
     def renameexport(self, key, filename, new_filename):
-        """
-        # move the remote file in `name` to `new_name`
-        # raise RemoteError if it couldn't be moved
-        import json
-        # when it's not published we can simply edit the name with the edit function
-        url = self.url + '%s/files' % self.deposit_id
-        r = self.query('get, url')
-
-        for i in range(len(r.json())):
-            if r.json()[i]['filename'] == filename:
-                id = r.json()[i]['id']
-
-        data = {"name": new_filename}
-        url = url + '/' + str(id)    
-        r = self.query('put', url, data=json.dumps(data))   
-
-        if r.status_code != 200:
-            raise RemoteError('Failed to rename the file')
-        """
         pass
 
 

@@ -10728,3 +10728,17 @@ Now, we can just move on to the second part of the process which is
 recovering the files. 
 
 ** recovering - new version.
+After having added the missing details to the program restorearchive,
+we tested the three types of restoring.
+* Tuesday 27/07.
+- Made changes in the programs and added a few missing functions. In
+  disableremotelocally, added a function to look for the ids of the
+  deposits that are available in this directory, as well as the
+  missing functions to archive the files. Also made some changes in
+  the options and added a function to printout information about the
+  options. 
+- Worked on the report for a little as well taking notes and working
+  on the next part of the report (the second part).
+  
+* Wednesday 28/07.
+- 
