@@ -10834,4 +10834,62 @@ curl -X GET "https://apitest.nakala.fr/datas/uploads" -H "X-API-KEY: 01234567-89
   API and since it's the only identifier we have of the data.
 ** prepare.
 - We can just send a GET query to the API to the url /datas to see if
-  it's accessible and if that 
+  it's accessible and if that's the case we can just continue on, and
+  if not we raise an error.
+- We also need to check if the temporary file has been deleted from
+  the remote. If it's the case, we do nothing, if not, we try to
+  delete it and we also need to set the status to deleted in
+  configs. We know that in nakala we can't delete all the files in a
+  data since there needs to be one in it at all times. So when we try
+  to delete the temporary file, if it's been successfully deleted, we
+  continue on, if not, we need to inform the user (through the
+  messages in debug mode) why the deletion has not been
+  successful. The possible reasons for it not working is when there is
+  only one file in the remote (this is not an error in thre requests)
+  or if there are other technical problems (ex: authentification
+  errors).
+** transferstore.
+- Uploading files to the data happens in two parts; First, we need to
+  upload the files into a temporary space where they are kept before
+  they get assigned to a data. Second, we need to send POST requests
+  to the api to /datas/id with the sha1 of the file (the identifier
+  that is given when we upload the file). It's when we do the second
+  step that we finally upload the file into the data. 
+- When storing the files we need to store them named as their
+  git-annex key. So either we change their names when we upload them
+  or we can upload them like we did and then when we want to add them
+  to the data we can then modify their names using PUT /datas to
+  change the list of the files and to put instead the new names. To do
+  this, we can get the info about the data and then go through the
+  response and change the things that need to be changed (ie the
+  keys).
+** transferretrieve.
+- We need to retrieve the list of the files that are on the data and
+  then compare the key that we have t the keys of the files and when
+  we find the file we are looking for we can just simply fetch it and
+  download it.
+- If we want to store a file that has all the files that we uploaded
+  to nakala as well as their ids, we can just look in the file (load
+  it into a dictionary for example) and if the file is there, we can
+  just fetch the info from this file and send a GET query to
+  /datas/id/files/fileid to fetch the file. If not, we can send a
+  GET query to /datas/id/files to get the list of files and update the
+  dictionary and then just fetch the id of the file we want to
+  download from the response.
+** checkpresent.
+- The same logic as in trasferretrieve but this time istead of
+  downloading the file we just need to return a boolean informing
+  git-annex of whether or not that file is on the remote.
+- If there is a problem when trying to look for the file we need to
+  raise an exception.
+** remove.
+- To be able to delete a file we need its id and so we need to either
+  send a GET query to /datas/id/files to get the list of the files or
+  if we decide to keep a info of the files that are on the rmeote
+  locally we can just take a look inside this file (it needs to be
+  updated everytime there is a change so is it really that useful).
+- To delete a file from a data we can just send a DELETE query to
+  /datas/id/files/fileid and then look to see if the operation has
+  been successfully done (if not, raise an exception).
+- If the file has not been found on the remote, we don't need to raise
+  an exception.

@@ -8,7 +8,7 @@ from annexremote import RemoteError, ProtocolError
 
 class NakalaRemote(ExportRemote):
 
-    def upload_tmpfile(self, key):
+    def upload_tmpfile(self, apikey):
         import tempfile, subprocess
 
         # creating a temporary directory to store the file in
@@ -17,12 +17,14 @@ class NakalaRemote(ExportRemote):
         # setting the path of the file
         path = dir.name + "/tmpfile.txt"
 
+        # creating a simple txt file 
         with open(path, "w+") as f:
             f.write("This is just a temporary file created and uploaded to be used to create a data.")
 
-        status, output = subprocess.getstatusoutput("curl -s -X POST 'https://apitest.nakala.fr/datas/uploads' -H 'accept: application/json' -H 'X-API-KEY: "+ key +"' -H 'Content-Type: multipart/form-data' -F 'file=@"+ path +";type=file/txt'")
-        print(output)
-
+        # uploading the file into nakala (into the temporary space)
+        status, output = subprocess.getstatusoutput("curl -s -X POST 'https://apitest.nakala.fr/datas/uploads' -H 'accept: application/json' -H 'X-API-KEY: "+ apikey +"' -H 'Content-Type: multipart/form-data' -F 'file=@"+ path +";type=file/txt'")
+        
+        # closing the temporary directory that we used to create the file
         dir.cleanup()
 
         return output
@@ -30,7 +32,8 @@ class NakalaRemote(ExportRemote):
     # initialize the remote, eg. create the folders
     # raise RemoteError if the remote couldn't be initialized
     def initremote(self):
-        
+        import requests, json
+
         # let's set the url and key first
         url = 'https://api.nakala.fr/datas'
         if not self.annex.getconfig('key'):
@@ -38,6 +41,12 @@ class NakalaRemote(ExportRemote):
         else:
             self.key = self.annex.getconfig('key')
         
+        ## NB: maybe we can also ask for the name of the data for the user to give when initializing the remote
+        if not self.annex.getconfig('dataname'):
+            raise RemoteError("You need to give the name of the data")
+        else:
+            self.dataname = self.annex.getconfig('dataname')
+
         # let's create a tmp file and upload it on /datas/uploads
         info_tmpfile = self.upload_tmpfile(self.key)
         file_id = info_tmpfile.split(',')[-1].split(':')[-1]
@@ -61,25 +70,59 @@ class NakalaRemote(ExportRemote):
         }
         # let's send a query to the API to create the new data using the tpm file 
         # that we have previously uploaded via /datas/uploads
-    """
-    curl -X POST "https://apitest.nakala.fr/datas" -H "accept: application/json" -H "X-API-KEY: 01234567-89ab-cdef-0123-456789abcdef" -H "Content-Type: application/json" -d "{ \"status\": \"pending\", \"metas\": [ { \"value\": \"testing\", \"typeUri\": \"http://www.w3.org/2001/XMLSchema#string\", \"propertyUri\": \"http://nakala.fr/terms#title\" }, { \"value\": \"http://purl.org/coar/resource_type/c_18cf\", \"typeUri\": \"http://www.w3.org/2001/XMLSchema#anyURI\", \"propertyUri\": \"http://nakala.fr/terms#type\" } ], \"files\": [ { \"sha1\": \"2686db4e1a2b40a03c5b891f30278c40d669ddf8\" } ]}"
+    
+        #curl -X POST "https://apitest.nakala.fr/datas" -H "accept: application/json" -H "X-API-KEY: 01234567-89ab-cdef-0123-456789abcdef" -H "Content-Type: application/json" -d "{ \"status\": \"pending\", \"metas\": [ { \"value\": \"testing\", \"typeUri\": \"http://www.w3.org/2001/XMLSchema#string\", \"propertyUri\": \"http://nakala.fr/terms#title\" }, { \"value\": \"http://purl.org/coar/resource_type/c_18cf\", \"typeUri\": \"http://www.w3.org/2001/XMLSchema#anyURI\", \"propertyUri\": \"http://nakala.fr/terms#type\" } ], \"files\": [ { \"sha1\": \"2686db4e1a2b40a03c5b891f30278c40d669ddf8\" } ]}"
+        
+        # setting up the headers
+        headers = {"accept": "application/json", "X-API-KEY": self.key, "Content-Type": "application/json"}
 
-    """
-        # save the if of the data in configs for later use
-        # we can also save the title of data in configs
+        # sending a POST request to the API to create the data using the metadata and the temporary file
+        r = requests.post(url, headers=headers, data=json.dumps(data))
 
+        # raising an exception if the data couldn't be created
+        if r.status_code > 201:
+            self.annex.debug("[error]: failed to send a post query in initremote. Returned code: " + str(r.status_code))
+            raise RemoteError('could not send a post query to the API in initremote.')
+
+        # getting the id of the data
+        data_id = r.json()['payload']['id']
+
+        # setting up the configs
+        self.annex.setconfig('tmpfile_state', 'up')
+        self.annex.setconfig('tmpfile_id', file_id)
+        self.annex.setconfig('data_id', data_id)
+
+        # finished initializing the remote
+        self.show_info("------------ git-annex-remote-nakala------------")
+        self.show_info("Finished initializing a Nakala remote successfully.")
+        self.show_info("------------------------------------------------")
 
     # prepare to be used, eg. open TCP connection, authenticate with the server etc.
     # raise RemoteError if not ready to use       
     def prepare(self):
         import requests
-        url = "https://apitest.nakala.fr/datas/%s" % self.data_id
-        headers = {"accept": "application/json", "X-API-KEY": self.key}
+        url = "https://apitest.nakala.fr/datas/%s" % self.annex.getconfig('data_id')
+        headers = {"accept": "application/json", "X-API-KEY": self.annex.getconfig('key')}
         r = requests.get(url, headers=headers)
 
         if r.status_code > 200:
             self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
             raise RemoteError('could not send a get query to the API in prepare.')
+
+        # let's take a look at the list of files to see if the tmp file has been deleted
+        tmpfile_state = self.annex.getconfig('tmpfile_state')
+        # if the temporary file is still there 
+        if tmpfile_state == 'up':
+            # let's try to delete it
+            r = requests.delete(url, headers=headers)
+            if r.status_code == 200:
+                # changing the state of the file in the configs
+                self.annex.setconfig('tmpfile_state', "deleted")
+                self.annex.debug("[info]: temporary file deleted successfully.")
+            else:
+                # we can't delete a file if it's the only one available in the data
+                self.annex.debug("[info]: temporary file couldn't be deleted. Here is the returned message: ")
+                self.annex.debug(r.json())
 
 
     # store the file in `filename` to a unique location derived from `key`
@@ -93,15 +136,15 @@ class NakalaRemote(ExportRemote):
         import subprocess
 
         # let's upload the file first to datas/uploads (temporary space where all the files are uploaded)
-        status, output = subprocess.getstatusoutput("curl -s -X POST 'https://apitest.nakala.fr/datas/uploads' -H 'accept: application/json' -H 'X-API-KEY: "+ self.key +"' -H 'Content-Type: multipart/form-data' -F 'file=@"+ filename +"'")
+        status, output = subprocess.getstatusoutput("curl -s -X POST 'https://apitest.nakala.fr/datas/uploads' -H 'accept: application/json' -H 'X-API-KEY: "+ self.annex.getconfig('key') +"' -H 'Content-Type: multipart/form-data' -F 'file=@"+ filename +"'")
         # fetching the file id from the returned message (it's in the form {"sha1":"x"})
         # we want it to be in this form to be able to send it in the post query when we add the file to the data 
         file_info = '{' + output.split(',')[-1]
         
         # adding the file to the data 
-        url = "https://apitest.nakala.fr/datas/%s/files" % self.data_id
+        url = "https://apitest.nakala.fr/datas/%s/files" % self.annex.getconfig('data_id')
         # sending a request to the API to add the file
-        status, output = subprocess.getoutput('curl -X POST '+ url + ' -H "accept: application/json" -H "X-API-KEY: '+ str(self.key) +'" -H "Content-Type: application/json" -d "'+ file_info + '"')
+        status, output = subprocess.getoutput('curl -X POST '+ url + ' -H "accept: application/json" -H "X-API-KEY: '+ str(self.annex.getconfig('key')) +'" -H "Content-Type: application/json" -d "'+ file_info + '"')
         
         # getting the returned message to see if the request has been done successfully
         returned_code= output.split(',')[0].split(':')[-1]
@@ -121,8 +164,8 @@ class NakalaRemote(ExportRemote):
         import requests
         try:
             # setting the url and the headers
-            url = "https://apitest.nakala.fr/datas/%s" % self.data_id
-            headers = {"accept": "application/json", "X-API-KEY": self.key}
+            url = "https://apitest.nakala.fr/datas/%s" % self.annex.getconfig('data_id')
+            headers = {"accept": "application/json", "X-API-KEY": self.annex.getconfig('key')}
             # sending a get request to the API to get the list of files in this data
             r = requests.get(url, headers=headers)
             
@@ -167,8 +210,8 @@ class NakalaRemote(ExportRemote):
         import requests
         try:
             # setting the url and the headers
-            url = "https://apitest.nakala.fr/datas/%s/files" % self.data_id
-            headers = {"accept": "application/json", "X-API-KEY": self.key}
+            url = "https://apitest.nakala.fr/datas/%s/files" % self.annex.getcnnfig('data_id')
+            headers = {"accept": "application/json", "X-API-KEY": self.annex.getconfig('key')}
             # sending a get request to the API to get the list of files in this data
             r = requests.get(url, headers=headers)
             
@@ -194,11 +237,13 @@ class NakalaRemote(ExportRemote):
         # we need the id of the file and so either keep it in a dictionary 
         # or do a request to get the list (like in checkpresent)
         # success_code = 200
+        # take care of the case of when there is only one file left in the remote and we want to delete it
+        # it can't be done !
         import requests
         try:
             # setting the url and the headers
-            url = "https://apitest.nakala.fr/datas/%s/files" % self.data_id
-            headers = {"accept": "application/json", "X-API-KEY": self.key}
+            url = "https://apitest.nakala.fr/datas/%s/files" % self.annex.getconfig('data_id')
+            headers = {"accept": "application/json", "X-API-KEY": self.annex.getconfig('key')}
             # sending a get request to the API to get the list of files in this data
             r = requests.get(url, headers=headers)
             
