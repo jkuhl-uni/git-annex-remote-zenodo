@@ -90,7 +90,26 @@ class NakalaRemote(ExportRemote):
         # then, we transfer it to data via /datas/data_id/files POST
         # we can just give info about the file {sha1: file_id}
         # success code = 200
-        pass
+        import subprocess
+
+        # let's upload the file first to datas/uploads (temporary space where all the files are uploaded)
+        status, output = subprocess.getstatusoutput("curl -s -X POST 'https://apitest.nakala.fr/datas/uploads' -H 'accept: application/json' -H 'X-API-KEY: "+ self.key +"' -H 'Content-Type: multipart/form-data' -F 'file=@"+ filename +"'")
+        # fetching the file id from the returned message (it's in the form {"sha1":"x"})
+        # we want it to be in this form to be able to send it in the post query when we add the file to the data 
+        file_info = '{' + output.split(',')[-1]
+        
+        # adding the file to the data 
+        url = "https://apitest.nakala.fr/datas/%s/files" % self.data_id
+        # sending a request to the API to add the file
+        status, output = subprocess.getoutput('curl -X POST '+ url + ' -H "accept: application/json" -H "X-API-KEY: '+ str(self.key) +'" -H "Content-Type: application/json" -d "'+ file_info + '"')
+        
+        # getting the returned message to see if the request has been done successfully
+        returned_code= output.split(',')[0].split(':')[-1]
+
+        if returned_code != '200':
+            self.annex.debug("[error]: failed to send a post query in transfer_store. Returned code: " + str(returned_code))
+            raise RemoteError('could not send a post query to the API in transfer_store.')
+
 
     # get the file identified by `key` and store it to `filename`
     # raise RemoteError if the file couldn't be retrieved    
@@ -229,13 +248,15 @@ class NakalaRemote(ExportRemote):
     # raise RemoteError if it couldn't be removed
     # note that removing a not existing directory isn't considered an error
     def removeexportdirectory(self, remote_directory):
-        # DELETE to /datas/data_id
+        # DELETE to /datas/data_id: deletes the whole data
+        # there are no directories in nakala and so this won't be needed
         pass
 
     # move the remote file in `name` to `new_name`
     # raise RemoteError if it couldn't be moved
     def renameexport(self, key, filename, new_filename):
         # PUT /datas/data_id if needed
+        # not needed, we won't be changing the names of the files in the remote (will be kept as the git-annex keys)
         pass
     
     def print_info(self, message):
