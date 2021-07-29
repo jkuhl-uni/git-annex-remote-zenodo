@@ -99,6 +99,41 @@ class NakalaRemote(ExportRemote):
         # ex: curl -X GET "https://apitest.nakala.fr/data/10.34847%2Fnkl.bedef1t9/8ba504b7ee513e519f0c3009bf0ed5b41a5e5462" -H "accept: application/json" -H "X-API-KEY: 01234567-89ab-cdef-0123-456789abcdef"
         # we can download it easily with --output file
         # success code = 200
+        import requests
+        try:
+            # setting the url and the headers
+            url = "https://apitest.nakala.fr/datas/%s" % self.data_id
+            headers = {"accept": "application/json", "X-API-KEY": self.key}
+            # sending a get request to the API to get the list of files in this data
+            r = requests.get(url, headers=headers)
+            
+            # seeing if there is a problem with the return msg
+            if r.status_code > 200:
+                self.annex.debug("[error]: failed to send a get query in transfer_retrieve. Returned code: " + str(r.status_code))
+                raise RemoteError('could not send a get query to the API in transfer_retrieve.')
+
+            file_list = r.json()
+            # looking in the list of files if the file exists
+            for i in range(len(file_list)):
+                if file_list[i]['name'] == key:
+                    # getting the id of the file that we want to download
+                    file_id =  file_list[i]['sha1']
+                    # sending a get query to the api to download the file
+                    url = url + '/%s' % file_id
+                    q = requests.get(url, headers=headers)
+                    # checking the returned code to see if there is an error
+                    if q.status_code > 200:
+                        self.annex.debug("[error]: couldn't retrieve the file from the remote. Returned code: " + str(q.status_code))
+                        raise RemoteError('could not send a get query to the API in transfer_retrieve.')
+                    # downloading the file
+                    f = open(filename, "wb")
+                    for chunk in q.iter_content(chunk_size=120): 
+                        f.write(chunk)
+                    # once we finish writing into the file we can close it
+                    f.close()
+            
+        except Exception as error:
+            raise RemoteError(error)
         pass
 
     # return True if the key is present in the remote
@@ -110,7 +145,27 @@ class NakalaRemote(ExportRemote):
         # then, compare the key to the files to see if it's there
         # ex: curl -X GET "https://apitest.nakala.fr/datas/10.34847%2Fnkl.bedef1t9/files" -H "accept: application/json" -H "X-API-KEY: 01234567-89ab-cdef-0123-456789abcdef"
         # success code = 200
-        pass
+        import requests
+        try:
+            # setting the url and the headers
+            url = "https://apitest.nakala.fr/datas/%s/files" % self.data_id
+            headers = {"accept": "application/json", "X-API-KEY": self.key}
+            # sending a get request to the API to get the list of files in this data
+            r = requests.get(url, headers=headers)
+            
+            # seeing if there is a problem with the return msg
+            if r.status_code > 200:
+                self.annex.debug("[error]: failed to send a get query in checkpresent. Returned code: " + str(r.status_code))
+                raise RemoteError('could not send a get query to the API in checkpresent.')
+
+            file_list = r.json()
+            # looking in the list of files if the file exists
+            for i in range(len(file_list)):
+                if file_list[i]['name'] == key:
+                    return True
+            return False
+        except Exception as error:
+            raise RemoteError(error)
     
     # remove the key from the remote
     # raise RemoteError if it couldn't be removed
@@ -120,6 +175,32 @@ class NakalaRemote(ExportRemote):
         # we need the id of the file and so either keep it in a dictionary 
         # or do a request to get the list (like in checkpresent)
         # success_code = 200
+        import requests
+        try:
+            # setting the url and the headers
+            url = "https://apitest.nakala.fr/datas/%s/files" % self.data_id
+            headers = {"accept": "application/json", "X-API-KEY": self.key}
+            # sending a get request to the API to get the list of files in this data
+            r = requests.get(url, headers=headers)
+            
+            # seeing if there is a problem with the return msg
+            if r.status_code > 200:
+                self.annex.debug("[error]: failed to send a get query in checkpresent. Returned code: " + str(r.status_code))
+                raise RemoteError('could not send a get query to the API in checkpresent.')
+
+            file_list = r.json()
+            # looking in the list of files if the file exists
+            for i in range(len(file_list)):
+                if file_list[i]['name'] == key:
+                    file_id =  file_list[i]['sha1']
+                    url = url + '/%s' % file_id
+                    q = requests.delete(url, headers=headers)
+                    if q.status_code > 200:
+                        self.annex.debug("[error]: couldn't delete the file from the remote. Returned code: " + str(q.status_code))
+                        raise RemoteError('could not send a delete query to the API in remove.')
+                    break;
+        except Exception as error:
+            raise RemoteError(error)
         pass
 
     # store the file located at `local_file` to `remote_file` on the remote
@@ -176,4 +257,5 @@ def main():
 
 if __name__ == "__main__":
     main()        
+
 
