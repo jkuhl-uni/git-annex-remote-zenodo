@@ -614,7 +614,9 @@ script to fetch when we want to restore the archive (restorearchive.py).
   containing all these programs and it's a simple python script that
   will be used to restore all the files. This could be downloaded from
   the Zenodo deposit by the user anytime they want to restore their
-  files. All they need to do is execute it  
+  files. All they need to do is execute it by giving the access token
+  and setting the restoring option.
+   
 We propose three ways to get the files back, and the user gets to
 choose which way when they execute the program. The options are:
 - *rebuildannex*: Rebuild the annex so that the downloaded symbolic
@@ -626,10 +628,94 @@ choose which way when they execute the program. The options are:
 
 We will be trying out all of these options in the following parts.
 
+** retrieving the restoring file
+As has been explained above, a python script will be used to restore
+the files and this script as already been uploaded to the Zenodo
+deposit when we archived the files. And so, to be able to retrieve the
+archive and restore the files from it, we need to get the file
+*restorearchive.py* and put it in the directory where we want to restore
+our files.
+
+This task could be done manually by going to Zenodo and downloading it
+from the deposit, but in this walkthrough we will be doing it using a
+simple python program. The user will need the id of the deposit (the
+one where the file is uploaded) as well as the access token.
+
+#+begin_src python :results output :exports both
+
+#+end_src
+
+Now that we have downloaded the file and put it in the three test
+directories we can move on to the next step of the process which is
+the restoring stage.
+
 ** restoring with simpledownload
+First, let's go to the directory where we will be doing this test.
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/test_restore/simpledownload
+#+end_src
 
+Now, we can simply execute the program by choosing the option
+simpledownload. This program downloads the archive as well as the file
+*git-init-info.json* and uses them restore the files by removing the
+broken symbolic links and downloading the correct files instead. It
+then deletes the archive, *git-init-info.json*, and *restorearcive.py*
+when it finishes using them. The user ends up with a folder containing
+only the restored files.
+#+begin_src shell :session *shell* :results output :exports both
+python3 restore_archive.py -k KEY -o simpledownload -u sandbox
+#+end_src
 
+Now, we can just go to the folder and see the files that are on it.
+#+begin_src shell :session *shell* :results output :exports both
+cd Myproject
+ls
+#+end_src
 ** restoring with rebuildannex
+First, let's go to the directory where we will be doing this test.
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/test_restore/rebuildannex
+#+end_src
 
+Now, we can simply execute the program by choosing the option
+rebuildannex. This program downloads the archive as well as the file
+*git-init-info.json* and uses them restore the files by creating the
+directories where the symbolic links have been pointing and downloads
+the files there. The symbolic links are working again.
+It then deletes the archive, *git-init-info.json*, and *restorearcive.py*
+when it finishes using them. The user ends up with a folder containing
+only the restored files.
+#+begin_src shell :session *shell* :results output :exports both
+python3 restore_archive.py -k KEY -o rebuildannex -u sandbox
+#+end_src
 
+Now, we can just go to the folder and see the files that are on it.
+#+begin_src shell :session *shell* :results output :exports both
+cd Myproject
+ls
+#+end_src
 ** restoring with usegitannex
+First, let's go to the directory where we will be doing this test.
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/test_restore/usegitannex
+#+end_src
+
+Now, we can simply execute the program by choosing the option
+simpledownload. This program downloads the archive as well as the file
+*git-init-info.json* and uses them restore the files by downloading them
+and then initializing git and git-annex in the directory and adding
+the files into the annex. It also uses web remotes and registers te
+files in the remote so that the user can have a second copy available.
+It then deletes the archive, *git-init-info.json*, and *restorearcive.py*
+when it finishes using them. The user ends up with a folder containing
+only the restored files.
+#+begin_src shell :session *shell* :results output :exports both
+python3 restore_archive.py -k KEY -o usegitannex -u sandbox
+#+end_src
+
+
+Now, we can just go to the folder and see the files that are on it.
+#+begin_src shell :session *shell* :results output :exports both
+cd Myproject
+ls
+#+end_src

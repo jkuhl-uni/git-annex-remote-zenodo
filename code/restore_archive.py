@@ -122,7 +122,7 @@ def restore_files(key, url, restoring_option):
     os.chdir(u)
     os.system("rm git-annex-info.json")
     os.system("rm %s.tar.gz" % remote_name)
-    #os.system("rm restore_archive.py")
+    os.system("rm restore_archive.py")
 
 def main(argv):
     import sys, getopt
