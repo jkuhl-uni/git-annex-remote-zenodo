@@ -454,8 +454,8 @@ copy the example that was given in the zenodo tutorial
 create our own with information that concerns us.
 
 I've added a file in the directory that contains the code source files
-for the internship and so it could be used to pass this test. You
-could also change things in the file according to the type of content
+and so it could be used to pass this test.
+You could also change things in the file according to the type of content
 you want to publish (this all could be found in the tutorial in the
 same url given earlier).
 
@@ -564,9 +564,72 @@ git remote
 
 #+RESULTS:
  
-
 * Initializing a new version of a deposit.
-* Restoring an archive.
+In this part, we will test the feature of the program that allows us
+to create a new version of a deposit that we have already
+published. To do this, we can simply initialize a new remote in the
+directory where we want to continue the test by using the option
+newversion=id and giving the id of the deposit that we want to create
+the new version of.
+
+To get the id of the deposit that we want to create a new version of,
+we need to check on the uploads on Zenodo by clicking on the deposit
+and then fetching the id from the url.
+#+begin_src shell :session *shell* :results output :exports both
+git annex initremote test-zenodo-newver type=external newversion=879747 externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
+#+end_src
+
+Now, we can check to see information about the directory and the
+remotes that have been initialized in.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+* Restoring an archive
+** introduction
+In this last part of the walkthrough, we will be trying to keep a copy
+of the files in an archive that we will upload to Zenodo and that we
+will use later on to restore the files if we don't want to pass by
+git-annex and do that manually. This could be interesting if a user
+wants to get the files that are stored in the remote in another
+machine. 
+
+By using this program, we will be storing copies of the files that we
+have uploaded to the Zenodo remote and we will try to download them
+back after having extracted them from the archive. We already know
+that git-annex keeps files as symbolic links that point to where they
+are stored, and so when we archive them and download the archive, the
+links get broken since they no longer point to something
+existent. This is the problem we solve in this part.
+
+There two separate logical parts to this process:
+First, we need to archive the files and upload them to Zenodo. This
+is done automatically when the user publishes their deposit. Along
+with this archive, we also upload a file containing information
+about all the files (git-annex-info.json), and a
+script to fetch when we want to restore the archive (restorearchive.py).
++ *git-annex-info.json*: in this file, we keep valuable information
+  about the files such as their keys, download links, locations, ..
++ *restorearchive.py*: this script is available in the directory
+  containing all these programs and it's a simple python script that
+  will be used to restore all the files. This could be downloaded from
+  the Zenodo deposit by the user anytime they want to restore their
+  files. All they need to do is execute it  
+We propose three ways to get the files back, and the user gets to
+choose which way when they execute the program. The options are:
+- *rebuildannex*: Rebuild the annex so that the downloaded symbolic
+  links point to the files.
+- *usegitannex*: initialize a git-annex and add the restored files
+  into it as well as store them as web remotes.
+- *simpledownload*: download the files once we restore them by making
+  them replace the broken symbolic links. 
+
+We will be trying out all of these options in the following parts.
+
+** restoring with simpledownload
 
 
+** restoring with rebuildannex
 
+
+** restoring with usegitannex

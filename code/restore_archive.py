@@ -30,7 +30,7 @@ def download_archive(key, url):
             f.close()
     return  
 
-def restore_files(deposit_id, key, url, restoring_option):
+def restore_files(key, url, restoring_option):
     import os, shlex, json, subprocess
 
     # extracting the files from the archive.
@@ -128,24 +128,21 @@ def main(argv):
     import sys, getopt
 
     url = None
-    deposit_id =''
     try:
-        opts, args = getopt.getopt(argv,"hi:k:u:o:",["id=", "key=", "url=", "option="])
+        opts, args = getopt.getopt(argv,"hk:u:o:",["key=", "url=", "option="])
     except getopt.GetoptError:
-        print('Problem with the syntax of the command. Please enter the id of the deposit to restore. If the deposit is on the sandbox, enter url=sandbox or -u sandbox \n')
+        print('Problem with the syntax of the command.  If the deposit is on the sandbox, enter url=sandbox or -u sandbox \n')
         print('You need to choose the chosen option: rebuildannex / usegitannex / simpledownload. Enter -h for more help.')
-        print ('restore_archive.py -i <deposit_id> -k <access_key> -u <sandbox if used> -o <chosen option>')
+        print ('restore_archive.py -k <access_key> -u <sandbox if used> -o <chosen option>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print ('restore_archive.py -i <deposit_id> -k <access_key> -u <sandbox if used> -o <chosen option>')
+            print ('restore_archive.py -k <access_key> -u <sandbox if used> -o <chosen option>')
             print('The option for restoring files: \n')
             print("- 'rebuildannex': Rebuild the annex so that the downloaded symbolic links point to the files. \n")
             print("- 'usegitannex': initialize a git-annex and add the restored files into it as well as store them as web remotes. \n")
             print("- 'simpledownload': download the files once we restore them by making them replace the broken symbolic links. ")
             sys.exit()
-        elif opt in ("-i", "--id"):
-            deposit_id = arg
         elif opt in ("-k", "--key"):
             key = arg
         elif opt in ("-u", "--url"):
@@ -161,7 +158,7 @@ def main(argv):
     # downloading the archive and the file from the new 
     download_archive(key, zenodo_url)
     # restoring the files
-    restore_files(deposit_id, key, zenodo_url, option)
+    restore_files(key, zenodo_url, option)
 
 if __name__ == "__main__":
     import sys
