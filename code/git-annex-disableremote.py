@@ -97,8 +97,8 @@ def archiving(deposit_id, key, url, path_restorearchive):
 
     ########### creating the archive ###############################
     # creating the archive
-    os.system("git archive --output=" + dir.name + "/%s.tar.gz" % remote_name + " --format=tar.gz HEAD --prefix=%s/" % remote_name)
-
+    archivepath =  dir.name + "/" + remote_name + ".tar.gz"
+    os.system("git archive --output="+ archivepath + " --format=tar.gz HEAD --prefix=%s/" % remote_name)         
 
     ########### creating a new deposit on Zenodo ###################
     r = requests.post(url, params=params, json={}, headers=headers)
@@ -121,8 +121,9 @@ def archiving(deposit_id, key, url, path_restorearchive):
     with open(path_restorearchive, "rb") as fp:
         r = requests.put("%s/%s" % (archivedeposit_bucket, 'restore_archive.py'), params=params, json={}, data=fp)
                         
-    with open(dir.name + '/%s.tar.gz' % remote_name, "rb") as fp:
-        r = requests.put("%s/%s" % (archivedeposit_bucket, '%s.tar.gz' % remote_name), params=params, json={}, data=fp)
+    with open(archivepath, "rb") as fp:
+        archivename = remote_name + '.tar.gz'
+        r = requests.put("%s/%s" % (archivedeposit_bucket, archivename), params=params, json={}, data=fp)
 
     with open(dir.name + "/git-annex-info.json", "rb") as fp:
         r = requests.put("%s/%s" % (archivedeposit_bucket, 'git-annex-info.json'), params=params, json={}, data=fp)
@@ -384,7 +385,7 @@ def transformtoweb(deposit_id, key, url):
         # now, we can finally create the web url
         nurl = download_link + '?access_token='+ key
         # now, let's turn the files into web remotes
-        os.system('git annex addurl '+ nurl + ' --file=' + file_name + " --relaxed")
+        u = os.system('git annex addurl '+ nurl + ' --file=' + file_name + " --relaxed")
 
 
 # method to disable the remote locally with git rm
@@ -489,11 +490,11 @@ def main(argv):
     # creating an archive and uploading it to a new deposit
     archiving(deposit_id, key, url, path_restorearchive)
     # publishing the deposit
-    publish(deposit_id, key, file_path, url)
+    publish(deposit_id, key, url, file_path)
     # transforming each of the files into web remotes
     transformtoweb(deposit_id, key, url)
     # disabling the remote locally
-    disableremotelocally(deposit_id, url)
+    disableremotelocally(deposit_id)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

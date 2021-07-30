@@ -1,5 +1,6 @@
-archivedeposit_id=888019
-remote_name='test-zenodo-newver2'
+archivedeposit_id=890176
+ 
+remote_name='Myproject'
 
 
 

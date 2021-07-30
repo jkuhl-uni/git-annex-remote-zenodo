@@ -60,7 +60,6 @@ class ZenodoRemote(ExportRemote):
         url = self.url + '/' + str(newdeposit_id) + '/files'
         r = self.query('get', url, "link_files")
 
-
         # first step: getting the name of the remote
         # reading the file from the other branch without checking into it
         output = subprocess.getoutput("git show git-annex:./remote.log")
@@ -103,7 +102,8 @@ class ZenodoRemote(ExportRemote):
             if file_key in dico:
                 name = dico[file_key]
                 output = subprocess.getoutput("git annex copy " + name + " --to " + remote_name)
-        return
+                print(output)
+        
 
     def create_newversion(self, oldrecord_id):
         # making sure that the given id for the old record is correct
@@ -125,7 +125,6 @@ class ZenodoRemote(ExportRemote):
         # fetching the deposition id of the new version
         # we can only access it this way because it's not given as a field
         newdeposit_id = r.json()['links']['latest_draft'].split('/')[-1]
-
         # making a new get request to get the information about this reposit and returning the response
         url = self.url + '/' + str(newdeposit_id) 
         r = self.query('get', url, "create_newversion")  
@@ -160,8 +159,7 @@ class ZenodoRemote(ExportRemote):
         if not newversion:
             r = self.query('post', self.url,  "initremote")
         else:   
-            r = self.create_newversion(newversion)
-           
+            r = self.create_newversion(newversion)           
  
         # making sure that we got the correct success response for creating a new deposit
         if r.status_code > 201:
