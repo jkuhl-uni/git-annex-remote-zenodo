@@ -1,13 +1,44 @@
-#+TITLE:       rapport stage
-#+AUTHOR:      Oumaima Hajji
-#+STARTUP: overview indent inlineimages logdrawer
-#+TAGS: R(R) Python(p) OrgMode(O) 
+% Created 2021-08-02 lun. 17:01
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Oumaima Hajji}
+\date{\today}
+\title{rapport stage}
+\hypersetup{
+ pdfauthor={Oumaima Hajji},
+ pdftitle={rapport stage},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 27.2 (Org mode 9.4.4)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
 
 
-* Abstract (TODO)
-* Introduction (TODO)
-* Etat de l'art (TOEDIT - 2.5 pages)
-** Historique, gros fichiers
+
+\section{Abstract (TODO)}
+\label{sec:orga884902}
+\section{Introduction (TODO)}
+\label{sec:org9349393}
+\section{Etat de l'art (TOEDIT)}
+\label{sec:org4f9f1b7}
+\subsection{Historique, gros fichiers}
+\label{sec:org6746f50}
 Dans la science moderne, particulièrement la science computationnelle
 et la data science, on gère un énorme volume des fichiers et de
 données qui évoluent fréquemment au cours du temps. Il faut donc
@@ -33,8 +64,9 @@ maximale possible. Heureusement, Git a plusieurs extensions dont on
 peut se servir quand on a des fichiers de grandes tailles. Les deux
 outils les plus recommandés sont: git-annex et Git LFS.
 Git LFS est ….
-git-annex ...
-** Archivage
+git-annex \ldots{}
+\subsection{Archivage}
+\label{sec:org9dc43af}
 Maintenant que l'on sait comment gérer les fichiers il faut passer à
 l'autre étape importante dans ce procès qui est l'étape de
 l'archivage. Dans le cadre de la recherche, c’est impératif de bien
@@ -54,10 +86,10 @@ aussi un identificateur unique pour les bien citer et référencier.  Et
 puisque les trois outils offrent des services similaires, on a décidé
 de se servir de Zenodo qui est un outil multidisciplinaire (on peut
 déposer des papiers de recherche, des datasets, des logiciels, des
-rapports, ...) développé par OpenAIRE ( ) et exploité par CERN ( ).
+rapports, \ldots{}) développé par OpenAIRE ( ) et exploité par CERN ( ).
 C’est l’un des entrepôts les plus utilisés dans tous les domaines de
 recherche qui ne coûte rien et qui permet d’avoir des dépôts de 50 GB
-(https://public.tableau.com/app/profile/bibdesponts/viz/tableauDATAv2_0/Tableaudebord1).
+(\url{https://public.tableau.com/app/profile/bibdesponts/viz/tableauDATAv2\_0/Tableaudebord1}).
 Maintenant que l’on connait les deux parties imporantes pour bien
 gérer les gros fichiers et les archiver, il faut forger une liaison
 directe entre elles. Un souci que l’on rencontre c’est que l’archivage
@@ -91,8 +123,10 @@ Amazon S3, git lfs, …) , mais Zenodo ne figure pas dans cette
 liste. On va donc implémenter un special remote git-annex pour Zenodo
 qui va répondre à toutes nos attentes.
 
-* Contributions (TOEDIT - 8 pages)
-** Modèle de données
+\section{Contributions (TOEDIT)}
+\label{sec:org298c094}
+\subsection{Modèle de données}
+\label{sec:org78aa685}
 
 Avant de commencer l’implémentation du remote, il y avait quelques
 choix à faire pour savoir comment bien répondre à des problèmes qui
@@ -141,9 +175,11 @@ local quand on fait un upload sur Zenodo, on a décidé de remplacer les
 noms des fichiers par les clés. Et puisque l’on a un lien unique entre
 le remote et le dépôt Zenodo, on peut facilement retrouver les
 fichiers que l’on veut et les récupérer en local.
-** Implémantation de remote Zenodo: le backend 
+\subsection{Implémantation de remote Zenodo: le backend}
+\label{sec:org0bdf26b}
 
-*** Introduction à l'API REST Zenodo
+\subsubsection{Introduction à l'API REST Zenodo}
+\label{sec:orge10a23b}
 Afin de se communiquer avec Zenodo pour effectuer des
 opérations sur les fichiers, il faut utiliser son API. La première
 partie du process est donc de comprendre comment elle fonctionne et de
@@ -165,7 +201,8 @@ une évolution gracieuse au cours de sa recherche:
 
 INSERT THE FLOW CHART
 
-*** AnnexRemote: la bibliothèque python utilisée
+\subsubsection{AnnexRemote: la bibliothèque python utilisée}
+\label{sec:orge79622e}
 Maintenant que l'on peut facilement communiquer avec Zenodo et que
 l'on a un blueprint de comment on veut structurer notre backend
 Zenodo, il faut commencer son implémentation.
@@ -178,18 +215,19 @@ ne pas avoir des soucis de confusion des intéractions, à chaque fois
 l'une des deux parties prend l'initiative en n'envoyant que des
 requêtes et l'autre partie répond alors avec des reponses à ces requêtes. 
 C'est pour cette raison qu'il faut avoir un programme qui répond bien
-à ces contraintes. On utilise donc la bibliothèque *AnnexRemote* de
+à ces contraintes. On utilise donc la bibliothèque \textbf{AnnexRemote} de
 python qui implémente la totalité du protocole et respecte toutes ses
 spécifications. Il faut donc juste importer cette bibiliothèque dans
-notre programme et définir une classe /ZenodoRemote/ qui extend la classe
-/SpecialRemote/ (implémentée par *AnnexRemote*). Ensuite, on implémente
+notre programme et définir une classe \emph{ZenodoRemote} qui extend la classe
+\emph{SpecialRemote} (implémentée par \textbf{AnnexRemote}). Ensuite, on implémente
 les fonctions de la classe avec les fonctionnalitées qui sont uniques
 à notre backend Zenodo. Toutes les fonctions du création du dépôt,
 suppression des fichiers, obtention d'un fichier, .. sont définies,
 mais pour tout ce qui reste (par exemple, la création d'une nouvelle
 version) c'est à nous d'ajouter.
 
-*** Les opérations principales du remote
+\subsubsection{Les opérations principales du remote}
+\label{sec:org095d06b}
 Chaque remote Zenodo doit être capable d'exécuter des opérations
 principales qui servent à envoyer les fichiers sur le remote, les
 manipuler, et les récupérer en local. Tout cela se fait avec les
@@ -197,142 +235,142 @@ fonctions du programme principal git-annex-remote-zenodo. Voici les
 opérations essentielles que l'on a implémenté dans le programme
 principal:
 
-- Création du dépôt :: 
-  C'est la première étape du procès qui se fait une fois pour chaque
-  remote, on l'implémente donc lors de l'initialisation du remote
-  (dans la fonction ~initremote~ de la classe). On s'appuie sur la clé
-  donnée par l'utilisateur, ainsi que son choix Sandbox (FN) ou non,
-  pour envoyer une requête POST à l'API demandant la création du
-  dépôt. On récupère ensuite l'identifiant unique du dépôt ainsi que
-  d'autres informations (comme le lien à utiliser pour déposer les
-  fichiers), et on les stoque dans le fichier des configurations de
-  git-annex. On stoque aussi la clé unique de l'utilisateur pour ne
-  pas lui demander à chaque fois de la donner. 
+\begin{description}
+\item[{Création du dépôt}] C'est la première étape du procès qui se fait une fois pour chaque
+remote, on l'implémente donc lors de l'initialisation du remote
+(dans la fonction \texttt{initremote} de la classe). On s'appuie sur la clé
+donnée par l'utilisateur, ainsi que son choix Sandbox (FN) ou non,
+pour envoyer une requête POST à l'API demandant la création du
+dépôt. On récupère ensuite l'identifiant unique du dépôt ainsi que
+d'autres informations (comme le lien à utiliser pour déposer les
+fichiers), et on les stoque dans le fichier des configurations de
+git-annex. On stoque aussi la clé unique de l'utilisateur pour ne
+pas lui demander à chaque fois de la donner.
 
-- Envoi d'un fichier ::
-  Cette opération peut s'exécuter plusieurs fois par l'utilisateur
-  lors de sa recherche, puisqu'elle permet de stoquer les fichiers
-  dans un autre endroit où ils sont disponibles à tout moment pour
-  être observés ou récupérés. On implémente cette fonctionnalité dans
-  la fonction ~transfer_store~ de la classe.
-  Pour commencer l'envoi des fichiers, il ne faut d'abord le lien vers
-  le dépôt que l'on récupère facilement avec la fonction ~getconfig~ de
-  l'annex. Après, on exploite le fait que git-annex donne à chaque
-  fichier annexé un identificateur unique (une clé SHA1), et on
-  utilise donc cet identificateur comme nom quand on dépose un fichier
-  sur Zenodo. Ce choix d'implémentation nous permet de garder un lien
-  direct entre git-annex et Zenodo sans devoir passer par autres
-  étapes supplémentaires d'identification. On sait qu'un fichier File1
-  qui a un identificateur Key1 et qui est annexé en local est le même
-  que le fichier Key1 qui est dans le remote. Et puisque git-annex
-  s'appuie principalement sur les identificateurs des fichiers pour
-  les manipuler, maintenant, quand veut chercher un fichier dans le
-  remote, on peut faire ça directement sans devoir chercher le fichier
-  qui est relié à cet identificateur. 
+\item[{Envoi d'un fichier}] Cette opération peut s'exécuter plusieurs fois par l'utilisateur
+lors de sa recherche, puisqu'elle permet de stoquer les fichiers
+dans un autre endroit où ils sont disponibles à tout moment pour
+être observés ou récupérés. On implémente cette fonctionnalité dans
+la fonction \texttt{transfer\_store} de la classe.
+Pour commencer l'envoi des fichiers, il ne faut d'abord le lien vers
+le dépôt que l'on récupère facilement avec la fonction \texttt{getconfig} de
+l'annex. Après, on exploite le fait que git-annex donne à chaque
+fichier annexé un identificateur unique (une clé SHA1), et on
+utilise donc cet identificateur comme nom quand on dépose un fichier
+sur Zenodo. Ce choix d'implémentation nous permet de garder un lien
+direct entre git-annex et Zenodo sans devoir passer par autres
+étapes supplémentaires d'identification. On sait qu'un fichier File1
+qui a un identificateur Key1 et qui est annexé en local est le même
+que le fichier Key1 qui est dans le remote. Et puisque git-annex
+s'appuie principalement sur les identificateurs des fichiers pour
+les manipuler, maintenant, quand veut chercher un fichier dans le
+remote, on peut faire ça directement sans devoir chercher le fichier
+qui est relié à cet identificateur.
 
-- Récupération d'un fichier ::
-  Afin de récupérer un fichier qui sur Zenodo en local, on peut
-  simplement faire une requête GET de l'API pour récupérer la liste
-  des fichiers qui sont dans le dépôt. Après, on peut chercher le
-  fichier dont le nom correspond à la clé git-annex que l'on veut
-  récupérer. Une fois trouvé, on peut récupérer l'identificateur
-  Zenodo donné à chaque fichier stoqué dessus, et on utilise cet
-  identifiant pour télécharger ce fichier.
-  On ne peut pas directement télécharger un fichier sans connaître son
-  identificateur Zenodo unique. Cet identificateur est donné lors du
-  stockage du fichier sur Zenodo et est différent de l'identificateur
-  git-annex que l'on utilise pour renommer le fichier. 
-  
-- Vérification de l'existence d'un fichier ::
-  Cette opération se fait plusieurs fois durant le procès puisqu'elle
-  est exécutée par git-annex à chaque fois que l'on cherche à savoir
-  l'état d'un fichier. Elle est donc lancée quand on
-  veut déposer un fichier (pour être sûr qu'il n'y est déjà pas),
-  quand on veut le récupérer, et quand on veut savoir où il est (la
-  commande 'git-annex whereis' par exemple).
-  En principe, on parcours la liste des fichiers qui sont disponibles
-  sur le dépôt en comparant la clé git-annex donnée avec le nom des
-  fichiers et on renvoie ua final un booléan pour informer git-annex
-  de l'existence ou non de ce fichier dans le remote.
-  
-- Suppression d'un fichier ::
-  Afin d'envoyer un fichier, on s'assure déjà qu'il est disponible sur
-  le remote (s'il n'est pas là, on ne fait rien, et on ne considère
-  pas ça comme erreur). On récupère donc la liste des fichiers
-  disponibles dans le dépôt et on envoir une requête DELETE à l'API
-  avec l'identifiant unique de ce fichier. 
+\item[{Récupération d'un fichier}] Afin de récupérer un fichier qui sur Zenodo en local, on peut
+simplement faire une requête GET de l'API pour récupérer la liste
+des fichiers qui sont dans le dépôt. Après, on peut chercher le
+fichier dont le nom correspond à la clé git-annex que l'on veut
+récupérer. Une fois trouvé, on peut récupérer l'identificateur
+Zenodo donné à chaque fichier stoqué dessus, et on utilise cet
+identifiant pour télécharger ce fichier.
+On ne peut pas directement télécharger un fichier sans connaître son
+identificateur Zenodo unique. Cet identificateur est donné lors du
+stockage du fichier sur Zenodo et est différent de l'identificateur
+git-annex que l'on utilise pour renommer le fichier.
 
-*** Les tests effectués
-  Après chaque opération effectuée, s'il y a eu des problèmes, on évoque
-  une exception RemoteError avec le souci rencontré. On s'appuie sur
-  les codes retournés dans les réponses de l'API pour savoir le status
-  de la requête. Pour chaque opération, un code définit un état unique
-  et donc on peut imprimer l'erreur dans les messages de debug pour
-  l'utilisateur. C'est grâce à ces messages que l'on peut donc savoir
-  la source du problème (si cela parvient juste de la requête ou si
-  c'est un problème interne à Zenodo). 
-  Donc lors des tests de fonctionnement du backend, et grâce à
-  l'inclusion d'un mode debug, on a pu s'assurer de la correction des
-  opérations et de la cohérence entre git-annex et l'API Zenodo.
-  Il y a eu des tests élémentaires pour chaque partie du programme
-  pour gérer les petites tâches avant de passer aux tests complets où
-  on a effectué toutes les opérations possibles sur le remote.
-  Les traces qui informent le déroulement de ce procès peuvent être
-  observées dans le fichier ~journal.org~  [fn: lien] où j'ai rédigé toutes les
-  notes qui concernent ce projet et les tests effectués tout au long
-  du stage avec les résultats trouvés.
-  
-** Archivage
-*** Archivage direct des données
+\item[{Vérification de l'existence d'un fichier}] Cette opération se fait plusieurs fois durant le procès puisqu'elle
+est exécutée par git-annex à chaque fois que l'on cherche à savoir
+l'état d'un fichier. Elle est donc lancée quand on
+veut déposer un fichier (pour être sûr qu'il n'y est déjà pas),
+quand on veut le récupérer, et quand on veut savoir où il est (la
+commande 'git-annex whereis' par exemple).
+En principe, on parcours la liste des fichiers qui sont disponibles
+sur le dépôt en comparant la clé git-annex donnée avec le nom des
+fichiers et on renvoie ua final un booléan pour informer git-annex
+de l'existence ou non de ce fichier dans le remote.
+
+\item[{Suppression d'un fichier}] Afin d'envoyer un fichier, on s'assure déjà qu'il est disponible sur
+le remote (s'il n'est pas là, on ne fait rien, et on ne considère
+pas ça comme erreur). On récupère donc la liste des fichiers
+disponibles dans le dépôt et on envoir une requête DELETE à l'API
+avec l'identifiant unique de ce fichier.
+\end{description}
+
+\subsubsection{Les tests effectués}
+\label{sec:orgbb06810}
+Après chaque opération effectuée, s'il y a eu des problèmes, on évoque
+une exception RemoteError avec le souci rencontré. On s'appuie sur
+les codes retournés dans les réponses de l'API pour savoir le status
+de la requête. Pour chaque opération, un code définit un état unique
+et donc on peut imprimer l'erreur dans les messages de debug pour
+l'utilisateur. C'est grâce à ces messages que l'on peut donc savoir
+la source du problème (si cela parvient juste de la requête ou si
+c'est un problème interne à Zenodo). 
+Donc lors des tests de fonctionnement du backend, et grâce à
+l'inclusion d'un mode debug, on a pu s'assurer de la correction des
+opérations et de la cohérence entre git-annex et l'API Zenodo.
+Il y a eu des tests élémentaires pour chaque partie du programme
+pour gérer les petites tâches avant de passer aux tests complets où
+on a effectué toutes les opérations possibles sur le remote.
+Les traces qui informent le déroulement de ce procès peuvent être
+observées dans le fichier \texttt{journal.org}  [fn: lien] où j'ai rédigé toutes les
+notes qui concernent ce projet et les tests effectués tout au long
+du stage avec les résultats trouvés.
+
+\subsection{Archivage}
+\label{sec:org0e4681d}
+\subsubsection{Archivage direct des données}
+\label{sec:org8eeb868}
 Quand la première partie de la gestion des données finit, et on stocke
 tous les fichiers qui nous intéressent dans le remote, il faut
 maintenant passer à la deuxième partie de l'archivage qui se fait
 indépendamment de la première, et où on finalise son dépôt avec toutes
 les méta-données nécessaires avant de le publier.
-Dans notre programme d'archivage ~git-annex-disableremote.py~, on a
+Dans notre programme d'archivage \texttt{git-annex-disableremote.py}, on a
 décidé de diviser les principales étapes de l'archivages en trois
 parties logiques: la publication du dépôt, la transformation des
 fichiers en remote web, et finalement la suppression du remote en
 local. Chacune de ces étapes joue un rôle intrinsèque et la succession
 des trois est ce que garantie l'archivage de notre dépôt.
 
-- La publication du dépôt ::
-  Afin de publier un dépôt sur Zenodo, il faut d'abord donner des
-  informations sur ce dépôt. On donne ainsi le choix à l'utilisateur
-  de choisir la manière dont il veut fixer les méta-données: soit il
-  donne le path d'un fichier zenodo.json qui contient déjà les
-  métadonnées, ou il les donne manuellement sur le terminal en
-  répondant aux questions posées par le programme, ou il les configure
-  directement sur Zenodo. On fait des tests après pour s'assurer que
-  elles sont bien données, et on passe à l'étape suivante de la
-  publication. C'est maintenant que l'on utilise l'opération /publish/
-  de l'API pour finaliser la publication.  
+\begin{description}
+\item[{La publication du dépôt}] Afin de publier un dépôt sur Zenodo, il faut d'abord donner des
+informations sur ce dépôt. On donne ainsi le choix à l'utilisateur
+de choisir la manière dont il veut fixer les méta-données: soit il
+donne le path d'un fichier zenodo.json qui contient déjà les
+métadonnées, ou il les donne manuellement sur le terminal en
+répondant aux questions posées par le programme, ou il les configure
+directement sur Zenodo. On fait des tests après pour s'assurer que
+elles sont bien données, et on passe à l'étape suivante de la
+publication. C'est maintenant que l'on utilise l'opération \emph{publish}
+de l'API pour finaliser la publication.
 
-- La transformation de fichiers en un web remote ::
-  Cette étape est implémentée pour ajouter les fichiers que l'on vient
-  de publier dans un deuxième remote avant de supprimer ce remote (On
-  veut que git-annex aie au moins deux copies de chacun des
-  fichiers). Si on passe pas par cette étape, l'utilisateur perdera le
-  lien direct git-annex <-> Zenodo pour ces fichiers.
-  C'est pour cette raison que l'on reprend la liste des fichiers
-  (leurs noms ainsi que la clé git-annex) et que l'on récupère les
-  liens de téléchargement de chacun des fichiers avant de les ajouter
-  à un remote web avec la commande 'git-annex addurl'.
-  Maintenant, et grâce à cela, tous les fichiers sont toujours
-  enregistrés commes des copies dans l'annex même après la suppression
-  du remote Zenodo.
-  
-- La suppression du remote en local ::
-  On s'appuie sur un fichier ~remote.log~ de git-annex pour récupérer le
-  nom du remote afin de le supprimer. Ce fichier est accessible depuis
-  la branche git-annex de Git et est utilisé pour stocker toutes les
-  informations concernant les remotes git-annex.
-  On peut retrouver le nom du remote (que l'on lui a donné lors de
-  l'initialisation) grâce à l'identificateur du dépôt Zenodo. Une fois
-  trouvé, on utilise la commande 'git remote remove' pour supprimer le
-  remote.  
+\item[{La transformation de fichiers en un web remote}] Cette étape est implémentée pour ajouter les fichiers que l'on vient
+de publier dans un deuxième remote avant de supprimer ce remote (On
+veut que git-annex aie au moins deux copies de chacun des
+fichiers). Si on passe pas par cette étape, l'utilisateur perdera le
+lien direct git-annex <-> Zenodo pour ces fichiers.
+C'est pour cette raison que l'on reprend la liste des fichiers
+(leurs noms ainsi que la clé git-annex) et que l'on récupère les
+liens de téléchargement de chacun des fichiers avant de les ajouter
+à un remote web avec la commande 'git-annex addurl'.
+Maintenant, et grâce à cela, tous les fichiers sont toujours
+enregistrés commes des copies dans l'annex même après la suppression
+du remote Zenodo.
 
-*** Création d'une nouvelle version après l'archivage d'un dépôt
+\item[{La suppression du remote en local}] On s'appuie sur un fichier \texttt{remote.log} de git-annex pour récupérer le
+nom du remote afin de le supprimer. Ce fichier est accessible depuis
+la branche git-annex de Git et est utilisé pour stocker toutes les
+informations concernant les remotes git-annex.
+On peut retrouver le nom du remote (que l'on lui a donné lors de
+l'initialisation) grâce à l'identificateur du dépôt Zenodo. Une fois
+trouvé, on utilise la commande 'git remote remove' pour supprimer le
+remote.
+\end{description}
+
+\subsubsection{Création d'une nouvelle version après l'archivage d'un dépôt}
+\label{sec:orgc24c91d}
 Cette opération n'est pas possible que si on essaye de créer un
 nouvelle version d'un dépôt déjà publié. C'est l'outil qui permet de
 faire évoluer ses fichiers même après publication.
@@ -343,7 +381,8 @@ utiliser pour créer la nouvelle version.
 L'option à utiliser est newversion=id et notre programme prend soins
 de toutes les opérations possibles comme il aurait fait avec un
 nouveau dépôt. 
-*** Stockage d'une archive de données dans un autre dépôt comme copie
+\subsubsection{Stockage d'une archive de données dans un autre dépôt comme copie}
+\label{sec:org384d724}
 Il y a aussi une étape que l'on fait au début de l'opération de
 l'archivage qui est la création d'une archive contenant les fichiers
 et le stockage de cette archive sur un nouveau dépôt Zenodo. 
@@ -353,63 +392,70 @@ l'utilisateur seulement sur le site web de Zenodo.
 L'utilité de cette opération est de permettre à l'utilisateur de
 garder une copie qu'il peut récupérer quand il veut sans passer par
 git-annex. Il y a des autres fichiers qui sont stockés dans ce dépôt
-autre que l'archive: ~git-annex-info.json~ et ~restore_archive.py~. Le
+autre que l'archive: \texttt{git-annex-info.json} et \texttt{restore\_archive.py}. Le
 premier fichier contient des informations sur les fichiers tels que
 leurs liens de téléchargements, leurs identifiants, et leurs
 noms. Tandis que le deuxième est un script python à lancer par
 l'utilisateur pour restorer les fichiers de l'archive. 
 
-** Restauration d'une archive
-La restauration d'une archive se fait grâce au script ~restore_archive~
+\subsection{Restauration d'une archive}
+\label{sec:org28e1d45}
+La restauration d'une archive se fait grâce au script \texttt{restore\_archive}
 que l'utilisateur peut télécharger depuis le dépôt Zenodo avant de le
 lancer. Comme options, il faut fournir la clé Zenodo, l'option de
 restauration, et il faut aussi indiquer si c'est le site officiel
 Zenodo qui est utilisé ou le sandbox.
 Au début, le programme télécharge l'archive et le fichier
-~git-annex-info.json~ depuis le dépôt avant d'extraire son
+\texttt{git-annex-info.json} depuis le dépôt avant d'extraire son
 contenu. Maintenant, on se trouve avec des lien symboliques cassés
 (git-annex utilise des liens symboliques pour pointer à où les
 fichiers sont stockés). Il faut donc restorer le contenu des fichiers
 maintenant. Les trois options possibles de restauration sont:
 
-- L'option simpledownload ::
-  On supprime les liens symboliques en les remplaçant par les fichiers
-  que l'on télécharge grâce aux liens stoqués dans le fichier json. Au
-  final, l'utilisateur se retrouve avec ses fichiers qui sont
-  maintenant disponibles dans un dossier simple. 
+\begin{description}
+\item[{L'option simpledownload}] On supprime les liens symboliques en les remplaçant par les fichiers
+que l'on télécharge grâce aux liens stoqués dans le fichier json. Au
+final, l'utilisateur se retrouve avec ses fichiers qui sont
+maintenant disponibles dans un dossier simple.
 
-- L'option rebuildannex ::
-  Dans ce cas, au lieu de remplacer les liens symboliques par les
-  fichiers, on crée des dossiers dont les paths sont ceux où pointent
-  les liens symboliques. On peut récupérer les paths grâce au fichier
-  json où on a stocké les informations.
-  Au final, les liens qui étaient cassés sont maintenant fonctionnels
-  de nouveau et ils pointent vers des fichiers qui sont stockés ailleurs. 
-  
-- L'option usegitannex ::
-  Cette option est pour un utilisateur qui compte repasser à git-annex
-  lors de la récupération des fichiers. L'idée est donc d'initialiser
-  un répertoire Git et git-annex où on ajoute tous les fichiers après
-  leurs restauration (la restauration se fait de manière simple comme
-  en *simpledownload*). Une fois les fichiers ajoutés en annex, on les
-  ajoute aussi à un remote web pour garder une dexuième copies en
-  externe.
-  Puisque l'on initialise git-annex, les fichiers donc auront des
-  nouvelles clés git-annex.
+\item[{L'option rebuildannex}] Dans ce cas, au lieu de remplacer les liens symboliques par les
+fichiers, on crée des dossiers dont les paths sont ceux où pointent
+les liens symboliques. On peut récupérer les paths grâce au fichier
+json où on a stocké les informations.
+Au final, les liens qui étaient cassés sont maintenant fonctionnels
+de nouveau et ils pointent vers des fichiers qui sont stockés ailleurs.
+
+\item[{L'option usegitannex}] Cette option est pour un utilisateur qui compte repasser à git-annex
+lors de la récupération des fichiers. L'idée est donc d'initialiser
+un répertoire Git et git-annex où on ajoute tous les fichiers après
+leurs restauration (la restauration se fait de manière simple comme
+en \textbf{simpledownload}). Une fois les fichiers ajoutés en annex, on les
+ajoute aussi à un remote web pour garder une dexuième copies en
+externe.
+Puisque l'on initialise git-annex, les fichiers donc auront des
+nouvelles clés git-annex.
+\end{description}
 
 Quand on finit la restauration des fichiers, le programme supprime
 l'archive et les deux autres fichiers utilisés.
-  
-* Evaluation (TODO)
-* Méthodologie et compétences développées (TODO)
-** Méthodologie
-*** Documentation de l'ensemble du processus
-*** Gestion du projet
-** Compétences développées
 
-* Conclusion (TODO)
-* Bibliographie (TODO)
-* Annex (TODO)
+\section{Evaluation (TODO)}
+\label{sec:orgfbc1868}
+\section{Méthodologie et compétences développées (TODO)}
+\label{sec:orge4c88b8}
+\subsection{Méthodologie}
+\label{sec:orgefbe701}
+\subsubsection{Documentation de l'ensemble du processus}
+\label{sec:org8b825b0}
+\subsubsection{Gestion du projet}
+\label{sec:orge4121fe}
+\subsection{Compétences développées}
+\label{sec:orgaffddf4}
 
-
-  
+\section{Conclusion (TODO)}
+\label{sec:org8c8904e}
+\section{Bibliographie (TODO)}
+\label{sec:org6e3f752}
+\section{Annex (TODO)}
+\label{sec:org7fa85e3}
+\end{document}
