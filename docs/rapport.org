@@ -4,8 +4,46 @@
 #+TAGS: R(R) Python(p) OrgMode(O) 
 
 
-* Abstract (TODO)
-* Introduction (TODO)
+* Abstract (TOEDIT - 0.5 pages)
+As time goes on and the sciences progress exponentially, we find
+ourselves in a position where it's hard for a scientist to fully
+develop their research and present it for the others in a way that's
+easy to grasp and reproduce. With the abundant number of research
+papers written with no data attached to test them with, or the the
+ones lost with no way to restore, it's time for the researchers to
+change their attitude and work towards a more reproducible
+research. This is the main goal of the mooc which aims to teach all
+the many ways a researcher can make every step of their process as
+reproducible as possible. And so, in this project, our main aim was to
+take care of making science more open and have it stored in an eternal
+archiving space. This is the reason we worked to create a backend for
+git-annex to handle the versioning of huge files during the entire research process, and
+then allow the user to archive their findings on Zenodo, and cite
+their results using the doi given by Zenodo. Now only this, but we
+added other tools to the arsenal for the user to keep on evolving
+their work and for them to restore their files whenever and whereever
+they want with the use of our programs.  
+
+* Introduction (TODO - 1.5 pages)
+En France, dans les dernières années, il y a un mouvement autour de la
+science ouverte qui vise à rendre toutes les publications et les
+données de la recherche disponibles pour toute personne intéressée. Il
+vise la dissoulution des frontières strictes financées qui rendent des
+articles de recherches importants prisonniers et limitent leur rayon
+d'exposition. Son objectif est ainsi important puisque rendre ces
+travaux disponible réduit les efforts de la recherche et comlexifie
+les recherches futurs des autres scientifiques. Non seulement cela,
+mais il limite aussi le taux de réutilisation du matériel et donc
+cause l'augmentation du temps perdu pour atteindre un même résultat.
+
+C'est là où parvient le plan national de la science ouverte qui oblige
+les scientifiques à rendre ouvert l'accès pour leurs recherches
+financées et leurs projets scientifiques. Il met en place un comité
+qui gère tous ces efforts de structuration et qui planifie des points
+de gestion de ce sujet.
+
+
+
 * Etat de l'art (TOEDIT - 2.5 pages)
 ** Historique, gros fichiers
 Dans la science moderne, particulièrement la science computationnelle
@@ -399,17 +437,137 @@ maintenant. Les trois options possibles de restauration sont:
 
 Quand on finit la restauration des fichiers, le programme supprime
 l'archive et les deux autres fichiers utilisés.
-  
-* Evaluation (TODO)
-* Méthodologie et compétences développées (TODO)
-** Méthodologie
-*** Documentation de l'ensemble du processus
-*** Gestion du projet
-** Compétences développées
+* Evaluation (TOEDIT - 0.75 page)
+Après avoir fini l'implémentation du remote Zenodo et tous les autres
+programmes complémentaires (scripts python pour la publication et pour
+la restauration de l'archive), la dernière contribution effectuée
+était la rédaction d'un tutorial permettant de tester et comprendre la
+totalité des fonctionnalités du remote. Le fichier ~walkthrough.org~
+[fn: link to where it is] contient un tutorial détaillé avec des
+explications pour chacune des fonctionnalités mentionnées en
+haut. Commençant par une introdution au sujet, et après dans une
+deuxième partie, l'utilisateur peut comprendre comment manipuler les
+données en local avec git-annex et avec le remote Zenodo. Ensuite, il
+passe à l'étape de l'archivage des données par publication, avant de
+finir par initialiser une nouvelle version du dépôt ou par restaurer
+les fichiers en local.
 
-* Conclusion (TODO)
+Et puisque ce projet fait partie du mooc 2, la dernière partie du
+procès sera son intégration dans ce mooc pour permettre aux
+rechercheurs de l'utiliser. Puisque le mooc est ouvert pour toute
+personne travaillant sur un projet scientifique, surtout les projets
+de data science, alors avoir un backend Zenodo déjà développé avec un
+tutorial et une documentation déjà prêts, va faciliter leurs tâches de
+gestion de données et d'archivage.
+
+L'implémentation de ce remote Zenodo m'a aussi permet de commencer à
+travailler sur un autre backend git-annex pour Nakala. En effet,
+puisque nakala était l'un des outils d'archivage concurrent dont on a
+parlé au début et que l'on a considéré moins intéréssant que Zenodo
+quand on a fait le choix, alors même s'il était un choix possible, il
+a cédé sa place pour Zenodo. Mais une fois que l'on a fini avec
+l'implémentation du backend Zenodo, on a décidé d'avancer un peu sur
+le backend Nakala pendant la dernière semaine du stage. 
+
+* Méthodologie et compétences développées (TODO - 3 pages)
+** Méthodologie
+*** Documentation de l'ensemble du processus (TOEDIT - 0.75 pages)
+Puisque le sujet principal de ce stage est fortement relié à la
+recherche reproductible, et que le mooc cherche à inclure des conseils
+pour aider les rechercheurs à atteindre ce but, alors la première
+étape pour moi était de comprendre comment rendre mon travail
+compréhensible et reproductible. Grâce au mooc 1, j'ai appris comment
+prendre des notes détaillées dans un fichier computationnel (j'ai
+utilisé des fichiers en org mode pour exécuter des bouts de code avec
+des commentaires en texte). Cela m'a permet d'avoir la majorité de ma
+recherche dans un fichier complet (~journal.org~) dans un ordre
+chronologique où chaque entrée est une journée de travail. Grâce à ça,
+je peut revenir en arrière pour relire des notes que j'avais prises
+il y a des semaines en réexécutant le code en parallèle aussi.
+
+J'avais aussi lu la documentation des outils et fait un tutorial pour
+chacun d'eux avant de commencer l'implémentation du remote. C'est la
+lecture de la documentation en parallèle avec l'exécution des exemples
+de test qui m'a permet de saisir leur fonctionnement et leur utilité.
+Commençant par git-annex où un tutorial complet est disponible sur le
+site [fn: intser site]. J'avais appris dans ce tutorial comment
+manipuler les fichiers en local avec git-annex avant de créer un
+remote USB pour faire mes premiers tests avec un backend.
+
+Pour Zenodo, c'était pareil puisque des premiers exemples de
+manipulation de l'API sont donnés dans le tutorial [fn: give site]
+mais pour le reste j'ai juste suivi la même logique en testant des
+fonctionnalités plus complexes.
+
+Les notes initiales que j'avais prises sont valables dans un fichier
+org (~notes.org~ [fn: link]) avec des explications de chacun des outils utilisés et des
+commentaires sur le sujet de la recherche reproductible que j'avais
+notés pendant des ateliers auxquels j'ai assisté au début du stage. 
+
+*** Gestion du projet (TODO - 1 page)
+
+** Compétences développées (TODO - 1 page)
+
+* Conclusion (TOEDIT - 1.5 pages)
+Pour conclure, durant les trois mois du stage, j'ai pu bien apprendre
+les principes de la science ouverte et l'importance de
+rendre ses travaux pas seulement compréhensibles par les autres, mais
+aussi reproductibles. Le fait de bien archiver les bonnes versions de
+ses données et son code avec son papier final de recherche s'est avéré
+bien util et important pour faciliter les travaux des autres et pour
+automatiser la vérification des résultats. D'un point de vue personnel,
+j'ai appris comment bien rédiger mon journal de laboratoire pendant
+les mois de recherche pour permettre aux autres de revisiter mes idées
+dans un ordre logique et chronologique.
+
+Et pour ce qui concerne la partie technique de la gestion de version
+et de l'archivage, j'ai pu implémenter un backend Zenodo où on peut
+stocker ses données tout au long de la période de recherche, avec
+l'intérmidiare de git-annex qui gère les versions et le déplacement
+des fichiers. Grâce à ce backend Zenodo, on gère la pérenneté de
+l'archivage des données et on facilite la tâche de référencement pour
+un rechercheur puisqu'il peut citer ses travaux en utilisant le
+doi. On a aussi pu implémenté des autres fonctionnalités permettant à
+l'utilisateur de faire évoluer ses données publiées en créant des
+nouvelles versions de son dépôt. La restauration des données
+indépendamment de git-annex s'est aussi automatisée grâce à un
+programme qui gère la récupération d'une archive des données et de
+restorer les fichiers qui figurent dedans en laissant le choix de
+restauration à l'utilisateur.
+
+Vers la fin de la période du stage, pendant la dernière semaine,
+j'avais aussi commencé l'implémentation d'un autre backend git-annex
+pour Nakala. J'avais suivi la même philosophie avec ce remote en
+commenàant par des tests d'API, avant de faire des choix
+d'implémentation en gardant en tête l'architecture d'un dépôt Nakala
+et les notions qui en sont dépendants. Au final, la majorité des
+fonctions du remote Nakala ont été implémentées, et j'ai aussi faits
+des tests pour chacune des fonctions indépendamment des autres, mais
+des tests globaux n'ont pas été effectués.
+
+L'utilisation de Datalad a aussi été planifiée pour aider à bien gérer
+les données puisque Datalad a une notion de modules et submodules et
+donc il peut être intéréssant si on veut garder la hiérarchie des
+dossiers. Et puisque Datalad donne accès à un backend figshare pour
+archiver ses données, on a étudié le cas de figshare lors de
+l'implémentation du remote Zenodo pour comparer les décisions qui ont
+été prises par Datalad pour structurer les données. Au final, on a
+décidé de prioritiser Zenodo comme remote de git-annex et on n'a donc
+pas pu avancer sur les idées que l'on avait pour inclure Datalad dans
+ce procès.
+
+En fin de compte, l'archivage et la gerstion des version ne sont que
+deux points miniscules dans le trajet vers une recherche plus
+reproductible. C'est pour raison qu'il reste autres parties à gérer
+pour bien combler la totalité de ce sujet. Donc, l'une des étapes qui
+sont intéréssant est la gestion du workflow et l'automatisation des
+tâches de compilation et d'exécution du code. Snakemake est l'outil
+choisi pour atteindre ce but et donc il reste à chercher comment
+integrer des commandes git-annex dans un fichier Snakemake pourque le
+workflow soit complet et la gestion des versions du code et des
+données se fasse de manière complète.
+
 * Bibliographie (TODO)
-* Annex (TODO)
 
 
   

@@ -195,8 +195,6 @@
      and where the developper can state the packages and the versions
      that they want to use makes it possible for them to reproduce
      the same results.
-
-     
 * The tutorials that were done in order get a better grasp of the tool.
 ** git-annex.
 *** useful commands.
@@ -306,7 +304,6 @@ bucket_url = r.json()["links"]["bucket"]
    In the case of creating new images, I've tried creating some using
    simple Dockerfiles.
 
-   
 * An introduction to Reproducible Research.
   It is the practice of having the flow of research documented in all
   of its steps in order to get the same result even if it's retested
@@ -325,7 +322,6 @@ bucket_url = r.json()["links"]["bucket"]
     randomization procedures, floating-point operations, or
     specialized computer hardware.
 
-    
 * A look into GUIX and reproducible software environments.
 ** Link:
   https://link.springer.com/content/pdf/10.1007%2F978-3-319-27308-2_47.pdf
@@ -394,8 +390,6 @@ with Guix/ by _Ludovic Courtès_ and _Ricardo Wurmus_.
     to the selected /gnu/store item and the symbolic link is then
     stored in  ~ /.guix-profile.
 
-
-
 * Combining Snakemake with other tools.
 ** Integrated package management with Conda.
    We can now define isolated software environments in each rule and
@@ -437,8 +431,6 @@ with Guix/ by _Ludovic Courtès_ and _Ricardo Wurmus_.
    - Conda based package management in containerized OS (use versions
      and OS defined by the workflow developer).
    + Link: https://snakemake.readthedocs.io/en/v5.1.4/snakefiles/deployment.html
-
-
 
 
 
@@ -488,8 +480,6 @@ with Guix/ by _Ludovic Courtès_ and _Ricardo Wurmus_.
       
 ** Link:
    https://the-turing-way.netlify.app/reproducible-research/vcs/vcs-data.html
-
-
 
 
 * Tutorial git-annex

@@ -1,4 +1,4 @@
-% Created 2021-08-02 lun. 17:01
+% Created 2021-08-03 mar. 15:33
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -31,14 +31,33 @@
 
 
 
-\section{Abstract (TODO)}
-\label{sec:org884fd36}
+\section{Abstract (TOEDIT)}
+\label{sec:org5a5b239}
+As time goes on and the sciences progress exponentially, we find
+ourselves in a position where it's hard for a scientist to fully
+develop their research and present it for the others in a way that's
+easy to grasp and reproduce. With the abundant number of research
+papers written with no data attached to test them with, or the the
+ones lost with no way to restore, it's time for the researchers to
+change their attitude and work towards a more reproducible
+research. This is the main goal of the mooc which aims to teach all
+the many ways a researcher can make every step of their process as
+reproducible as possible. And so, in this project, our main aim was to
+take care of making science more open and have it stored in an eternal
+archiving space. This is the reason we worked to create a backend for
+git-annex to handle huge files during the entire research process, and
+then allow the user to archive their findings on Zenodo, and cite
+their results using the doi given by Zenodo. Now only this, but we
+added other tools to the arsenal for the user to keep on evolving
+their work and for them to restore their files whenever and whereever
+they want with the use of our programs.  
+
 \section{Introduction (TODO)}
-\label{sec:org2edb885}
-\section{Etat de l'art (TOEDIT)}
-\label{sec:orgdf136f5}
+\label{sec:org25a179d}
+\section{Etat de l'art (TOEDIT - 2.5 pages)}
+\label{sec:org8082975}
 \subsection{Historique, gros fichiers}
-\label{sec:org3b7de40}
+\label{sec:orgad12ccb}
 Dans la science moderne, particulièrement la science computationnelle
 et la data science, on gère un énorme volume des fichiers et de
 données qui évoluent fréquemment au cours du temps. Il faut donc
@@ -66,7 +85,7 @@ outils les plus recommandés sont: git-annex et Git LFS.
 Git LFS est ….
 git-annex \ldots{}
 \subsection{Archivage}
-\label{sec:orgc25aa51}
+\label{sec:org2e06a47}
 Maintenant que l'on sait comment gérer les fichiers il faut passer à
 l'autre étape importante dans ce procès qui est l'étape de
 l'archivage. Dans le cadre de la recherche, c’est impératif de bien
@@ -123,10 +142,10 @@ Amazon S3, git lfs, …) , mais Zenodo ne figure pas dans cette
 liste. On va donc implémenter un special remote git-annex pour Zenodo
 qui va répondre à toutes nos attentes.
 
-\section{Contributions (TOEDIT)}
-\label{sec:orgd912bdf}
+\section{Contributions (TOEDIT - 8 pages)}
+\label{sec:org72e33e2}
 \subsection{Modèle de données}
-\label{sec:orga0bff91}
+\label{sec:orgb025f00}
 
 Avant de commencer l’implémentation du remote, il y avait quelques
 choix à faire pour savoir comment bien répondre à des problèmes qui
@@ -176,10 +195,10 @@ noms des fichiers par les clés. Et puisque l’on a un lien unique entre
 le remote et le dépôt Zenodo, on peut facilement retrouver les
 fichiers que l’on veut et les récupérer en local.
 \subsection{Implémantation de remote Zenodo: le backend}
-\label{sec:orgb85c7ea}
+\label{sec:org26584a9}
 
 \subsubsection{Introduction à l'API REST Zenodo}
-\label{sec:orga20e9ee}
+\label{sec:org79682f3}
 Afin de se communiquer avec Zenodo pour effectuer des
 opérations sur les fichiers, il faut utiliser son API. La première
 partie du process est donc de comprendre comment elle fonctionne et de
@@ -202,7 +221,7 @@ une évolution gracieuse au cours de sa recherche:
 INSERT THE FLOW CHART
 
 \subsubsection{AnnexRemote: la bibliothèque python utilisée}
-\label{sec:org57e67b3}
+\label{sec:org7bf7f9d}
 Maintenant que l'on peut facilement communiquer avec Zenodo et que
 l'on a un blueprint de comment on veut structurer notre backend
 Zenodo, il faut commencer son implémentation.
@@ -227,7 +246,7 @@ mais pour tout ce qui reste (par exemple, la création d'une nouvelle
 version) c'est à nous d'ajouter.
 
 \subsubsection{Les opérations principales du remote}
-\label{sec:org530be60}
+\label{sec:orgda9c098}
 Chaque remote Zenodo doit être capable d'exécuter des opérations
 principales qui servent à envoyer les fichiers sur le remote, les
 manipuler, et les récupérer en local. Tout cela se fait avec les
@@ -298,7 +317,7 @@ avec l'identifiant unique de ce fichier.
 \end{description}
 
 \subsubsection{Les tests effectués}
-\label{sec:org240961d}
+\label{sec:org9eca528}
 Après chaque opération effectuée, s'il y a eu des problèmes, on évoque
 une exception RemoteError avec le souci rencontré. On s'appuie sur
 les codes retournés dans les réponses de l'API pour savoir le status
@@ -319,9 +338,9 @@ notes qui concernent ce projet et les tests effectués tout au long
 du stage avec les résultats trouvés.
 
 \subsection{Archivage}
-\label{sec:orgca1e259}
+\label{sec:org1c5fec4}
 \subsubsection{Archivage direct des données}
-\label{sec:org6b712e4}
+\label{sec:orga69bb81}
 Quand la première partie de la gestion des données finit, et on stocke
 tous les fichiers qui nous intéressent dans le remote, il faut
 maintenant passer à la deuxième partie de l'archivage qui se fait
@@ -370,7 +389,7 @@ remote.
 \end{description}
 
 \subsubsection{Création d'une nouvelle version après l'archivage d'un dépôt}
-\label{sec:org6220695}
+\label{sec:orga921f77}
 Cette opération n'est pas possible que si on essaye de créer un
 nouvelle version d'un dépôt déjà publié. C'est l'outil qui permet de
 faire évoluer ses fichiers même après publication.
@@ -382,7 +401,7 @@ L'option à utiliser est newversion=id et notre programme prend soins
 de toutes les opérations possibles comme il aurait fait avec un
 nouveau dépôt. 
 \subsubsection{Stockage d'une archive de données dans un autre dépôt comme copie}
-\label{sec:orgb04a6bd}
+\label{sec:orge5f27da}
 Il y a aussi une étape que l'on fait au début de l'opération de
 l'archivage qui est la création d'une archive contenant les fichiers
 et le stockage de cette archive sur un nouveau dépôt Zenodo. 
@@ -399,7 +418,7 @@ noms. Tandis que le deuxième est un script python à lancer par
 l'utilisateur pour restorer les fichiers de l'archive. 
 
 \subsection{Restauration d'une archive}
-\label{sec:orgce904d5}
+\label{sec:org2c384fd}
 La restauration d'une archive se fait grâce au script \texttt{restore\_archive}
 que l'utilisateur peut télécharger depuis le dépôt Zenodo avant de le
 lancer. Comme options, il faut fournir la clé Zenodo, l'option de
@@ -434,28 +453,89 @@ ajoute aussi à un remote web pour garder une dexuième copies en
 externe.
 Puisque l'on initialise git-annex, les fichiers donc auront des
 nouvelles clés git-annex.
-
-\item Quand on finit la restauration des fichiers, le programme supprime
 \end{description}
-l'archive et les deux autres fichiers utilisés.
 
-\section{Evaluation (TODO)}
-\label{sec:orgc6ca2a2}
+Quand on finit la restauration des fichiers, le programme supprime
+l'archive et les deux autres fichiers utilisés.
+\section{Evaluation (TOEDIT - 0.5 page)}
+\label{sec:org649c33d}
+Après avoir fini l'implémentation du remote Zenodo et tous les autres
+programmes complémentaires (scripts python pour la publication et pour
+la restauration de l'archive), la dernière contribution effectuée
+était la rédaction d'un tutorial permettant de tester et comprendre la
+totalité des fonctionnalités du remote. Le fichier \texttt{walkthrough.org}
+[fn: link to where it is] contient un tutorial détaillé avec des
+explications pour chacune des fonctionnalités mentionnées en
+haut. Commençant par une introdution au sujet, et après dans une
+deuxième partie, l'utilisateur peut comprendre comment manipuler les
+données en local avec git-annex et avec le remote Zenodo. Ensuite, il
+passe à l'étape de l'archivage des données par publication, avant de
+finir par initialiser une nouvelle version du dépôt ou par restaurer
+les fichiers en local.
+
+Et puisque ce projet fait partie du mooc 2, la dernière partie du
+procès sera son intégration dans ce mooc pour permettre aux
+rechercheurs de l'utiliser. Puisque le mooc est ouvert pour toute
+personne travaillant sur un projet scientifique, surtout les projets
+de data science, alors avoir un backend Zenodo déjà développé avec un
+tutorial et une documentation déjà prêts, va faciliter leurs tâches de
+gestion de données et d'archivage.
+
+L'implémentation de ce remote Zenodo m'a aussi permet de commencer à
+travailler sur un autre backend git-annex pour Nakala. En effet,
+puisque nakala était l'un des outils d'archivage concurrent dont on a
+parlé au début et que l'on a considéré moins intéréssant que Zenodo
+quand on a fait le choix, alors même s'il était un choix possible, il
+a cédé sa place pour Zenodo. Mais une fois que l'on a fini avec
+l'implémentation du backend Zenodo, on a décidé d'avancer un peu sur
+le backend Nakala pendant la dernière semaine du stage. 
+
 \section{Méthodologie et compétences développées (TODO)}
-\label{sec:orge71db98}
+\label{sec:org579c0f6}
 \subsection{Méthodologie}
-\label{sec:org1506b62}
+\label{sec:orgd74193c}
 \subsubsection{Documentation de l'ensemble du processus}
-\label{sec:orgba15039}
+\label{sec:org753054f}
+Puisque le sujet principal de ce stage est fortement relié à la
+recherche reproductible, et que le mooc cherche à inclure des conseils
+pour aider les rechercheurs à atteindre ce but, alors la première
+étape pour moi était de comprendre comment rendre mon travail
+compréhensible et reproductible. Grâce au mooc 1, j'ai appris comment
+prendre des notes détaillées dans un fichier computationnel (j'ai
+utilisé des fichiers en org mode pour exécuter des bouts de code avec
+des commentaires en texte). Cela m'a permet d'avoir la majorité de ma
+recherche dans un fichier complet (\texttt{journal.org}) dans un ordre
+chronologique où chaque entrée est une journée de travail. Grâce à ça,
+je peut revenir en arrière pour relire des notes que j'avais prises
+il y a des semaines en réexécutant le code en parallèle aussi.
+
+J'avais aussi lu la documentation des outils et fait un tutorial pour
+chacun d'eux avant de commencer l'implémentation du remote. C'est la
+lecture de la documentation en parallèle avec l'exécution des exemples
+de test qui m'a permet de saisir leur fonctionnement et leur utilité.
+Commençant par git-annex où un tutorial complet est disponible sur le
+site [fn: intser site]. J'avais appris dans ce tutorial comment
+manipuler les fichiers en local avec git-annex avant de créer un
+remote USB pour faire mes premiers tests avec un backend.
+
+Pour Zenodo, c'était pareil puisque des premiers exemples de
+manipulation de l'API sont donnés dans le tutorial [fn: give site]
+mais pour le reste j'ai juste suivi la même logique en testant des
+fonctionnalités plus complexes.
+
+Les notes initiales que j'avais prises sont valables dans un fichier
+org (\texttt{notes.org} [fn: link]) avec des explications de chacun des outils utilisés et des
+commentaires sur le sujet de la recherche reproductible que j'avais
+notés pendant des ateliers auxquels j'ai assisté au début du stage. 
+
 \subsubsection{Gestion du projet}
-\label{sec:orge803cef}
+\label{sec:org1250f33}
+
 \subsection{Compétences développées}
-\label{sec:orgd1eea4b}
+\label{sec:orgb5e800a}
 
 \section{Conclusion (TODO)}
-\label{sec:org42e4f8d}
+\label{sec:org1a2c107}
 \section{Bibliographie (TODO)}
-\label{sec:org7ce4c71}
-\section{Annex (TODO)}
-\label{sec:orgd77f8c8}
+\label{sec:orga949aad}
 \end{document}

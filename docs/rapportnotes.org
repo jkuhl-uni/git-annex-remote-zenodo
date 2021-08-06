@@ -353,8 +353,6 @@ rédaction d'un tutorial pour tester et comprendre la totalité du projet (0.5 p
      d'ingénieur en informatique ou aussi des compétences
      transversales au métier d'ingénieur (voir les deux fichiers excel
      attachés).
-   - MOOC 1 (prise des notes! rendre mon travail compréhensible par
-     quelqu'un d'autre)
 
 *** méthodologie (2 page).
 **** documentaion de l'ensemble du processus (0.5 page).
@@ -379,6 +377,9 @@ ce j'ai pas pu faire: nakala - datalad (submodules ) voir comment ça
 peut s'integrer avec zenodo (ex de figshare par opposition) -
 (snakemake <-> git-annex) : pb: où integrer les commandes git annex
 simples (ex get) dans un workflow snakemake.
+
+Zenodo remote <--> nakala remote <--> datalad / zenodo <--> autres
+points de la recherche reproductible is snakemake et le workflow. 
 
 ** Bibliographie.
 liens à mettre après.
