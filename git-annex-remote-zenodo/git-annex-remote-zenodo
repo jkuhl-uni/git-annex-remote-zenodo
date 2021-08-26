@@ -1,0 +1,382 @@
+#!/usr/bin/env python
+
+
+from annexremote import Master
+from annexremote import ExportRemote
+from annexremote import RemoteError, ProtocolError
+
+import sys
+
+class ZenodoRemote(ExportRemote):
+
+    # showing useful info to the user using the info method of the Annex class.
+    def show_info(self, msg):
+        try:
+            self.annex.info(msg)
+        except ProtocolError:
+            print(msg)
+
+    # method to handle all the basic queries
+    def query(self, query_method, url, parent_func = str, headers=None, data=None, stream = None):
+        # id = key (!= KEY or access token to the API): to be stored in the remote. 
+        # In most cases, this is going to be the remote file name. It should be at 
+        # least be unambigiously derived from it.
+        # parent_func is the fucntion that calls this method. We pass the name of the function as
+        # an argument to be able to show where the problem is when debugging.
+        import requests
+        # making sure that the headers are specified before sending the request
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
+
+        # we use the same access key for all the queries. 
+        params = {'access_token': self.key}
+
+        # depending on the query, some of the arguments might be null
+        if query_method == 'get':
+            # this is for when we want to retrieve and download the file
+            if stream is True:
+                request = requests.get(url, params = params, stream = True)
+            else:
+                request = requests.get(url, params = params)
+        elif query_method == 'post':
+            request = requests.post(url, params=params, json={}, headers=headers)
+        elif query_method == 'put':
+            request = requests.put(url, params=params, json={}, data=data)
+        else:
+            request = requests.delete(url, params= params)
+
+        # informing the user of the currint state of the operation        
+        self.annex.debug("[info]: " +  query_method + " operation finished in "+ parent_func + ". The returned code: "+ str(request.status_code))
+        return request
+
+
+    # linking the files that were in the old deposit and that are now in the new deposit with git-annex
+    def link_files(self, response):
+        import shlex
+        import subprocess
+
+        # sending a request to the API to get info about the new version
+        newdeposit_id = response.json()['id']
+        url = self.url + '/' + str(newdeposit_id) + '/files'
+        r = self.query('get', url, "link_files")
+
+        # first step: getting the name of the remote
+        # reading the file from the other branch without checking into it
+        output = subprocess.getoutput("git show git-annex:./remote.log")
+
+        # we can have multiple remotes in one log and they are separated by lines.
+        lines = output.splitlines()
+        remote_name = ''	
+        # going through the remotes
+        for line in lines:
+            # parsing the output and separating the lines in a list where each element is a file
+            s = shlex.split(line, comments=True, posix=False)
+            # now, let's go through the list
+            for elm in s:
+                # looking through the elemnts for the index of the id
+                if elm.startswith("deposit_id"):
+                    id = elm.split("=")[-1]
+                # we have found the name of the remote that we are looking for
+                if (elm.startswith("name")) and (id == self.annex.getconfig('deposit_id')):
+                    remote_name = elm.split("=")[-1]
+
+        # fetching the keys of these files
+        # getting the output from trom the command
+        output = subprocess.getoutput("git-annex find")
+        # parsing the output and separating the lines in a list where each element is a file
+        s = shlex.split(output, comments=True, posix=False)
+        dico ={}
+        for file in s:
+            output = subprocess.getoutput("git-annex info %s" % file)
+            l = shlex.split(output)
+            # we won't take care of the ones with the fatal error now
+            if l[0] == 'file:':
+                k = l[6]
+                dico[str(k)] = file
+                
+
+        # second step: copying the files from the remote to keep the link
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            file_key = r.json()[i]['filename']
+            if file_key in dico:
+                name = dico[file_key]
+                output = subprocess.getoutput("git annex copy " + name + " --to " + remote_name)
+                print(output)
+        
+
+    def create_newversion(self, oldrecord_id):
+        # making sure that the given id for the old record is correct
+        url = self.url + '/' + oldrecord_id 
+        r = self.query('get', url, "create_newversion")
+
+        # raise error if there is a problem (the success code is 200)
+        if r.status_code != 200:
+            raise RemoteError('error while retrieving the old deposit')
+        
+        # making the post request to create the new version
+        url = self.url + '/' +  oldrecord_id + '/actions/newversion'
+        r = self.query('post', url, "create_newversion")
+        
+        # raise error if there is a problem (the success code is 201)
+        if r.status_code != 201:
+            raise RemoteError('error while creating the newversion')
+
+        # fetching the deposition id of the new version
+        # we can only access it this way because it's not given as a field
+        newdeposit_id = r.json()['links']['latest_draft'].split('/')[-1]
+        # making a new get request to get the information about this reposit and returning the response
+        url = self.url + '/' + str(newdeposit_id) 
+        r = self.query('get', url, "create_newversion")  
+
+        self.link_files(r)
+        return r
+        
+
+    def initremote(self):
+        # initialize the remote, eg. create the folders
+        # raise RemoteError if the remote couldn't be initialized
+        
+        # getting the url of the remote (Zenodo or Sandbox)
+        # the user would need the key for both of them and it's created on the website of the one they chose
+        url = self.annex.getconfig('url') 
+        if url is None:
+            self.url = 'https://zenodo.org/api/deposit/depositions'
+        else:
+            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+
+        # the key is passed as an argument when using the commant initremote (ex: key='')
+        # if it's not been added as an argument, we raise an 
+        if not self.annex.getconfig('key'):
+            raise RemoteError("You need to add the access token (key=TOKEN)")
+        else:
+            # need to get the key by using the getconfig method
+            self.key = self.annex.getconfig('key')
+
+        # now, we need to create an empty upload that we will be using from now on
+        # it's either a new version of a deposit or a brand new one
+        newversion= str(self.annex.getconfig('newversion'))
+        if not newversion:
+            r = self.query('post', self.url,  "initremote")
+        else:   
+            r = self.create_newversion(newversion)           
+ 
+        # making sure that we got the correct success response for creating a new deposit
+        if r.status_code > 201:
+            self.annex.debug("[error]: failed to send a post query in initremote. Returned code: " + str(r.status_code))
+            raise RemoteError('could not send a post query to the API in initremote.')
+
+        # other settings
+        self.annex.setconfig('deposit', r)
+        self.annex.setconfig('url', self.url)
+        self.annex.setconfig('key', self.key)
+        # setting the id for this deposit
+        self.annex.setconfig('deposit_id', r.json()['id'])
+        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
+
+        self.show_info("------------ git-annex-remote-zenodo------------")
+        self.show_info("Finished initializing a Zenodo remote successfully.")
+        self.show_info("------------------------------------------------")
+            
+
+
+    def prepare(self):
+        # prepare to be used, eg. open TCP connection, authenticate with the server etc.
+        # raise RemoteError if not ready to use
+        # let's try to connect to the API, if the status code is not 200: there is an error 
+        self.key = self.annex.getconfig('key')
+        url = self.annex.getconfig('url')
+        if url is None:
+            self.url = 'https://zenodo.org/api/deposit/depositions'
+        else:
+            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+        
+
+        r = self.query('get', self.url, "prepare")
+        if r.status_code != 200:
+            self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
+            raise RemoteError('could not send a get query to the API in prepare.')
+
+        self.deposit_id = self.annex.getconfig('deposit_id')  
+                 
+
+    def transfer_store(self, key, filename):
+        # store the file in `filename` to a unique location derived from `key`
+        # raise RemoteError if the file couldn't be stored
+        try:
+            # fetching the url of the bucket
+            URL_BUCKET = self.annex.getconfig('deposit_bucket')
+
+            # and then we upload it
+            # extracting the filename and the path from filename
+            # the argument filename of the function contains the full path to the path.
+            # we  can get the name of the file by using the function rsplit to split 
+            # the string at the specified separator '/' and we can get the filename by 
+            # getting the lest element of the file.
+            list = filename.rsplit("/")
+            file = list[-1]
+            path = filename
+
+            # The target URL is a combination of the bucket link with the desired filename
+            # seperated by a slash.
+            with open(path, "rb") as fp:
+                r = self.query('put', "%s/%s" % (URL_BUCKET, file), "transfer_store" ,key, data=fp)
+            
+            if r.status_code < 400:
+                self.annex.debug("[info]: finished exporting the file. ")
+            else:
+                raise RemoteError ('error while exporting the file... \n')
+
+        except Exception as error:
+            raise RemoteError(error)
+
+
+    def transfer_retrieve(self, key, filename):
+        # get the file identified by `key` and store it to `filename`
+        # raise RemoteError if the file couldn't be retrieved
+        # getting the information on the files that are in the deposit
+        url = self.url + '/' + str(self.deposit_id) + '/files'
+        r = self.query('get', url, "transfer_retrieve")
+        # going through the list of the files in this deposit
+        for i in range(len(r.json())):
+            # checking if the file exists by comparing the key/filename
+            # sending a get request to check information on the file
+            if r.json()[i]['filename'] == key:
+                # getting the id of the file that we want to download
+                file_id =  r.json()[i]['id']
+                # getting the download link of the file
+                url = r.json()[i]['links']['download']
+                q = self.query('get', url, "transfer_retrieve", stream = True)  
+                #r.raise_for_status()
+                # storing the file in the path given in filename
+                # this is done by reading the content of the file and writing it in the new file
+                # if the files are very large, we can make the chunk size bigger 
+                with open(filename, "wb") as f:
+                    for chunk in q.iter_content(chunk_size=120): 
+                        f.write(chunk)
+                # once we finish writing into the file we can close it
+                f.close()
+                
+        if r.status_code > 204:
+            self.annex.debug("[error]: couldn't retrieve the file from the remote. Returned code: " + str(r.status_code))
+            raise RemoteError('could not send a get query to the API in transfer_retrieve.')
+        
+
+    def checkpresent(self, key):
+        # return True if the key is present in the remote
+        # return False if the key is not present
+        # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
+        try:
+            url = self.url + '/' +  str(self.annex.getconfig('deposit_id')) + '/files'
+            r = self.query('get', url, "checkpresent")
+            # going through the list of the files in this deposit
+            for i in range(len(r.json())):
+                if r.json()[i]['filename'] == key:
+                    self.annex.debug("[info]: In checkpresent. Yes, this file exists in the remote " + key)
+                    return True
+            return False 
+            
+        except Exception as error:
+            raise RemoteError(error)
+
+
+    def remove(self, key):
+        # remove the key from the remote
+        # raise RemoteError if it couldn't be removed
+        # note that removing a not existing key isn't considered an error
+        # checking if the key exists in the remote deposit
+        url = self.url + '/' + str(self.deposit_id) + '/files'
+        r = self.query('get', url, "remove")
+        # going through the list of the files in this deposit
+        file_id = None
+        for i in range(len(r.json())):
+            if r.json()[i]['filename'] == key:
+                file_id = r.json()[i]['id']
+
+        # if the key is non existing, we shouldn't raise an exception        
+        if file_id is None:
+            return
+        
+        # Delete an existing deposition file resource. Note, only deposition 
+        # files for unpublished depositions may be deleted.
+
+        # first, we update the url so as to use it to delete the file
+        url = url + '/' + str(file_id)
+        # we then make the query to delete the file
+        r = self.query('delete', url, "remove")
+
+        # raising RemoteError if there is a problem with the removal of the file
+        if r.status_code > 204:
+            self.annex.debug("[error]: failed to delete the file from the remote. Returned code: " + str(r.status_code))
+            raise RemoteError('could not send a delete query to the API')
+        
+
+    def transferexport_store(self, key, local_file, remote_file):
+        # store the file located at `local_file` to `remote_file` on the remote
+        # raise RemoteError if the file couldn't be stored
+        return self.transfer_store(key, local_file)
+        
+    def transferexport_retrieve(self, key, local_file, remote_file):
+        # get the file located at `remote_file` from the remote and store it to `local_file`
+        # raise RemoteError if the file couldn't be retrieved
+        return self.transfer_retrieve(key, local_file)
+
+    def checkpresentexport(self, key, remote_file):
+        # return True if the file `remote_file` is present in the remote
+        # return False if not
+        # raise RemoteError if the presence of the file couldn't be determined, eg. in case of connection error
+        return self.checkpresent(key)
+
+    def removeexport(self, key, remote_file):
+        # remove the file in `remote_file` from the remote
+        # raise RemoteError if it couldn't be removed
+        # note that removing a not existing key isn't considered an error
+        return self.remove(key)
+
+    # there ae no directories in a deposit Zenodo since the architecture is flat. 
+    # using this deletes all the files that are on the deposit
+    def removeexportdirectory(self, remote_directory):
+        # remove the directory `remote_directory` from the remote
+        # raise RemoteError if it couldn't be removed
+        # note that removing a not existing directory isn't considered an error
+
+        url = self.url + '/' + str(self.deposit_id) + '/files'
+        r = self.query('get', url, "removeexportdirectory")
+        # going through the list of the files in this deposit
+        file_id = None
+        # manipulating each of the files in this deposit
+        for i in range(len(r.json())):
+            file_id = r.json()[i]['id']
+            if file_id is not None:     
+                # Delete an existing deposition file resource. Note, only deposition 
+                # files for unpublished depositions may be deleted.
+                # first, we update the url so as to use it to delete the file
+                url = url + '/' + str(file_id)
+                # we then make the query to delete the file
+                r = self.query('delete', url, "removeexportdirectory")
+                # for each of the files
+                # raising RemoteError if there is a problem with the removal of the file
+                if r.status_code > 204: 
+                    self.annex.debug("[error]: failed to delete the files from the remote. Returned code: " + str(r.status_code))
+                    raise RemoteError('could not send a delete query to the API')
+
+
+    # renaming files isn't needed
+    def renameexport(self, key, filename, new_filename):
+        pass
+
+
+def main():
+    # Redirect output to stderr to avoid messing up the protocol
+    output = sys.stdout
+    sys.stdout = sys.stderr
+    
+    master = Master(output)
+    remote = ZenodoRemote(master)
+    master.LinkRemote(remote)
+    master.Listen()
+
+if __name__ == "__main__":
+    main()        
+
+

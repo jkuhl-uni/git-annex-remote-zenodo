@@ -1,0 +1,912 @@
+#+TITLE:       Walkthrough (complete tutorial)
+#+AUTHOR:      Oumaima Hajji
+#+STARTUP: overview indent inlineimages logdrawer
+#+TAGS: R(R) Python(p) OrgMode(O) 
+
+* Introduction.
+In this file, we will be using the programs we have implemented to
+initialize and manipulate a git-annex remote which is this case a
+Zenodo special remote.
+
+This tutorial is devided into a few steps in order to regroup the
+tasks that belong together and execute them in a logical order with
+explanations that go with them. So, in the first step, we will have to
+prepare a directory where all the next tests will be held, before
+starting on the more technical steps concerning the remote. 
+
+* Initializing the remote.
+1. First, we need to export the path to where the git-annex-remote-zenodo
+function so as to be able to locate it when executing. Since that
+program is in the same path as we are right now, we can just put the
+current path .
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+export PATH=$PATH:$(pwd)
+#+END_SRC
+
+#+RESULTS:
+
+
+Let's check if the path has been successfully exported:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+echo $PATH
+#+END_SRC
+
+#+RESULTS:
+: /home/nubudi/anaconda2/bin:/home/nubudi/anaconda2/condabin:/home/nubudi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/nubudi/Desktop/Internship/code
+
+We also need to make the git-annex-remote-zenodo executable so as to
+be able to execute it as a command. To do this, we can simply
+change the permissions in the properties of the program (by checking
+the box) or we can do it using the shell command line with ths
+command (go to the path where the program is to execute it):
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+chmod +x git-annex-remote-zenodo
+#+END_SRC
+
+#+RESULTS:
+
+For this, We will need the sheebang line #!/usr/bin/env python3 to
+execute this command which we added to the program.
+
+2. Now, let's make the directory where we will be doing our tests.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~
+mkdir test_zenodoremote
+cd test_zenodoremote
+#+END_SRC
+
+#+RESULTS:
+
+3. Then, we have to initialize the git and the git annex directory before
+we move on to the next steps. 
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both 
+git init
+git annex init
+#+END_SRC
+
+#+RESULTS:
+: Initialized empty Git repository in /home/nubudi/test_zenodoremote/.git/
+: init  ok
+: (recording state in git...)
+
+4. Now, we can simply work with git annex like we would usually
+   do. Since we have already initialized git and git annex in this
+   repository, we now only need to initialize a Zenodo special remote
+   using the command with added options (ex: url to specify if we want
+   to use the sandbox or newversion if we want to initialize the
+   remote as a new version of an already published remote).
+   In this case, and since this is a test, we will be using the
+   sandbox, and so we need to specify the option url=sandbox. We will
+   be working with a brand new deposit and so we won't be using the
+   newversion option for now. The rest of the options is self
+   explanatory: key is the access token (since we will be using the
+   sandbox, you need an access key created on
+   https://sandbox.zenodo.org/account/settings/applications/)
+
+#+begin_src shell :session *shell* :results output :exports both
+git annex initremote Myproject type=external externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
+#+end_src
+
+#+RESULTS:
+: initremote Myproject 
+:   ------------ git-annex-remote-zenodo------------
+: 
+:   Finished initializing a Zenodo remote successfully.
+: 
+:   ------------------------------------------------
+: ok
+: (recording state in git...)
+
+* Preparing the files for the remote.
+Now, and in order to manipulate a git-annex remote, we will need to
+add some files to this directory. This could be done either manually
+by choosing some local files and copying them here, or by creating new
+random files as test subjects. This is what will be done in this
+case.
+First, we will be pulling words from a remote dictionary using the
+requests library. Then, we will use the random.choices method to pick
+random words from that list. We can then use these chosen words (after
+turning the elements of the list into a string with the String
+function join()) to write in new files we create.
+
+Here is the python program that does this:
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/test_zenodoremote
+#+END_SRC
+
+#+RESULTS:
+
+#+begin_src python :results output :exports both
+import requests
+import random
+import os
+
+# chnaging into the correct directory for the test
+u = os.path.expanduser('~/test_zenodoremote')
+os.chdir(u)
+
+# fetching the words from the dictionary
+words = "https://www.mit.edu/~ecprice/wordlist.10000"
+response = requests.get(words)
+# putting the words in a list
+wordlist = response.content.splitlines()
+
+# choosing random words from the list and writing into files
+for i in range(5):
+    chosenwords = random.choices(wordlist, k=random.randint(1,150))
+    s = ' '.join(str(i) for i in chosenwords)
+    f= open("test%s.txt" % str(i), "w")
+    f.write(s)
+    f.close()
+
+#+end_src
+
+#+RESULTS:
+
+* Manipulating the files in the remote.
+1. Now that we have finished with the initial preparations of the
+   depository, we can start working with the remote. As a first step,
+   we can annex the files we have just created.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+cd ~/test_zenodoremote
+git annex add . 
+#+END_SRC
+
+#+RESULTS:
+: 
+: add test0.txt ok
+: add test1.txt ok
+: add test2.txt ok
+: add test3.txt ok
+: add test4.txt ok
+: (recording state in git...)
+
+We can find all the files that have been added to the annex.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+As we can see, they are all seen as annexed and avaialble locally.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myproject
+||||
+X___ test0.txt
+X___ test1.txt
+X___ test2.txt
+X___ test3.txt
+X___ test4.txt
+#+end_example
+
+2. Now, let's copy these files to the remote. We can either copy them
+   all or choose the ones we are most interested in storing in the
+   deposit. For this example, I've just chosen to copy three of the
+   files we have created and leave the rest available only locally.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex copy test1.txt --to Myproject
+git annex copy test2.txt --to Myproject
+git annex copy test3.txt --to Myproject
+#+END_SRC
+
+#+RESULTS:
+: copy test1.txt (to Myproject...) 
+: ok
+: (recording state in git...)
+: copy test2.txt (to Myproject...) 
+: ok
+: (recording state in git...)
+: copy test3.txt (to Myproject...) 
+: ok
+: (recording state in git...)
+
+Now, let's check the files we have uploaded to see if they have been
+successfully uploaded to the remote. We can either do this for each
+file using the whereis command, or use the list command to show all
+the annexed files and their positions.
+
+Here is a first step with the whereis command for the file test1.txt:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex whereis test1.txt
+#+END_SRC
+
+We can see in the results that this file is now available in both the
+remote and here locally.
+#+RESULTS:
+: whereis test1.txt (2 copies) 
+:   	ae468d69-f6e8-4828-9ca3-ce8b5189ba0d -- [Myproject]
+:    	bd27fa1f-b9a4-4189-a0fc-5ccb5294a249 -- nubudi@ubunto:~/test_zenodoremote [here]
+: ok
+
+
+And now, let's do the same using the second command and for all the
+files:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+The same could be said about the other two files that we have copied
+into the remote.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myproject
+||||
+X___ test0.txt
+X__X test1.txt
+X__X test2.txt
+X__X test3.txt
+X___ test4.txt
+#+end_example
+
+
+3. Now, let's drop one of the files we have uploaded from the
+   remote. This is done to see if the program we have implemented
+   works and also to test the usefulness of git-annex remotes.
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop test1.txt --from Myproject
+#+END_SRC
+
+#+RESULTS:
+: drop Myproject test1.txt ok
+: (recording state in git...)
+
+Now, let's list the annexed files to see if the files test1.txt is
+still available in the remote:
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+As we can see, it's only available locally now.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myproject
+||||
+X___ test0.txt
+X___ test1.txt
+X__X test2.txt
+X__X test3.txt
+X___ test4.txt
+#+end_example
+
+
+5. Now, let's try something new, this time having the file only
+   available on the remote and trying to get it to here.
+
+   To do this, we can first list all the files that are annexed and
+   see where the file is kept now.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myproject
+||||
+X___ test0.txt
+X___ test1.txt
+X__X test2.txt
+X__X test3.txt
+X___ test4.txt
+#+end_example
+
+   We then can choose either a file that's not here but is on the
+   remote or we can do this manually by dropping a file that is here
+   from its local position and then getting it from the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex drop test3.txt
+#+END_SRC
+
+#+RESULTS:
+: drop test3.txt ok
+: (recording state in git...)
+
+
+We can now check to see if it has been successfully dropped locally
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+Which is the case since the file test3.txt is no longer in here but
+it's still available in the remote Myproject.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myproject
+||||
+X___ test0.txt
+X___ test1.txt
+X__X test2.txt
+___X test3.txt
+X___ test4.txt
+#+end_example
+
+
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex get test3.txt --from Myproject
+#+END_SRC
+
+#+RESULTS:
+: get test3.txt (from Myproject...) 
+: (checksum...) ok
+: (recording state in git...)
+
+
+Now, let's check to see if git-annex succeeded in getting the file
+from the remote.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+As we can see from the results, the file test3.txt that wasn't
+available locally just a few moments ago is now here and available for
+our use.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myproject
+||||
+X___ test0.txt
+X___ test1.txt
+X__X test2.txt
+X__X test3.txt
+X___ test4.txt
+#+end_example
+
+> We can continue playing with files this way, annexing the ones we want
+to store and copying/moving them from/to the remote. We can drop them either
+locally if we no longer want them there, or drop them from the remote
+as well.
+
+* Disabling the remote
+** introduction
+Once we finish working with a certain remote, it's time to disable
+it. To do this, we will be using a program that takes care of all the
+steps that are necessary for a remote to be disabled
+(*git-annex-disableremote.py*).
+In our case, this program first publishes the Zenodo deposit that has
+been created when we initialized the remote. Then, it transforms all
+the annexed files that have been published in the deposit into web
+remotes and adds them in git-annex. Lastly, it deletes the remote locally.
+
+To do so, we will only need the necessary information that will allow
+us to acess the deposit (deposit id and the access token). We will
+also use a file containing all the necessary metadata for publishing
+so as to not have to give the information in the command line. And
+because our program also takes care of uploading an archive of the
+files into Zenodo to keep for later use (this is explained in the next
+part of the walkthrough), we also need to give the program the path to
+the script *restorearchive.py* that is also available in the same
+directory as the other programs.
+
+** creating the json file for the metadata
+First, let's just create a simple json file (example: *zenodo.json*)
+with example metadata to allow us to publish. For this, we can just
+copy the example that was given in the zenodo tutorial
+(https://developers.zenodo.org/?python#quickstart-upload) or we can
+create our own with information that concerns us.
+
+I've added a file in the directory that contains the code source files
+and so it could be used to pass this test.
+You could also change things in the file according to the type of content
+you want to publish (this all could be found in the tutorial in the
+same url given earlier).
+
+Let's write the file using a python program which creates a dictionary
+and fills it in with all the metadata that's needed before dumping the
+content of this dictionary in a zenodo.json file.
+#+begin_src python :results output :exports both
+import os
+import json
+
+# filling dico with information
+dico= {}
+metadata = {}
+dico['title'] = "Test upload of Myproject"
+dico['upload_type'] = "poster"
+dico['description'] = "This is a test to publish a deposit"
+dico['creators'] = [{'name': 'Doe, Mary', 'affiliation': 'researcher'}]
+dico['access_right'] = "closed"
+# creating the the other dictionary metadata that has dico as a value for the key metadata
+metadata['metadata'] = dico
+
+outputpath = os.getcwd() + "/zenodo.json"
+# opening the file and writing into it.
+f = open(outputpath, "w+")
+json.dump(metadata, f)
+f.close()
+#+end_src
+
+#+RESULTS:
+
+** executing the program
+Now, we can execute the program giving it the id of the deposit, the
+access key, and the path to the *zenodo.json* file.
+- First, we will need the id of the deposit and this could be known
+  easily by checking the uploads on the zenodo website. Depending on
+  whether or nor the sandbox is used, we can get the id on the upload
+  window. But here, we can write a program that automatically looks
+  for the id for us without us having to do it on the browser. So,
+  this is what we will do in the following function.
+
+  *NOTE*: because we will be creating a git archive of our project, we
+  will need to have had commited something on git. When working on a
+  project, the user usually does commits every now and then to keep
+  track of changes, but because this is a test, we will need to do it
+  now.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git commit -m "new changes"
+#+END_SRC
+
+#+RESULTS:
+: [master (root-commit) ef617d9] new changes
+:  5 files changed, 5 insertions(+)
+:  create mode 120000 test0.txt
+:  create mode 120000 test1.txt
+:  create mode 120000 test2.txt
+:  create mode 120000 test3.txt
+:  create mode 120000 test4.txt
+
+Now, let's execute the program.
+  #+begin_src python :results output :exports both
+import subprocess
+import os
+import shlex
+
+# getting the current directory where this file is (and the python script as well)
+cwd = os.getcwd()
+# changing the directory to that of the test
+u = os.path.expanduser('~/test_zenodoremote')
+os.chdir(u)
+remote_path = os.getcwd()
+# reading the file from the other branch without checking into it
+output = subprocess.getoutput("git show git-annex:./remote.log")
+s = shlex.split(output, comments=True, posix=False)
+for elm in s:
+    # looking through the elemnts for the index of the id
+    if elm.startswith("deposit_id"):
+        id = elm.split("=")[-1]
+
+# now, let's execute the command to disable the remote
+progpath = cwd + "/git-annex-disableremote.py"
+jsonfilepath = cwd + "/zenodo.json"
+restorearchivepath = cwd + "/restore_archive.py"
+
+os.system("python3 "+ progpath + " -i " + id + " -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -f " + jsonfilepath + " -u sandbox -p " + restorearchivepath)
+#+end_src
+
+  #+RESULTS:
+  : addurl https://sandbox.zenodo.org/api/files/77cf97b4-e3e7-4fa0-9249-c9c12f75bed1/SHA256E-s1489--960daf2b0e7ac81f54208c5a1033f5644debac14aab0806d83fa3f3bc547836f.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+  : (recording state in git...)
+  : addurl https://sandbox.zenodo.org/api/files/77cf97b4-e3e7-4fa0-9249-c9c12f75bed1/SHA256E-s1541--619a79740d0f8847b25eef99df16e48f2f419cb49d98c1fa312cfcf8c9e03d3d.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+  : (recording state in git...)
+
+  Now, we can finally take a look at the results after the operation
+  of disabling the remote. As we can see, there were two major changes
+  in the result of the command list:
+  - Firstly, the two files that were on the Zenodo remote (test2.txt and
+    test3.txt) are now available on the web, which means that they
+    have been successfully turned into web remotes.
+    This step was taken care of by the function transformtoweb.
+  - Secondly, the Zenodo remote (test-zenodo) no longer appears in the list of the
+    remotes where the files are kept. This shows that the remote has
+    been successfully removed.
+    This was done by the command 'git remote remove' in the
+    disableremotelocally method which looks in the file remote.log for
+    the remote that we want to remove and then removes it from git.
+#+BEGIN_SRC shell :session *shell* :results output :exports both
+git annex list
+#+END_SRC
+
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||
+: X__ test0.txt
+: X__ test1.txt
+: XX_ test2.txt
+: XX_ test3.txt
+: X__ test4.txt
+
+ We can also check the list of the remotes that are kept in git and we
+ can see that we get nothing in result, which would have been
+ different if we still have remotes in this directory.
+
+ #+BEGIN_SRC shell :session *shell* :results output :exports both
+git remote
+#+END_SRC
+
+#+RESULTS:
+ 
+* Initializing a new version of a deposit.
+In this part, we will test the feature of the program that allows us
+to create a new version of a deposit that we have already
+published. To do this, we can simply initialize a new remote in the
+directory where we want to continue the test by using the option
+newversion=id and giving the id of the deposit that we want to create
+the new version of.
+
+To get the id of the deposit that we want to create a new version of,
+we need to check on the uploads on Zenodo by clicking on the deposit
+and then fetching the id from the url.
+#+begin_src shell :session *shell* :results output :exports both
+git annex initremote Myprojectv2 type=external newversion=890172 externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
+#+end_src
+
+#+RESULTS:
+#+begin_example
+initremote Myprojectv2
+
+  ------------ git-annex-remote-zenodo------------
+
+  Finished initializing a Zenodo remote successfully.
+
+  ------------------------------------------------
+ok
+(recording state in git...)
+#+end_example
+
+Now, we can check to see information about the directory and the
+remotes that have been initialized in. 
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+As we can see, the remote
+Myprojectv2 has been initialized and appears in the list of remotes.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myprojectv2
+||||
+X___ test0.txt
+X___ test1.txt
+XX__ test2.txt
+XX__ test3.txt
+X___ test4.txt
+#+end_example
+
+Now, if we want to keep the link between the files that were in the
+old version and the ones in the new version (they are the same files
+with the same keys since we have just created the new version and
+still haven't changed anything).
+#+begin_src shell :session *shell* :results output :exports both
+git annex enableremote Myprojectv2 type=external newversion=890172 externaltype=zenodo key=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG encryption=none url=sandbox
+#+end_src
+
+
+#+RESULTS:
+#+begin_example
+enableremote Myprojectv2 copy test3.txt ok
+(recording state in git...)
+copy test2.txt ok
+(recording state in git...)
+
+  ------------ git-annex-remote-zenodo------------
+
+  Finished initializing a Zenodo remote successfully.
+
+  ------------------------------------------------
+ok
+(recording state in git...)
+#+end_example
+
+Now, let's list the files that we have locally and see if there are changes.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+As we can see now, the files that used to be in the old version of the
+deposit now also appear to be in the new version, so we have
+successfully linked them in the two deposits.
+#+RESULTS:
+#+begin_example
+here
+|web
+||bittorrent
+|||Myprojectv2
+||||
+X___ test0.txt
+X___ test1.txt
+XX_X test2.txt
+XX_X test3.txt
+X___ test4.txt
+#+end_example
+
+* Restoring an archive
+** introduction
+In this last part of the walkthrough, we will be trying to keep a copy
+of the files in an archive that we will upload to Zenodo and that we
+will use later on to restore the files if we don't want to pass by
+git-annex and do that manually. This could be interesting if a user
+wants to get the files that are stored in the remote in another
+machine. 
+
+By using this program, we will be storing copies of the files that we
+have uploaded to the Zenodo remote and we will try to download them
+back after having extracted them from the archive. We already know
+that git-annex keeps files as symbolic links that point to where they
+are stored, and so when we archive them and download the archive, the
+links get broken since they no longer point to something
+existent. This is the problem we solve in this part.
+
+There two separate logical parts to this process:
+First, we need to archive the files and upload them to Zenodo. This
+is done automatically when the user publishes their deposit. Along
+with this archive, we also upload a file containing information
+about all the files (git-annex-info.json), and a
+script to fetch when we want to restore the archive (restorearchive.py).
++ *git-annex-info.json*: in this file, we keep valuable information
+  about the files such as their keys, download links, locations, ..
++ *restorearchive.py*: this script is available in the directory
+  containing all these programs and it's a simple python script that
+  will be used to restore all the files. This could be downloaded from
+  the Zenodo deposit by the user anytime they want to restore their
+  files. All they need to do is execute it by giving the access token
+  and setting the restoring option.
+   
+We propose three ways to get the files back, and the user gets to
+choose which way when they execute the program. The options are:
+- *rebuildannex*: Rebuild the annex so that the downloaded symbolic
+  links point to the files.
+- *usegitannex*: initialize a git-annex and add the restored files
+  into it as well as store them as web remotes.
+- *simpledownload*: download the files once we restore them by making
+  them replace the broken symbolic links. 
+
+We will be trying out all of these options in the following parts.
+
+** retrieving the restoring file
+As has been explained above, a python script will be used to restore
+the files and this script as already been uploaded to the Zenodo
+deposit when we archived the files. And so, to be able to retrieve the
+archive and restore the files from it, we need to get the file
+*restorearchive.py* and put it in the directory where we want to restore
+our files.
+
+This task could be done manually by going to Zenodo and downloading it
+from the deposit, but in this walkthrough we will be doing it using a
+simple python program. The user will need the id of the deposit (the
+one where the file is uploaded) as well as the access token.
+
+#+begin_src python :results output :exports both
+import requests, os
+def f():
+    deposit_id= '890176'
+    url = 'https://sandbox.zenodo.org/api/deposit/depositions/'+ deposit_id + '/files'
+    key = 'K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG'
+    params = {'access_token': key}
+
+    # sending the request to the API to get the list of files stored in the deposit
+    r = requests.get(url, params=params)
+    pathtest1 = '~/test_restore/simpledownload'
+    pathtest2 = '~/test_restore/rebuildannex'
+    pathtest3 = '~/test_restore/usegitannex'
+
+    # downloading the script
+    for i in range(len(r.json())):
+        if r.json()[i]['filename'] == 'restore_archive.py' :
+            url_download = r.json()[i]['links']['download']
+            filename=r.json()[i]['filename']
+            q = requests.get(url_download, params=params, stream=True)
+            
+            # downloading the file in one of the test directories
+            # dir 1
+            u = os.path.expanduser(pathtest1)
+            os.makedirs(u)
+            os.chdir(u)
+            with open('restore_archive.py', "wb") as f1:
+                for chunk in q.iter_content(chunk_size=120):
+                    f1.write(chunk)
+            f1.close()
+            
+    # copying the file into the other two directories
+    os.makedirs(os.path.expanduser(pathtest2))
+    os.makedirs(os.path.expanduser(pathtest3))
+    os.system("cp restore_archive.py " + pathtest2)
+    os.system("cp restore_archive.py " + pathtest3)
+f()
+#+end_src
+
+#+RESULTS:
+
+Now that we have downloaded the file and put it in the three test
+directories we can move on to the next step of the process which is
+the restoring stage.
+
+** restoring with simpledownload
+First, let's go to the directory where we will be doing this test.
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/test_restore/simpledownload
+#+end_src
+
+#+RESULTS:
+
+Now, we can simply execute the program by choosing the option
+simpledownload. This program downloads the archive as well as the file
+*git-init-info.json* and uses them restore the files by removing the
+broken symbolic links and downloading the correct files instead. It
+then deletes the archive, *git-init-info.json*, and *restorearcive.py*
+when it finishes using them. The user ends up with a folder containing
+only the restored files.
+#+begin_src shell :session *shell* :results output :exports both
+python3 restore_archive.py -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -o simpledownload -u sandbox
+#+end_src
+
+#+RESULTS:
+: 
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1541  100  1541    0     0   3057      0 --:--:-- --:--:-- --:--:--  3057
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1489  100  1489    0     0  11453      0 --:--:-- --:--:-- --:--:-- 11366
+
+Now, we can just go to the folder and see the files that are on it.
+#+begin_src shell :session *shell* :results output :exports both
+cd Myproject
+ls
+#+end_src
+
+As we can see, the files text2.txt and test3.txt are available now and
+we can read/write into them like we would any other file since the
+symbolic links have been resolved. 
+#+RESULTS:
+: 
+: test2.txt  test3.txt
+
+** restoring with rebuildannex
+First, let's go to the directory where we will be doing this test.
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/test_restore/rebuildannex
+#+end_src
+
+#+RESULTS:
+
+Now, we can simply execute the program by choosing the option
+rebuildannex. This program downloads the archive as well as the file
+*git-init-info.json* and uses them restore the files by creating the
+directories where the symbolic links have been pointing and downloads
+the files there. The symbolic links are working again.
+It then deletes the archive, *git-init-info.json*, and *restorearcive.py*
+when it finishes using them. The user ends up with a folder containing
+only the restored files.
+#+begin_src shell :session *shell* :results output :exports both
+python3 restore_archive.py -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -o rebuildannex -u sandbox
+#+end_src
+
+#+RESULTS:
+: 
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1541  100  1541    0     0   8805      0 --:--:-- --:--:-- --:--:--  8805
+: Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+:                                  Dload  Upload   Total   Spent    Left  Speed
+:   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1489  100  1489    0     0  10560      0 --:--:-- --:--:-- --:--:-- 10485100  1489  100  1489    0     0  10560      0 --:--:-- --:--:-- --:--:-- 10485
+
+Going to the folder of the project:
+#+begin_src shell :session *shell* :results output :exports both
+cd Myproject
+#+end_src
+
+As we can see, the files are available in the folder.
+#+begin_src shell :session *shell* :results output :exports both
+ls -a
+#+end_src
+
+#+RESULTS:
+: .  ..  .git  test2.txt  test3.txt
+
+But the difference between the first test is that now instead of
+having a normal file, /test2.txt/ and /test3.txt/ are symbolic links that
+point to where the files are stored. And so, we have managed to
+restore the files by rebuilding the annex.
+This could be seen by executing the following command that shows
+information about the files:
+
+#+begin_src shell :session *shell* :results output :exports both
+file test2.txt
+#+end_src
+
+As we can see, it's a symbolic link that points to the given
+directory.
+#+RESULTS:
+: test2.txt: symbolic link to .git/annex/objects/7F/f6/SHA256E-s1541--619a79740d0f8847b25eef99df16e48f2f419cb49d98c1fa312cfcf8c9e03d3d.txt/SHA256E-s1541--619a79740d0f8847b25eef99df16e48f2f419cb49d98c1fa312cfcf8c9e03d3d.txt
+
+** restoring with usegitannex
+First, let's go to the directory where we will be doing this test.
+#+begin_src shell :session *shell* :results output :exports both
+cd ~/test_restore/usegitannex
+#+end_src
+
+#+RESULTS:
+
+Now, we can simply execute the program by choosing the option
+simpledownload. This program downloads the archive as well as the file
+*git-init-info.json* and uses them restore the files by downloading them
+and then initializing git and git-annex in the directory and adding
+the files into the annex. It also uses web remotes and registers te
+files in the remote so that the user can have a second copy available.
+It then deletes the archive, *git-init-info.json*, and *restorearcive.py*
+when it finishes using them. The user ends up with a folder containing
+only the restored files.
+#+begin_src shell :session *shell* :results output :exports both
+python3 restore_archive.py -k K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG -o usegitannex -u sandbox
+#+end_src
+
+As we can see in the results, we have managed to restore the files and
+add them into the annex. This was done by first initializing git and
+git-annex and then by adding the files that we downloaded into the
+annex. We also registered the url for each of the files to be used as
+web remotes if needed. 
+#+RESULTS:
+#+begin_example
+Initialized empty Git repository in /home/nubudi/test_restore/usegitannex/Myproject/.git/
+init  ok
+(recording state in git...)
+Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1541  100  1541    0     0  10205      0 --:--:-- --:--:-- --:--:-- 10205
+add test2.txt ok
+(recording state in git...)
+registerurl https://sandbox.zenodo.org/api/files/77cf97b4-e3e7-4fa0-9249-c9c12f75bed1/SHA256E-s1541--619a79740d0f8847b25eef99df16e48f2f419cb49d98c1fa312cfcf8c9e03d3d.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+(recording state in git...)
+Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  1489  100  1489    0     0  11029      0 --:--:-- --:--:-- --:--:-- 10948100  1489  100  1489    0     0  11029      0 --:--:-- --:--:-- --:--:-- 10948
+add test3.txt ok
+(recording state in git...)
+registerurl https://sandbox.zenodo.org/api/files/77cf97b4-e3e7-4fa0-9249-c9c12f75bed1/SHA256E-s1489--960daf2b0e7ac81f54208c5a1033f5644debac14aab0806d83fa3f3bc547836f.txt?access_token=K1jsyYfSbH3hVfRWpzXkzTL5RDVy1ppQWet2v3DQu8WFDuWbfn4J9rITsQaG ok
+(recording state in git...)
+#+end_example
+
+
+Now, we can just go to the folder and see the files that are on it.
+#+begin_src shell :session *shell* :results output :exports both
+cd Myproject
+ls 
+#+end_src
+
+#+RESULTS:
+: 
+: test2.txt  test3.txt
+
+We can list the files that are in this directory with the following
+command which also shows information about the remotes.
+#+begin_src shell :session *shell* :results output :exports both
+git annex list
+#+end_src
+
+As we can see, we not only managed to restore the files but we also
+added them into git-annex as web remotes.
+#+RESULTS:
+: here
+: |web
+: ||bittorrent
+: |||
+: XX_ test2.txt
+: XX_ test3.txt
