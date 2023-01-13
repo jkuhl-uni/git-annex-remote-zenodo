@@ -68,7 +68,7 @@ These options are given to the program **restore_archive.py** when restoring an 
 	+ 'simpledownload': download the files once we restore them by making them replace the broken symbolic links.
 
 # Tutorial
-A complete tutorial that showcases all the features of this program is available in the file **walkthrough.org**. It could be read through before using this remote and reexecuted to grasp the functionalities of the remote. 
+A complete tutorial that showcases all the features of this program is available in the file **[walkthrough.org](walkthrough.org)**. It could be read through before using this remote and reexecuted to grasp the functionalities of the remote. 
 
 You need to have the access token to Zenodo in order to execute it.
 
