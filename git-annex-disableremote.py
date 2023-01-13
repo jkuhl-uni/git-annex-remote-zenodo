@@ -31,6 +31,7 @@ def get_remotename(deposit_id):
         # parsing the output and separating the lines in a list where each element is a file
         s = shlex.split(line, comments=True, posix=False)
         # now, let's go through the list
+        id = 'UNDEFINED_ID'
         for elm in s:
             # looking through the elemnts for the index of the id
             if elm.startswith("deposit_id"):
@@ -38,8 +39,9 @@ def get_remotename(deposit_id):
             # we have found the name of the remote that we are looking for
             if (elm.startswith("name")) and (id == deposit_id):
                 remote_name = elm.split("=")[-1]
-    return remote_name
-
+                return remote_name
+    print("Could not identify the remote matching this deposit id \n")
+    sys.exit()
 
 # this function creates an archive of the files and uploads it to Zenodo so as to allow the user
 # to recover the files later on if they wish to
