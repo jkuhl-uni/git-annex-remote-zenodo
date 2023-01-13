@@ -9,37 +9,36 @@ This code is in beta version and should be considered as a work in progress. Use
 
 # Features
 - The main program git-annex-remote-zenodo is used to create a special remote for git-annex where the used could upload files and move them around like they would do with any other git-annex remote. 
-- The publishing of the Zenodo deposit is also possible with the use of the script git-annex-disableremote.py which takes care of disabling the remote locally as well as publishing the files on Zenodo and keeping copies of them on a web remote of git-annex.
-- New versions of a published deposit could also be created using the program git-annex-remote-zenodo by simply choosing the option newversion=id and giving the id of the deposit we want to create a new version of.
-- An archive containing the files of the deposit gets automatically stored in a Zenodo deposit once the user publishes them and this archive could be restored later using the script restore_archive.py.
+- The publishing of the Zenodo deposit is also possible with the use of the script [git-annex-disableremote.py](git-annex-disableremote.py) which takes care of disabling the remote locally as well as publishing the files on Zenodo and keeping copies of them as a web remote of git-annex.
+- New versions of a published Zenodo deposit can also be created using the program git-annex-remote-zenodo by simply choosing the option newversion=id and giving the id of the deposit we want to create a new version of.
+- An archive containing the files of the deposit gets automatically stored in a Zenodo deposit once the user publishes them and this archive can be restored later using the script [`restore_archive.py`](restore_archive.py).
 
 
 # Usage
-## Initializing a remote
+## Installation
 1. Export the path to where git-annex-remote-zenodo is.
 `export PATH=$PATH:path-program`
-2. Make git-annex-remote-zenodo executable either by executing the following command or by simply
-changing the permissions in the properties of the program (by checking the box).
-`chmod +x git-annex-remote-zenodo`
-3. Create a git-annex repository (https://git-annex.branchable.com/walkthrough/).
-4. Initialize the remote by giving the needed information and choosing the other options.
-Example: 
-`git annex initremote Myproject type=external externaltype=zenodo key=ACCESS_TOKEN encryption=none`
+2. Make sure the git-annex-remote-zenodo is executable (`chmod +x git-annex-remote-zenodo`)
+
+## Initializing a remote
+1. Create a git-annex repository (https://git-annex.branchable.com/walkthrough/).
+2. Initialize the remote by providing the needed information through the command line options.
+   Example: `git annex initremote Myproject type=external externaltype=zenodo key=ACCESS_TOKEN encryption=none`
 
 ## Disabling the remote and publishing the files on the deposit
-Once the user has finished using the remote, they can disable it using the script **git-annex-disableremote.py**. This could be done by executing the program and giving it inofrmation about the deposit we want to publish. 
-Example: 
-`git-annex-disableremote.py -i deposit_id -k  ACCESS_TOKEN -p  path.restore_archive.py`
+Once the user has finished using the remote, they can disable it using the script **git-annex-disableremote.py**. This can be done by executing the program and giving it information about the deposit we want to publish. 
+
+Example: `git-annex-disableremote.py -i deposit_id -k  ACCESS_TOKEN -p  path.restore_archive.py`
 
 ## Initializing a new version of a deposit
-This could be done just like we would initialize a new remote but this time the user needs to specify that it's a new version of a deposit and not an empty deposit.
-Example: 
-`git annex initremote Myprojectv2 type=external newversion=id_olddeposit externaltype=zenodo key=ACCESS_TOKEN encryption=none` 
+This can be done is the same was as when initializing a new Zenodo remote but this time the user should specify that it's a new version of a deposit and not an empty deposit.
+
+Example: `git annex initremote Myprojectv2 type=external newversion=id_olddeposit externaltype=zenodo key=ACCESS_TOKEN encryption=none` 
 
 ## Restoring an archive
-When a deposit is published on Zenodo, we store an archive of the files on another Zenodo deposit and so the user could restore this archive by first retrieving the restoring file (**restore_archive.py**) from the Zenodo deposit and then executing it. The options are explained below. 
-Example: 
-`restore_archive.py -k ACCESS_TOKEN -o simpledownload -u sandbox` 
+Since the structure of a Zenodo deposit is flat (no file hierarchy), it may be hard to exploit. This is why when a deposit is published on Zenodo through the `disableremote` mechanism, we also store an archive of the current branch in another Zenodo deposit, a `git-annex-info.json` file that allows to map annexed files to their zenodo counterpart, and a script ([`restore_archive.py`](restore_archive.py)) that can be used to restore this archive. The options are explained below.
+
+Example: `restore_archive.py -k ACCESS_TOKEN -o simpledownload -u sandbox`
 
 # Options
 ## When initializing the remote
