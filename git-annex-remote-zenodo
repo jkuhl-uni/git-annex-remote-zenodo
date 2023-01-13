@@ -10,7 +10,7 @@ import sys
 class ZenodoRemote(ExportRemote):
 
     def listconfigs(self):
-        return {'url': '', 'key': ''}
+        return {'url': '', 'key': '', 'newversion': ''}
 
     # showing useful info to the user using the info method of the Annex class.
     def show_info(self, msg):
