@@ -15,6 +15,10 @@ This code is in beta version and should be considered as a work in progress. Use
 
 
 # Usage
+## Requirements
+- `git-annex-remote-zenodo` requires the python3 `annexremote` module which is provided by the `python3-annexremote` debian package.
+- `git-annex-disableremote.py` and `restore_archive.py` requires the python3 `requests` module (simple HTTP library) which is provided by the `python3-requests` debian package.
+
 ## Installation
 1. Export the path to where git-annex-remote-zenodo is.
 `export PATH=$PATH:path-program`
@@ -28,7 +32,7 @@ This code is in beta version and should be considered as a work in progress. Use
 ## Disabling the remote and publishing the files on the deposit
 Once the user has finished using the remote, they can disable it using the script **git-annex-disableremote.py**. This can be done by executing the program and giving it information about the deposit we want to publish. 
 
-Example: `git-annex-disableremote.py -i deposit_id -k  ACCESS_TOKEN -p  path.restore_archive.py`
+Example: ``git-annex-disableremote.py -i deposit_id -k  ACCESS_TOKEN -p  `which restore_archive.py` ``
 
 ## Initializing a new version of a deposit
 This can be done is the same was as when initializing a new Zenodo remote but this time the user should specify that it's a new version of a deposit and not an empty deposit.
