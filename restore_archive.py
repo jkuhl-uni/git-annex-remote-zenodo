@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 archivedeposit_id=890176
  
 remote_name='Myproject'

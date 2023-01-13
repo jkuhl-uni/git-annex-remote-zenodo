@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # This program will be used when finalizing the publishing in a remote.
 # by executing this command 'git-annex-disableremote', the deposit will
 # be publsihed using informaion given by the user or submitted in a json

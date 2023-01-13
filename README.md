@@ -26,7 +26,7 @@ Example:
 ## Disabling the remote and publishing the files on the deposit
 Once the user has finished using the remote, they can disable it using the script **git-annex-disableremote.py**. This could be done by executing the program and giving it inofrmation about the deposit we want to publish. 
 Example: 
-`python3 path.git-annex-disableremote.py -i deposit_id -k  ACCESS_TOKEN -p  path.restore_archive.py`
+`git-annex-disableremote.py -i deposit_id -k  ACCESS_TOKEN -p  path.restore_archive.py`
 
 ## Initializing a new version of a deposit
 This could be done just like we would initialize a new remote but this time the user needs to specify that it's a new version of a deposit and not an empty deposit.
@@ -36,7 +36,7 @@ Example:
 ## Restoring an archive
 When a deposit is published on Zenodo, we store an archive of the files on another Zenodo deposit and so the user could restore this archive by first retrieving the restoring file (**restore_archive.py**) from the Zenodo deposit and then executing it. The options are explained below. 
 Example: 
-`python3 restore_archive.py -k ACCESS_TOKEN -o simpledownload -u sandbox` 
+`restore_archive.py -k ACCESS_TOKEN -o simpledownload -u sandbox` 
 
 # Options
 ## When initializing the remote
