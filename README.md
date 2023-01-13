@@ -5,7 +5,7 @@ The backend could be defined on either the sandbox or the official Zenodo deposi
 
 # Disclaimer
 
-This code is in beta version. Do not use it in production for the moment and report any issue you would identify through GitHub.
+This code is in beta version and should be considered as a work in progress. Use at your own risk. Do not use it in production for the moment and report any issue you would identify through GitHub.
 
 # Features
 - The main program git-annex-remote-zenodo is used to create a special remote for git-annex where the used could upload files and move them around like they would do with any other git-annex remote. 
