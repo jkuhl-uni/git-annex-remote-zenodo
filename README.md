@@ -3,6 +3,9 @@ This is a git-annex special remote for Zenodo. It allows the user to initialize 
 
 The backend could be defined on either the sandbox or the official Zenodo deposits. The used needs to create an access key according to the platforme before initializing the remote.
 
+# Disclaimer
+
+This code is in beta version. Do not use it in production for the moment and report any issue you would identify through GitHub.
 
 # Features
 - The main program git-annex-remote-zenodo is used to create a special remote for git-annex where the used could upload files and move them around like they would do with any other git-annex remote. 
