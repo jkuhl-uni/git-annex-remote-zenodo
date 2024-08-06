@@ -131,9 +131,6 @@ class ZenodoRemote(ExportRemote):
         return r
 
     def initremote(self):
-        # NOTE: this does not work correctly, the method is not protected against opening a new deposit, when one is already there.
-        # As is, it will create a new deposit every time it's called. This is a problem, when calling enable remote on the zenodo remote.
-
         # initialize the remote, eg. create the folders
         # raise RemoteError if the remote couldn't be initialized
 
@@ -154,12 +151,9 @@ class ZenodoRemote(ExportRemote):
 
         # now, we need to create an empty upload that we will be using from now on
         # it's either a new version of a deposit or a brand new one
-        newversion = str(self.annex.getconfig('deposit_id'))
-        if not newversion:
+        deposit_id = str(self.annex.getconfig('deposit_id'))
+        if not deposit_id:
             r = self.query('post', self.url,  "initremote")
-        # else:
-            # r = self.create_newversion(str(self.annex.getconfig('deposit_id'))) # this does not work... it creates a new deposit every time
-            # can we distinguish between enableremote and initremote?
 
         # making sure that we got the correct success response for creating a new deposit
             if r.status_code > 201:
@@ -184,17 +178,20 @@ class ZenodoRemote(ExportRemote):
         # let's try to connect to the API, if the status code is not 200: there is an error
         self.key = self.annex.getconfig('key')
         url = self.annex.getconfig('url')
-        # if url == 'sandbox':
-        #    self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
-        #else:
-        #    self.url = 'https://zenodo.org/api/deposit/depositions'
-        self.url = url
+        if 'sandbox' in url:
+            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+        else:
+            self.url = 'https://zenodo.org/api/deposit/depositions'
+        # self.url = url
+        print("In Prepare")
         print(self.url)
         r = self.query('get', self.url, "prepare")
         if r.status_code != 200:
             self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
             raise RemoteError('could not send a get query to the API in prepare.')
-
+        if all([r.json()[i]['submitted'] for i in range(len(r.json()))]):
+            raise RemoteError('The deposit is already submitted. You cannot add files to it anymore.')
+        print(self.annex.getconfig('deposit_id'))
         self.deposit_id = self.annex.getconfig('deposit_id')
 
     def transfer_store(self, key, filename):
