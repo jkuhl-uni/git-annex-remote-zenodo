@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 from annexremote import Master
 from annexremote import ExportRemote
 from annexremote import RemoteError, ProtocolError
@@ -25,7 +24,7 @@ class ZenodoRemote(ExportRemote):
 
     # method to handle all the basic queries
     def query(self, query_method, url, parent_func=str, headers=None, data=None, stream=None):
-        # id = key (!= KEY or access token to the API): to be stored in the remote.
+       # id = key (!= KEY or access token to the API): to be stored in the remote.
         # In most cases, this is going to be the remote file name. It should be at
         # least be unambigiously derived from it.
         # parent_func is the fucntion that calls this method. We pass the name of the function as
@@ -36,7 +35,7 @@ class ZenodoRemote(ExportRemote):
 
         # we use the same access key for all the queries.
         params = {'access_token': self.key}
-
+        print(query_method, url)
         # depending on the query, some of the arguments might be null
         if query_method == 'get':
             # this is for when we want to retrieve and download the file
@@ -53,6 +52,7 @@ class ZenodoRemote(ExportRemote):
 
         # informing the user of the currint state of the operation
         self.annex.debug("[info]: " + query_method + " operation finished in " + parent_func + ". The returned code: " + str(request.status_code))
+        print(request.status_code)
         return request
 
     # linking the files that were in the old deposit and that are now in the new deposit with git-annex
@@ -112,9 +112,8 @@ class ZenodoRemote(ExportRemote):
         # raise error if there is a problem (the success code is 200)
         if r.status_code != 200:
             raise RemoteError('error while retrieving the old deposit')
-
         # making the post request to create the new version
-        url = self.url + '/' + oldrecord_id + '/actions/newversion'
+        url = r.json()['links']['newversion']
         r = self.query('post', url, "create_newversion")
 
         # raise error if there is a problem (the success code is 201)
@@ -132,17 +131,19 @@ class ZenodoRemote(ExportRemote):
         return r
 
     def initremote(self):
+        # NOTE: this does not work correctly, the method is not protected against opening a new deposit, when one is already there.
+        # As is, it will create a new deposit every time it's called. This is a problem, when calling enable remote on the zenodo remote.
+
         # initialize the remote, eg. create the folders
         # raise RemoteError if the remote couldn't be initialized
 
         # getting the url of the remote (Zenodo or Sandbox)
         # the user would need the key for both of them and it's created on the website of the one they chose
         url = self.annex.getconfig('url')
-        if url == 'sandbox':
+        if 'sandbox' in url:
             self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
         else:
             self.url = 'https://zenodo.org/api/deposit/depositions'
-
         # the key is passed as an argument when using the commant initremote (ex: key='')
         # if it's not been added as an argument, we raise an
         if not self.annex.getconfig('key'):
@@ -153,28 +154,29 @@ class ZenodoRemote(ExportRemote):
 
         # now, we need to create an empty upload that we will be using from now on
         # it's either a new version of a deposit or a brand new one
-        newversion = str(self.annex.getconfig('newversion'))
+        newversion = str(self.annex.getconfig('deposit_id'))
         if not newversion:
             r = self.query('post', self.url,  "initremote")
-        else:
-            r = self.create_newversion(newversion)
+        # else:
+            # r = self.create_newversion(str(self.annex.getconfig('deposit_id'))) # this does not work... it creates a new deposit every time
+            # can we distinguish between enableremote and initremote?
 
         # making sure that we got the correct success response for creating a new deposit
-        if r.status_code > 201:
-            self.annex.debug("[error]: failed to send a post query in initremote. Returned code: " + str(r.status_code))
-            raise RemoteError('could not send a post query to the API in initremote.')
+            if r.status_code > 201:
+                self.annex.debug("[error]: failed to send a post query in initremote. Returned code: " + str(r.status_code))
+                raise RemoteError('could not send a post query to the API in initremote.')
 
         # other settings
-        self.annex.setconfig('deposit', r)
-        self.annex.setconfig('url', self.url)
-        self.annex.setconfig('key', self.key)
-        # setting the id for this deposit
-        self.annex.setconfig('deposit_id', r.json()['id'])
-        self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
+            self.annex.setconfig('deposit', r)
+            self.annex.setconfig('url', self.url)
+            self.annex.setconfig('key', self.key)
+            # setting the id for this deposit
+            self.annex.setconfig('deposit_id', r.json()['id'])
+            self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
 
-        self.show_info("------------ git-annex-remote-zenodo------------")
-        self.show_info("Finished initializing a Zenodo remote successfully.")
-        self.show_info("------------------------------------------------")
+            self.show_info("------------ git-annex-remote-zenodo------------")
+            self.show_info("Finished initializing a Zenodo remote successfully.")
+            self.show_info("------------------------------------------------")
 
     def prepare(self):
         # prepare to be used, eg. open TCP connection, authenticate with the server etc.
@@ -182,11 +184,12 @@ class ZenodoRemote(ExportRemote):
         # let's try to connect to the API, if the status code is not 200: there is an error
         self.key = self.annex.getconfig('key')
         url = self.annex.getconfig('url')
-        if url == 'sandbox':
-            self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
-        else:
-            self.url = 'https://zenodo.org/api/deposit/depositions'
-
+        # if url == 'sandbox':
+        #    self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
+        #else:
+        #    self.url = 'https://zenodo.org/api/deposit/depositions'
+        self.url = url
+        print(self.url)
         r = self.query('get', self.url, "prepare")
         if r.status_code != 200:
             self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
@@ -240,6 +243,7 @@ class ZenodoRemote(ExportRemote):
                 # getting the download link of the file
                 url = r.json()[i]['links']['download']
                 q = self.query('get', url, "transfer_retrieve", stream=True)
+                # print(q.status_code)
                 # r.raise_for_status()
                 # storing the file in the path given in filename
                 # this is done by reading the content of the file and writing it in the new file
@@ -260,6 +264,7 @@ class ZenodoRemote(ExportRemote):
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
         try:
             url = self.url + '/' + str(self.annex.getconfig('deposit_id')) + '/files'
+            print(url)
             r = self.query('get', url, "checkpresent")
             # going through the list of the files in this deposit
             for i in range(len(r.json())):
