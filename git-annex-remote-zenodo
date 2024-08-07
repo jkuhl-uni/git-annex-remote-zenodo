@@ -24,7 +24,7 @@ class ZenodoRemote(ExportRemote):
 
     # method to handle all the basic queries
     def query(self, query_method, url, parent_func=str, headers=None, data=None, stream=None):
-       # id = key (!= KEY or access token to the API): to be stored in the remote.
+        # id = key (!= KEY or access token to the API): to be stored in the remote.
         # In most cases, this is going to be the remote file name. It should be at
         # least be unambigiously derived from it.
         # parent_func is the fucntion that calls this method. We pass the name of the function as
@@ -90,10 +90,10 @@ class ZenodoRemote(ExportRemote):
         dico = {}
         for file in s:
             output = subprocess.getoutput("git-annex info %s" % file)
-            l = shlex.split(output)
+            mylist = shlex.split(output)
             # we won't take care of the ones with the fatal error now
-            if l[0] == 'file:':
-                k = l[6]
+            if mylist[0] == 'file:':
+                k = mylist[6]
                 dico[str(k)] = file
         # second step: copying the files from the remote to keep the link
         # going through the list of the files in this deposit
@@ -104,9 +104,9 @@ class ZenodoRemote(ExportRemote):
                 output = subprocess.getoutput("git annex copy " + name + " --to " + remote_name)
                 print(output)
 
-    def create_newversion(self, oldrecord_id):
+    def create_newversion(self, current_id):
         # making sure that the given id for the old record is correct
-        url = self.url + '/' + oldrecord_id
+        url = self.url + '/' + current_id
         r = self.query('get', url, "create_newversion")
 
         # raise error if there is a problem (the success code is 200)
@@ -182,21 +182,23 @@ class ZenodoRemote(ExportRemote):
             self.url = 'https://sandbox.zenodo.org/api/deposit/depositions'
         else:
             self.url = 'https://zenodo.org/api/deposit/depositions'
-        # self.url = url
-        print("In Prepare")
-        print(self.url)
         r = self.query('get', self.url, "prepare")
         if r.status_code != 200:
             self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
             raise RemoteError('could not send a get query to the API in prepare.')
-        if all([r.json()[i]['submitted'] for i in range(len(r.json()))]):
-            raise RemoteError('The deposit is already submitted. You cannot add files to it anymore.')
-        print(self.annex.getconfig('deposit_id'))
         self.deposit_id = self.annex.getconfig('deposit_id')
 
-    def transfer_store(self, key, filename):
+    def transfer_store(self, key, path):
         # store the file in `filename` to a unique location derived from `key`
         # raise RemoteError if the file couldn't be stored
+        r = self.query('get', self.url, "transfer_store")
+        if r.status_code != 200:
+            self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
+            raise RemoteError('could not send a get query to the API in prepare.')
+        if all([r.json()[i]['submitted'] for i in range(len(r.json()))]):
+            # raise RemoteError('The deposit is already submitted. You cannot add files to it anymore.')
+            # if the deposit is already submitted, we create a new version of it
+            r = self.create_newversion(self.deposit_id)
         try:
             # fetching the url of the bucket
             URL_BUCKET = self.annex.getconfig('deposit_bucket')
@@ -207,9 +209,7 @@ class ZenodoRemote(ExportRemote):
             # we  can get the name of the file by using the function rsplit to split
             # the string at the specified separator '/' and we can get the filename by
             # getting the lest element of the file.
-            list = filename.rsplit("/")
-            file = list[-1]
-            path = filename
+            file = path.rsplit("/")[-1]
 
             # The target URL is a combination of the bucket link with the desired filename
             # seperated by a slash.
@@ -236,7 +236,7 @@ class ZenodoRemote(ExportRemote):
             # sending a get request to check information on the file
             if r.json()[i]['filename'] == key:
                 # getting the id of the file that we want to download
-                file_id = r.json()[i]['id']
+                # file_id = r.json()[i]['id']
                 # getting the download link of the file
                 url = r.json()[i]['links']['download']
                 q = self.query('get', url, "transfer_retrieve", stream=True)
