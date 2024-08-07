@@ -186,6 +186,7 @@ class ZenodoRemote(ExportRemote):
             raise RemoteError('could not send a get query to the API in prepare.')
         self.deposit_id = self.annex.getconfig('deposit_id')
         self.newest_id = self.latest_draft()
+        self.ids_to_try = self.suitable_ids()
 
     def suitable_ids(self):
         ids = []
@@ -254,10 +255,12 @@ class ZenodoRemote(ExportRemote):
         # get the file identified by `key` and store it to `filename`
         # raise RemoteError if the file couldn't be retrieved
         # getting the information on the files that are in the deposit
-        ids_to_try = self.suitable_ids()
-        for id in ids_to_try:
-            url = self.url + '/' + str(id) + '/files'
-            r = self.query('get', url, "transfer_retrieve")
+        for id in self.ids_to_try:
+            try:
+                url = self.url + '/' + str(id) + '/files'
+                r = self.query('get', url, "transfer_retrieve")
+            except Exception:
+                continue
             # going through the list of the files in this deposit
             for i in range(len(r.json())):
                 # checking if the file exists by comparing the key/filename
@@ -266,8 +269,11 @@ class ZenodoRemote(ExportRemote):
                     # getting the id of the file that we want to download
                     # file_id = r.json()[i]['id']
                     # getting the download link of the file
-                    url = r.json()[i]['links']['download']
-                    q = self.query('get', url, "transfer_retrieve", stream=True)
+                    try:
+                        url = r.json()[i]['links']['download']
+                        q = self.query('get', url, "transfer_retrieve", stream=True)
+                    except Exception:
+                        continue
                     # print(q.status_code)
                     # r.raise_for_status()
                     # storing the file in the path given in filename
@@ -279,28 +285,28 @@ class ZenodoRemote(ExportRemote):
                     # once we finish writing into the file we can close it
                     f.close()
                     return
-            
-        if r.status_code > 204:
-            self.annex.debug("[error]: couldn't retrieve the file from the remote. Returned code: " + str(r.status_code))
-            raise RemoteError('could not send a get query to the API in transfer_retrieve.')
+
+        self.annex.debug("[error]: couldn't retrieve the file from the remote. Returned code:")
+        raise RemoteError('could not send a get query to the API in transfer_retrieve.')
 
     def checkpresent(self, key):
         # return True if the key is present in the remote
         # return False if the key is not present
         # raise RemoteError if the presence of the key couldn't be determined, eg. in case of connection error
-        try:
-            url = self.url + '/' + str(self.annex.getconfig('deposit_id')) + '/files'
-            print(url)
-            r = self.query('get', url, "checkpresent")
-            # going through the list of the files in this deposit
-            for i in range(len(r.json())):
-                if r.json()[i]['filename'] == key:
-                    self.annex.debug("[info]: In checkpresent. Yes, this file exists in the remote " + key)
-                    return True
-            return False
 
-        except Exception as error:
-            raise RemoteError(error)
+        for id in self.ids_to_try:
+            try:
+                url = self.url + '/' + str(id) + '/files'
+                r = self.query('get', url, "checkpresent")
+                # going through the list of the files in this deposit
+                for i in range(len(r.json())):
+                    if r.json()[i]['filename'] == key:
+                        self.annex.debug("[info]: In checkpresent. Yes, this file exists in the remote " + key)
+                        return True
+                return False
+            except Exception:
+                continue
+        raise RemoteError("Could not find any copy in any deposit.")
 
     def remove(self, key):
         # remove the key from the remote
