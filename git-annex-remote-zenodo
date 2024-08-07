@@ -11,7 +11,6 @@ import subprocess
 
 
 class ZenodoRemote(ExportRemote):
-
     def listconfigs(self):
         return {'url': '', 'key': '', 'newversion': ''}
 
@@ -115,18 +114,16 @@ class ZenodoRemote(ExportRemote):
         # making the post request to create the new version
         url = r.json()['links']['newversion']
         r = self.query('post', url, "create_newversion")
-
         # raise error if there is a problem (the success code is 201)
         if r.status_code != 201:
             raise RemoteError('error while creating the newversion')
-
         # fetching the deposition id of the new version
         # we can only access it this way because it's not given as a field
         newdeposit_id = r.json()['links']['latest_draft'].split('/')[-1]
         # making a new get request to get the information about this reposit and returning the response
         url = self.url + '/' + str(newdeposit_id)
         r = self.query('get', url, "create_newversion")
-
+        self.newest_id = newdeposit_id
         self.link_files(r)
         return r
 
@@ -166,6 +163,7 @@ class ZenodoRemote(ExportRemote):
             self.annex.setconfig('key', self.key)
             # setting the id for this deposit
             self.annex.setconfig('deposit_id', r.json()['id'])
+            self.annex.setconfig('conceptrecid', r.json()['conceptrecid'])
             self.annex.setconfig('deposit_bucket', r.json()['links']['bucket'])
 
             self.show_info("------------ git-annex-remote-zenodo------------")
@@ -187,6 +185,20 @@ class ZenodoRemote(ExportRemote):
             self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
             raise RemoteError('could not send a get query to the API in prepare.')
         self.deposit_id = self.annex.getconfig('deposit_id')
+        self.newest_id = self.latest_draft()
+
+    def latest_draft(self):
+        newest_id = None
+        depositions = self.query('get', self.url, 'latest_draft')
+        for dep in depositions.json():
+            if not dep['submitted']:
+                if dep['conceptrecid'] == self.annex.getconfig('conceptrecid'):
+                    newest_id = dep['id']
+                    break
+        # making a new get request to get the information about this deposit and returning the response
+        url = self.url + '/' + str(newest_id)
+        self.query('get', url, "get_latest_draft")
+        return newest_id
 
     def transfer_store(self, key, path):
         # store the file in `filename` to a unique location derived from `key`
@@ -195,13 +207,16 @@ class ZenodoRemote(ExportRemote):
         if r.status_code != 200:
             self.annex.debug("[error]: failed to send a get query in prepare. Returned code: " + str(r.status_code))
             raise RemoteError('could not send a get query to the API in prepare.')
-        if all([r.json()[i]['submitted'] for i in range(len(r.json()))]):
+
+        if self.newest_id is None:
             # raise RemoteError('The deposit is already submitted. You cannot add files to it anymore.')
             # if the deposit is already submitted, we create a new version of it
             r = self.create_newversion(self.deposit_id)
+        # print(self.annex.getconfig('deposit_bucket'))
         try:
+            # r.json()['links']['files']
             # fetching the url of the bucket
-            URL_BUCKET = self.annex.getconfig('deposit_bucket')
+            # URL_BUCKET = self.annex.getconfig('deposit_bucket')
 
             # and then we upload it
             # extracting the filename and the path from filename
@@ -210,12 +225,15 @@ class ZenodoRemote(ExportRemote):
             # the string at the specified separator '/' and we can get the filename by
             # getting the lest element of the file.
             file = path.rsplit("/")[-1]
-
             # The target URL is a combination of the bucket link with the desired filename
             # seperated by a slash.
-            with open(path, "rb") as fp:
-                r = self.query('put', "%s/%s" % (URL_BUCKET, file), "transfer_store", key, data=fp)
-
+            # with open(path, "rb") as fp:
+            # r = self.query('put', "%s/%s" % (URL_BUCKET, file), "transfer_store", key, data=fp)
+            # print(self.deposit_id, file=log)
+            url = self.url + '/' + str(self.newest_id)
+            r = self.query('get', url, "transfer_store")
+            with open(path, 'rb') as fp:
+                r = requests.post(r.json()['links']['files'], params={'access_token': self.key}, data={'name': file}, files={'file': fp})
             if r.status_code < 400:
                 self.annex.debug("[info]: finished exporting the file. ")
             else:
@@ -228,7 +246,7 @@ class ZenodoRemote(ExportRemote):
         # get the file identified by `key` and store it to `filename`
         # raise RemoteError if the file couldn't be retrieved
         # getting the information on the files that are in the deposit
-        url = self.url + '/' + str(self.deposit_id) + '/files'
+        url = self.url + '/' + str(self.newest_id) + '/files'
         r = self.query('get', url, "transfer_retrieve")
         # going through the list of the files in this deposit
         for i in range(len(r.json())):
