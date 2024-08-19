@@ -209,7 +209,7 @@ class ZenodoRemote(ExportRemote):
         self.query('get', url, "get_latest_draft")
         return newest_id
 
-    def transfer_store(self, path):
+    def transfer_store(self, key, path):
         # store the file in `filename` to a unique location derived from `key`
         # raise RemoteError if the file couldn't be stored
         r = self.query('get', self.url, "transfer_store")
@@ -341,7 +341,7 @@ class ZenodoRemote(ExportRemote):
     def transferexport_store(self, key, local_file, remote_file):
         # store the file located at `local_file` to `remote_file` on the remote
         # raise RemoteError if the file couldn't be stored
-        return self.transfer_store(local_file)
+        return self.transfer_store(key, local_file)
 
     def transferexport_retrieve(self, key, local_file, remote_file):
         # get the file located at `remote_file` from the remote and store it to `local_file`
